@@ -2,7 +2,7 @@
 
 namespace SpendingTracker_API.Utils.UserRetriever
 {
-    public interface IUserRetriever
+    public interface IUserClaimsRetriever
     {
         string UserId { get; }
         ClaimsPrincipal User { get; }

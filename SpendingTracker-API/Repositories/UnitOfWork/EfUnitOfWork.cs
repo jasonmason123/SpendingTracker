@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using SpendingTracker_API.Context;
-using SpendingTracker_API.Repositories.AppUserRepository;
 using SpendingTracker_API.Repositories.TransactionRepository;
 
 namespace SpendingTracker_API.Repositories.UnitOfWork
@@ -13,17 +12,13 @@ namespace SpendingTracker_API.Repositories.UnitOfWork
 
         public ITransactionRepository Transactions { get; }
 
-        public IAppUserRepository Users { get; }
-
         public EfUnitOfWork(
             AppDbContext context,
-            ITransactionRepository transactions,
-            IAppUserRepository users
+            ITransactionRepository transactions
         )
         {
             _context = context;
             Transactions = transactions;
-            Users = users;
         }
 
         public async Task BeginTransactionAsync()

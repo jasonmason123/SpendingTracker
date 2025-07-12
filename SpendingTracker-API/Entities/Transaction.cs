@@ -10,6 +10,7 @@ namespace SpendingTracker_API.Entities
         private decimal _amount;
 
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Description { get; set; } = string.Empty;
         public string Merchant { get; set; } = string.Empty;

@@ -11,9 +11,9 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
     public class EfTransactionRepository : ITransactionRepository
     {
         private readonly AppDbContext _context;
-        private readonly IUserRetriever _userRetriever;
+        private readonly IUserClaimsRetriever _userRetriever;
 
-        public EfTransactionRepository(AppDbContext context, IUserRetriever userRetriever)
+        public EfTransactionRepository(AppDbContext context, IUserClaimsRetriever userRetriever)
         {
             _context = context;
             _userRetriever = userRetriever;
@@ -43,7 +43,7 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
                 .ToPagedList(pageNumber, pageSize);
         }
 
-        public async Task<Transaction> CreateAsync(Transaction transaction)
+        public async Task<Transaction> AddAsync(Transaction transaction)
         {
             transaction.CreatedAt = DateTime.UtcNow;
             transaction.UserId = _userRetriever.UserId;
@@ -83,7 +83,7 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
             return existingTransaction;
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> RemoveAsync(int id)
         {
             var result = await _context.Transactions
                 .Where(x => x.Id == id && x.UserId == _userRetriever.UserId)

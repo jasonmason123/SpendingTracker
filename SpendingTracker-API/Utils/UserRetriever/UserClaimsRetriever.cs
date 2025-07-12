@@ -1,15 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SpendingTracker_API.Entities;
+using SpendingTracker_API.Utils.Messages;
 using System.Security.Claims;
 
 namespace SpendingTracker_API.Utils.UserRetriever
 {
-    public class UserRetriever : IUserRetriever
+    public class UserClaimsRetriever : IUserClaimsRetriever
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<AppUser> _userManager;
 
-        public UserRetriever(
+        public UserClaimsRetriever(
             IHttpContextAccessor httpContextAccessor,
             UserManager<AppUser> userManager)
         {
@@ -22,7 +23,7 @@ namespace SpendingTracker_API.Utils.UserRetriever
         /// </summary>
         public string UserId =>
             _userManager.GetUserId(_httpContextAccessor.HttpContext?.User)
-            ?? throw new InvalidOperationException("User is not authenticated.");
+            ?? throw new InvalidOperationException(ErrorMessages.USER_NOT_AUTHENTICATED);
 
         /// <summary>
         /// get the current user's ClaimsPrincipal
@@ -34,7 +35,7 @@ namespace SpendingTracker_API.Utils.UserRetriever
                 var user = _httpContextAccessor.HttpContext?.User;
                 if (user == null)
                 {
-                    throw new InvalidOperationException("User is not authenticated.");
+                    throw new InvalidOperationException(ErrorMessages.USER_NOT_AUTHENTICATED);
                 }
                 return user;
             }
