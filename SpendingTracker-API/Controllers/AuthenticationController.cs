@@ -6,7 +6,6 @@ using SpendingTracker_API.DTOs.Web_Mobile;
 using SpendingTracker_API.Entities;
 using SpendingTracker_API.Services.AuthTokenService;
 using SpendingTracker_API.Utils.Messages;
-using static Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp;
 
 namespace SpendingTracker_API.Controllers
 {

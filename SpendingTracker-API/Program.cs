@@ -71,7 +71,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 
 // Add db context
-var connectionString = ""; //Get connection string from environment variable
+var connectionString = Environment.GetEnvironmentVariable(EnvNames.POSTGRES_CONNECTION_STRING);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));

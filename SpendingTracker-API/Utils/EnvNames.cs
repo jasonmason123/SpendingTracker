@@ -2,6 +2,9 @@
 {
     public class EnvNames
     {
+        // Postgres database configuration
+        public const string POSTGRES_CONNECTION_STRING = "POSTGRES__CONNECTION_STRING";
+
         // Gmail SMTP configuration
         public const string GMAIL_SMTP_CLIENT_DOMAIN = "GMAIL__SMTP_CLIENT_DOMAIN";
         public const string GMAIL_FROM = "GMAIL__FROM";
