@@ -96,15 +96,15 @@ public class TransactionListFragment extends ListFragment
     // performs database query outside GUI thread
     private class GetContactsTask extends AsyncTask<Object, Object, Cursor>
     {
-        DatabaseConnector databaseConnector =
-                new DatabaseConnector(getActivity());
+        SQLiteConnector sqLiteConnector =
+                new SQLiteConnector(getActivity());
 
         // open database and return Cursor for all contacts
         @Override
         protected Cursor doInBackground(Object... params)
         {
-            databaseConnector.open();
-            return databaseConnector.getAllTransactions();
+            sqLiteConnector.open();
+            return sqLiteConnector.getAllTransactions();
         }
 
         // use the Cursor returned from the doInBackground method
@@ -112,7 +112,7 @@ public class TransactionListFragment extends ListFragment
         protected void onPostExecute(Cursor result)
         {
             transactionAdapter.changeCursor(result); // set the adapter's Cursor
-            databaseConnector.close();
+            sqLiteConnector.close();
         }
     } // end class GetContactsTask
 

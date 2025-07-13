@@ -65,6 +65,11 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
                 existingTransaction.Description = transaction.Description;
             }
 
+            if (existingTransaction.Merchant != transaction.Merchant)
+            {
+                existingTransaction.Merchant = transaction.Merchant;
+            }
+
             if (existingTransaction.Date != transaction.Date)
             {
                 existingTransaction.Date = transaction.Date;

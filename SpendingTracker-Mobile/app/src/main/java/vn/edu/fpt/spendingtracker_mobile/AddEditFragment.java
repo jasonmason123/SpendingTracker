@@ -75,8 +75,7 @@ public class AddEditFragment extends Fragment
         setHasOptionsMenu(true); // fragment has menu items to display
 
         // inflate GUI and get references to EditTexts
-        View view =
-                inflater.inflate(R.layout.fragment_add_edit, container, false);
+        View view = inflater.inflate(R.layout.fragment_add_edit, container, false);
         descriptionEditText = (EditText) view.findViewById(R.id.descriptionEditText);
         merchantEditText = (EditText) view.findViewById(R.id.merchantEditText);
         dateEditText = (EditText) view.findViewById(R.id.dateEditText);
@@ -120,7 +119,6 @@ public class AddEditFragment extends Fragment
             merchantEditText.setText(transactionInfoBundle.getString("merchant"));
             dateEditText.setText(transactionInfoBundle.getString("date"));
             amountEditText.setText(transactionInfoBundle.getString("amount"));
-            //ISSUE: transactionInfoBundle still doesn't include transactionType
             String transactionType = transactionInfoBundle.getString("transactionType");
             if (transactionType != null && adapter != null) {
                 int position = adapter.getPosition(transactionType);
@@ -193,8 +191,8 @@ public class AddEditFragment extends Fragment
     private void saveTransaction()
     {
         // get DatabaseConnector to interact with the SQLite database
-        DatabaseConnector databaseConnector =
-                new DatabaseConnector(getActivity());
+        SQLiteConnector sqliteConnector =
+                new SQLiteConnector(getActivity());
 
         //Format the date entered
         String dateStr = dateEditText.getText().toString();
@@ -209,7 +207,7 @@ public class AddEditFragment extends Fragment
         if (transactionInfoBundle == null)
         {
             // insert the contact information into the database
-            rowID = databaseConnector.insertTransaction(
+            rowID = sqliteConnector.insertTransaction(
                     descriptionEditText.getText().toString(),
                     merchantEditText.getText().toString(),
                     date,
@@ -220,7 +218,7 @@ public class AddEditFragment extends Fragment
         }
         else
         {
-            databaseConnector.updateTransaction(rowID,
+            sqliteConnector.updateTransaction(rowID,
                 descriptionEditText.getText().toString(),
                 merchantEditText.getText().toString(),
                 date,

@@ -6,7 +6,7 @@
     <string name="menuitem_add">Add</string>
     <string name="menuitem_edit">Edit</string>
     <string name="menuitem_delete">Delete</string>
-    <string name="button_save_contact">Save Contact</string>
+    <string name="button_save">Save</string>
     <string name="hint_description">Description</string>
     <string name="hint_merchant">Merchant</string>
     <string name="hint_date">Date Recorded</string>

@@ -19,13 +19,13 @@ import java.util.Locale;
 
 import vn.edu.fpt.spendingtracker_mobile.enums.TransactionTypes;
 
-public class DatabaseConnector
+public class SQLiteConnector
 {
     private SQLiteDatabase database; // for interacting with the database
     private DatabaseOpenHelper databaseOpenHelper; // creates the database
 
     // public constructor for DatabaseConnector
-    public DatabaseConnector(Context context)
+    public SQLiteConnector(Context context)
     {
         // create a new DatabaseOpenHelper
         databaseOpenHelper =
@@ -76,8 +76,8 @@ public class DatabaseConnector
     }
 
     // updates an existing transaction in the database
-    public void updateTransaction (long id, String description, String merchant,
-                                   Date date, double amount, TransactionTypes transactionType)
+    public void updateTransaction (long id, String description, String merchant, Date date,
+                                   double amount, TransactionTypes transactionType)
     {
         //Parse date to yyyy-MM-dd string
         SimpleDateFormat datetimeFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -93,6 +93,7 @@ public class DatabaseConnector
 
         ContentValues editTransaction = new ContentValues();
         editTransaction.put("description", description);
+        editTransaction.put("merchant", merchant);
         editTransaction.put("date", datetimeString);
         editTransaction.put("amount", amount);
 

@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import vn.edu.fpt.spendingtracker_mobile.DatabaseConnector;
+import vn.edu.fpt.spendingtracker_mobile.SQLiteConnector;
 import vn.edu.fpt.spendingtracker_mobile.DetailsFragment;
 import vn.edu.fpt.spendingtracker_mobile.R;
 
@@ -46,12 +46,12 @@ public class ConfirmDeleteDialogFragment extends DialogFragment {
         builder.setPositiveButton(R.string.button_delete, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int button) {
-                DatabaseConnector databaseConnector = new DatabaseConnector(requireContext());
+                SQLiteConnector sqLiteConnector = new SQLiteConnector(requireContext());
 
                 new AsyncTask<Long, Void, Void>() {
                     @Override
                     protected Void doInBackground(Long... params) {
-                        databaseConnector.deleteContact(params[0]);
+                        sqLiteConnector.deleteContact(params[0]);
                         return null;
                     }
 

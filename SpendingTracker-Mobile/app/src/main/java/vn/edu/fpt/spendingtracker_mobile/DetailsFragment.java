@@ -142,15 +142,15 @@ public class DetailsFragment extends Fragment
     // performs database query outside GUI thread
     private class LoadContactTask extends AsyncTask<Long, Object, Cursor>
     {
-        DatabaseConnector databaseConnector =
-                new DatabaseConnector(getActivity());
+        SQLiteConnector sqLiteConnector =
+                new SQLiteConnector(getActivity());
 
         // open database & get Cursor representing specified contact's data
         @Override
         protected Cursor doInBackground(Long... params)
         {
-            databaseConnector.open();
-            return databaseConnector.getOneTransaction(params[0]);
+            sqLiteConnector.open();
+            return sqLiteConnector.getOneTransaction(params[0]);
         }
 
         // use the Cursor returned from the doInBackground method
@@ -175,7 +175,7 @@ public class DetailsFragment extends Fragment
             transactionTypeTextView.setText(result.getString(transactionTypeIndex));
 
             result.close(); // close the result cursor
-            databaseConnector.close(); // close database connection
+            sqLiteConnector.close(); // close database connection
         } // end method onPostExecute
     } // end class LoadContactTask
 
