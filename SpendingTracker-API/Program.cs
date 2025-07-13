@@ -25,6 +25,9 @@ builder.Services.AddScoped<IAppUnitOfWork, EfUnitOfWork>();
 builder.Services.AddScoped<ITransactionRepository, EfTransactionRepository>();
 builder.Services.AddScoped<IUserClaimsRetriever, UserClaimsRetriever>();
 
+// Add Razor Pages for serving static files and views
+builder.Services.AddRazorPages();
+
 // Configure Identity options
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -106,5 +109,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapRazorPages();
 
 app.Run();
