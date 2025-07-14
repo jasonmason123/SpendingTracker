@@ -5,27 +5,37 @@ import java.util.Date;
 import vn.edu.fpt.spendingtracker_mobile.enums.TransactionTypes;
 
 public class Transaction {
-    private long id;
+    private int id;
     private String description;
     private String merchant;
     private Date date;
     private double amount;
-    private TransactionTypes transactionTypes;
+    private TransactionTypes transactionType;
+    private Date createdAt;
+    private Date updatedAt;
 
     public Transaction() {
 
     }
 
-    public Transaction(long id, String description, String merchant, Date date, double amount, TransactionTypes transactionTypes) {
+    public Transaction(String description, String merchant, Date date, double amount, TransactionTypes transactionType) {
+        this.description = description;
+        this.merchant = merchant;
+        this.date = date;
+        this.amount = amount;
+        this.transactionType = transactionType;
+    }
+
+    public Transaction(int id, String description, String merchant, Date date, double amount, TransactionTypes transactionType) {
         this.id = id;
         this.description = description;
         this.merchant = merchant;
         this.date = date;
         this.amount = amount;
-        this.transactionTypes = transactionTypes;
+        this.transactionType = transactionType;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
@@ -45,8 +55,16 @@ public class Transaction {
         return amount;
     }
 
-    public TransactionTypes getTransactionTypes() {
-        return transactionTypes;
+    public TransactionTypes getTransactionType() {
+        return transactionType;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
     }
 
     public void setDescription(String description) {
@@ -64,5 +82,4 @@ public class Transaction {
     public void setAmount(double amount) {
         this.amount = amount;
     }
-
 }

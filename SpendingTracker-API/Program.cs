@@ -9,6 +9,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using SpendingTracker_API.Utils;
+using SpendingTracker_API.Authentication.PasswordAuthentication;
+using SpendingTracker_API.Services.AuthTokenService;
+using SpendingTracker_API.Services.NotificationService;
+using SpendingTracker_API.Services.EmailService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +28,9 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 builder.Services.AddScoped<IAppUnitOfWork, EfUnitOfWork>();
 builder.Services.AddScoped<ITransactionRepository, EfTransactionRepository>();
 builder.Services.AddScoped<IUserClaimsRetriever, UserClaimsRetriever>();
+builder.Services.AddScoped<IPasswordAuth, PasswordAuth>();
+builder.Services.AddScoped<IAuthTokenService, JwtService>();
+builder.Services.AddScoped<INotificationService, EmailService>();
 
 // Add Razor Pages for serving static files and views
 builder.Services.AddRazorPages();

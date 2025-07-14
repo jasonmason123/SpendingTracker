@@ -113,7 +113,16 @@ namespace SpendingTracker_API.Controllers
                 await _unitOfWork.Transactions.AddAsync(transaction);
                 await _unitOfWork.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetAsync), new { id = transaction.Id }, transactionDto);
+                return CreatedAtAction(nameof(GetAsync), new { id = transaction.Id }, new TransactionDto
+                {
+                    Id = transaction.Id,
+                    Description = transaction.Description,
+                    Merchant = transaction.Merchant,
+                    Date = transaction.Date,
+                    Amount = transaction.Amount,
+                    TransactionType = transaction.TransactionType,
+                    CreatedAt = transaction.CreatedAt,
+                });
             }
             catch (Exception ex)
             {

@@ -3,19 +3,30 @@
 package vn.edu.fpt.spendingtracker_mobile;
 
 import androidx.fragment.app.FragmentTransaction;
+
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import vn.edu.fpt.spendingtracker_mobile.fragments.AddEditFragment;
+import vn.edu.fpt.spendingtracker_mobile.fragments.DetailsFragment;
+import vn.edu.fpt.spendingtracker_mobile.fragments.LoginFragment;
+import vn.edu.fpt.spendingtracker_mobile.fragments.TransactionListFragment;
+import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
+
 public class MainActivity extends AppCompatActivity
 implements TransactionListFragment.TransactionListFragmentListener,
         DetailsFragment.DetailsFragmentListener,
-        AddEditFragment.AddEditFragmentListener
+        AddEditFragment.AddEditFragmentListener,
+        LoginFragment.LoginFragmentListener
 {
     // keys for storing row ID in Bundle passed to a fragment
-    public static final String ROW_ID = "row_id";
+    public static final String TRANSACTION_ID = "transaction_id";
 
     TransactionListFragment transactionListFragment; // displays transaction list
+    LoginFragment loginFragment;
 
     // display ContactListFragment when MainActivity first loads
     @Override
@@ -32,14 +43,17 @@ implements TransactionListFragment.TransactionListFragmentListener,
         // ContactListFragment is always displayed
         if (findViewById(R.id.fragmentContainer) != null)
         {
-            // create ContactListFragment
-            transactionListFragment = new TransactionListFragment();
-
             // add the fragment to the FrameLayout
             FragmentTransaction transaction =
                     getSupportFragmentManager().beginTransaction();
-            transaction.add(R.id.fragmentContainer, transactionListFragment);
-            transaction.commit(); // causes ContactListFragment to display
+            SharedPreferences prefs =
+                    getSharedPreferences(AppConstants.AUTH_PREFERENCE_NAME, Context.MODE_PRIVATE);
+            if(prefs.getString(AppConstants.AUTH_TOKEN_NAME, null) == null) {
+                transaction.add(R.id.fragmentContainer, new LoginFragment());
+            } else {
+                transaction.add(R.id.fragmentContainer, new TransactionListFragment());
+            }
+            transaction.commit(); // causes Fragment to display
         }
     }
 
@@ -61,25 +75,28 @@ implements TransactionListFragment.TransactionListFragmentListener,
 
     // display DetailsFragment for selected contact
     @Override
-    public void onTransactionSelected(long rowID)
+    public void onTransactionSelected(long transactionId)
     {
         if (findViewById(R.id.fragmentContainer) != null) // phone
-            displayTransaction(rowID, R.id.fragmentContainer);
+        {
+            //getSupportFragmentManager().popBackStack(); // removes top of back stack
+            displayTransaction(transactionId, R.id.fragmentContainer);
+        }
         else // tablet
         {
             getSupportFragmentManager().popBackStack(); // removes top of back stack
-            displayTransaction(rowID, R.id.rightPaneContainer);
+            displayTransaction(transactionId, R.id.rightPaneContainer);
         }
     }
 
     // display a contact
-    private void displayTransaction(long rowID, int viewID)
+    private void displayTransaction(long transactionId, int viewID)
     {
         DetailsFragment detailsFragment = new DetailsFragment();
 
         // specify rowID as an argument to the DetailsFragment
         Bundle arguments = new Bundle();
-        arguments.putLong(ROW_ID, rowID);
+        arguments.putLong(TRANSACTION_ID, transactionId);
         detailsFragment.setArguments(arguments);
 
         // use a FragmentTransaction to display the DetailsFragment
@@ -151,5 +168,16 @@ implements TransactionListFragment.TransactionListFragmentListener,
             // on tablet, display contact that was just added or edited
             displayTransaction(rowID, R.id.rightPaneContainer);
         }
+    }
+
+    @Override
+    public void onLoginCompleted(String authToken) {
+        SharedPreferences prefs = getSharedPreferences(AppConstants.AUTH_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putString(AppConstants.AUTH_TOKEN_NAME, authToken).apply();
+
+        // Navigate to another fragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragmentContainer, new TransactionListFragment())
+                .commit();
     }
 }

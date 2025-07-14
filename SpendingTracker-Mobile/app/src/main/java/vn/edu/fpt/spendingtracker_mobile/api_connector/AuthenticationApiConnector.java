@@ -1,13 +1,19 @@
 package vn.edu.fpt.spendingtracker_mobile.api_connector;
 
-import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.POST;
+import vn.edu.fpt.spendingtracker_mobile.dtos.AuthResponseDto;
+import vn.edu.fpt.spendingtracker_mobile.dtos.GoogleIdTokenDto;
+import vn.edu.fpt.spendingtracker_mobile.dtos.PasswordCredentialsDto;
 
-public class AuthenticationApiConnector {
-    private static String AUTHENTICATION_ROUTE_PREFIX =
-            AppConstants.API_SCHEME + "://" +
-            AppConstants.API_DOMAIN + "/api/auth";
-    private static String SIGN_IN_ROUTE = AUTHENTICATION_ROUTE_PREFIX + "/sign-in";
-    private static String SIGN_UP_ROUTE = AUTHENTICATION_ROUTE_PREFIX + "/sign-up";
-    private static String GOOGLE_SIGN_IN_ROUTE = AUTHENTICATION_ROUTE_PREFIX + "/google/mobile-sign-in";
+public interface AuthenticationApiConnector {
+    @POST("/api/auth/sign-in")
+    Call<AuthResponseDto> signIn(@Body PasswordCredentialsDto credentials);
 
+    @POST("/api/auth/sign-up")
+    Call<AuthResponseDto> signUp(@Body PasswordCredentialsDto credentials);
+
+    @POST("/api/auth/google/mobile-sign-in")
+    Call<AuthResponseDto> googleSignIn(@Body GoogleIdTokenDto request);
 }

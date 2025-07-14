@@ -22,5 +22,11 @@
     <string name="error_message">You must enter all required fields</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_delete">Delete</string>
+    <string name="login_text_view">Login to Spending Tracker</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="button_login">Login</string>
+    <string name="button_login_with_Google">Login with Google</string>
+    <string name="default_web_client_id">510994033480-gc1f2rmo7ss2iij9pc8ithuep9ivg00b.apps.googleusercontent.com</string>
 
 </resources>

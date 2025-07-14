@@ -11,7 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import vn.edu.fpt.spendingtracker_mobile.SQLiteConnector;
-import vn.edu.fpt.spendingtracker_mobile.DetailsFragment;
+import vn.edu.fpt.spendingtracker_mobile.fragments.DetailsFragment;
 import vn.edu.fpt.spendingtracker_mobile.R;
 
 public class ConfirmDeleteDialogFragment extends DialogFragment {
