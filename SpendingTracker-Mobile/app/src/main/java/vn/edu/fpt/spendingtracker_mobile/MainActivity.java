@@ -180,4 +180,15 @@ implements TransactionListFragment.TransactionListFragmentListener,
                 .replace(R.id.fragmentContainer, new TransactionListFragment())
                 .commit();
     }
+
+    @Override
+    public void onLogout() {
+        SharedPreferences prefs = getSharedPreferences(AppConstants.AUTH_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        prefs.edit().remove(AppConstants.AUTH_TOKEN_NAME).apply();
+
+        // Navigate to login fragment
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragmentContainer, new LoginFragment())
+                .commit();
+    }
 }

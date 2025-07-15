@@ -51,6 +51,7 @@ public class AddEditFragment extends Fragment
     {
         // called after edit completed so contact can be redisplayed
         public void onAddEditCompleted(long rowID);
+        public void onLogout();
     }
 
     private AddEditFragmentListener listener;

@@ -44,6 +44,7 @@ public class DetailsFragment extends Fragment
 
         // called to pass Bundle of transaction's info for editing
         public void onEditTransaction(Bundle arguments);
+        public void onLogout();
     }
 
     private DetailsFragmentListener listener;

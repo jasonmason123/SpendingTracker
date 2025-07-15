@@ -10,4 +10,9 @@
         android:orderInCategory="2"
         android:icon="@android:drawable/ic_delete"
         android:showAsAction="ifRoom|withText"></item>
+    <item android:id="@+id/action_logout"
+        android:title="@string/menuitem_logout"
+        android:orderInCategory="3"
+        android:icon="@android:drawable/ic_delete"
+        android:showAsAction="ifRoom|withText"></item>
 </menu>

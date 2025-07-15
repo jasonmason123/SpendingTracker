@@ -49,6 +49,7 @@ public class TransactionListFragment extends ListFragment
 
         // called when user decides to add a contact
         public void onAddTransaction();
+        public void onLogout();
     }
 
     private TransactionListFragmentListener listener;
@@ -228,6 +229,8 @@ public class TransactionListFragment extends ListFragment
         if(itemId == R.id.action_add) {
             listener.onAddTransaction();
             return true;
+        } else if(itemId == R.id.action_logout) {
+
         }
 
         return super.onOptionsItemSelected(item); // call super's method

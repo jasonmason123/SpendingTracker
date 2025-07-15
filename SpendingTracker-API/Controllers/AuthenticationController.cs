@@ -63,6 +63,7 @@ namespace SpendingTracker_API.Controllers
                 var registrationResult = await _passwordAuth.RegisterAsync(passwordCredentials, false);
                 if (registrationResult.Succeed)
                 {
+                    Console.WriteLine("Registration completed");
                     var jwtToken = _authTokenService.GenerateToken(registrationResult.User);
                     return Ok(new
                     {
@@ -70,10 +71,12 @@ namespace SpendingTracker_API.Controllers
                         token = jwtToken,
                     });
                 }
+                Console.WriteLine("Failed to register user");
                 return BadRequest("Failed to register user.");
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Server error: {ex}");
                 return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
             }
         }
