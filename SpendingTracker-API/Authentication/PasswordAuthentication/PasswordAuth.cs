@@ -140,7 +140,8 @@ namespace SpendingTracker_API.Authentication.PasswordAuthentication
                 {
                     Succeed = true,
                     User = user,
-                    ConfirmationToken = token
+                    ConfirmationToken = token,
+                    Message = "Registration successful. Please verify your email.",
                 };
             }
             else if(result.Succeeded && !requiresVerification)
@@ -149,7 +150,8 @@ namespace SpendingTracker_API.Authentication.PasswordAuthentication
                 {
                     Succeed = true,
                     User = user,
-                    ConfirmationToken = null
+                    ConfirmationToken = null,
+                    Message = "Registration successful without email verification."
                 };
             }
 
@@ -157,7 +159,8 @@ namespace SpendingTracker_API.Authentication.PasswordAuthentication
             {
                 Succeed = false,
                 User = null,
-                ConfirmationToken = null
+                ConfirmationToken = null,
+                Message = string.Join(", ", result.Errors.Select(e => e.Description))
             };
         }
 

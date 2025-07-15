@@ -71,8 +71,8 @@ namespace SpendingTracker_API.Controllers
                         token = jwtToken,
                     });
                 }
-                Console.WriteLine("Failed to register user");
-                return BadRequest("Failed to register user.");
+                Console.WriteLine($"Failed to register user: {registrationResult.Message}");
+                return BadRequest($"Failed to register user: {registrationResult.Message}");
             }
             catch (Exception ex)
             {
