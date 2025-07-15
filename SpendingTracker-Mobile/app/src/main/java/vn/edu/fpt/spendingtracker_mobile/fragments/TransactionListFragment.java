@@ -229,8 +229,9 @@ public class TransactionListFragment extends ListFragment
         if(itemId == R.id.action_add) {
             listener.onAddTransaction();
             return true;
-        } else if(itemId == R.id.action_logout) {
-
+        }
+        if(itemId == R.id.action_logout) {
+            listener.onLogout();
         }
 
         return super.onOptionsItemSelected(item); // call super's method

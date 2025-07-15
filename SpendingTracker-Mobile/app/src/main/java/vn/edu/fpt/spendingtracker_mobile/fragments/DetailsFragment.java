@@ -173,6 +173,9 @@ public class DetailsFragment extends Fragment
             deleteContact();
             return true;
         }
+        if(itemId == R.id.action_logout) {
+            listener.onLogout();
+        }
 
         return super.onOptionsItemSelected(item);
     }

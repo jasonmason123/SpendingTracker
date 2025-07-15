@@ -32,6 +32,7 @@ namespace SpendingTracker_API.Controllers
                 if (authResult.Succeed)
                 {
                     var jwtToken = _authTokenService.GenerateToken(authResult.User);
+                    Console.WriteLine("Signed in successfully");
                     return Ok(new
                     {
                         message = "Signed in successfully",
@@ -39,18 +40,22 @@ namespace SpendingTracker_API.Controllers
                     });
                 }
 
+                Console.WriteLine("Invalid email or password.");
                 return Unauthorized("Invalid email or password.");
             }
             catch(UnauthorizedAccessException ex)
             {
+                Console.WriteLine($"Unauthorized exception: {ex}");
                 return Unauthorized(ex.Message);
             }
             catch (ArgumentException ex)
             {
+                Console.WriteLine($"Argument exception: {ex}");
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Sign-in error: {ex}");
                 return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
             }
         }
@@ -76,7 +81,7 @@ namespace SpendingTracker_API.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Server error: {ex}");
+                Console.WriteLine($"Sign-up error: {ex}");
                 return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
             }
         }
