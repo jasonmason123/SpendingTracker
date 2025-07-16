@@ -7,7 +7,7 @@ using SpendingTracker_API.Repositories.UnitOfWork;
 
 namespace SpendingTracker_API.Controllers
 {
-    [ApiController, Route("api/transaction"), Authorize(Policy = "JWT")]
+    [ApiController, Route("api/transaction"), Authorize]
     public class TransactionController : ControllerBase
     {
         private readonly IAppUnitOfWork _unitOfWork;

@@ -13,6 +13,7 @@ using SpendingTracker_API.Authentication.PasswordAuthentication;
 using SpendingTracker_API.Services.AuthTokenService;
 using SpendingTracker_API.Services.NotificationService;
 using SpendingTracker_API.Services.EmailService;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,11 +81,10 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("JWT", policy =>
-    {
-        policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
-        policy.RequireAuthenticatedUser();
-    });
+    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+        .RequireAuthenticatedUser()
+        .Build();
 });
 
 // Add memory cache for caching purposes
