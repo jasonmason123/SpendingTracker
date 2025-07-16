@@ -113,13 +113,6 @@ public class TransactionListFragment extends ListFragment
 
         apiConnector = retrofit.create(TransactionApiConnector.class);
 
-        // map each contact's name to a TextView in the ListView layout
-//        String[] from = new String[] { "description", "amount", "date" };
-//        int[] to = new int[] { android.R.id.text1 };
-//        transactionAdapter = new SimpleCursorAdapter(getActivity(),
-//                android.R.layout.simple_list_item_1, null, from, to, 0);
-//        setListAdapter(transactionAdapter); // set adapter that supplies data
-
         // Set listener on clicking a row
         getListView().setOnItemClickListener((parent, v, position, id) -> {
             Transaction selected = transactionList.get(position);
@@ -178,42 +171,6 @@ public class TransactionListFragment extends ListFragment
             }
         });
     }
-
-    // performs database query outside GUI thread
-//    private class GetTransactionsTask extends AsyncTask<Object, Object, Cursor>
-//    {
-////        SQLiteConnector sqLiteConnector =
-////                new SQLiteConnector(getActivity());
-//
-//        // open database and return Cursor for all contacts
-//        @Override
-//        protected Cursor doInBackground(Object... params)
-//        {
-////            sqLiteConnector.open();
-////            return sqLiteConnector.getAllTransactions();
-//        }
-//
-//        // use the Cursor returned from the doInBackground method
-//        @Override
-//        protected void onPostExecute(Cursor result)
-//        {
-//            transactionAdapter.changeCursor(result); // set the adapter's Cursor
-//            //sqLiteConnector.close();
-//        }
-//    } // end class GetContactsTask
-
-    // when fragment stops, close Cursor and remove from contactAdapter
-//    @Override
-//    public void onStop()
-//    {
-//        Cursor cursor = transactionAdapter.getCursor(); // get current Cursor
-//        transactionAdapter.changeCursor(null); // adapter now has no Cursor
-//
-//        if (cursor != null)
-//            cursor.close(); // release the Cursor's resources
-//
-//        super.onStop();
-//    }
 
     // display this fragment's menu items
     @Override

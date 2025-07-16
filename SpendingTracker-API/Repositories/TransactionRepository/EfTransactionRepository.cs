@@ -77,10 +77,7 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
 
             if (existingTransaction.Amount != transaction.Amount)
             {
-                if (existingTransaction.TransactionType == TransactionType.INCOME && transaction.Amount < 0)
-                    existingTransaction.Amount = Math.Abs(transaction.Amount);
-                else if (existingTransaction.TransactionType == TransactionType.EXPENSE && transaction.Amount > 0)
-                    existingTransaction.Amount = -transaction.Amount;
+                existingTransaction.Amount = transaction.Amount;
             }
 
             existingTransaction.UpdatedAt = DateTime.UtcNow;

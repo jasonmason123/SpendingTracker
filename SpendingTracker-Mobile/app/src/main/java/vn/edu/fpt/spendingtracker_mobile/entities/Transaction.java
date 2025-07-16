@@ -1,5 +1,6 @@
 package vn.edu.fpt.spendingtracker_mobile.entities;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import vn.edu.fpt.spendingtracker_mobile.enums.TransactionType;
@@ -9,7 +10,7 @@ public class Transaction {
     private String description;
     private String merchant;
     private Date date;
-    private double amount;
+    private BigDecimal amount;
     private TransactionType transactionType;
     private Date createdAt;
     private Date updatedAt;
@@ -18,7 +19,7 @@ public class Transaction {
 
     }
 
-    public Transaction(String description, String merchant, Date date, double amount, TransactionType transactionType) {
+    public Transaction(String description, String merchant, Date date, BigDecimal amount, TransactionType transactionType) {
         this.description = description;
         this.merchant = merchant;
         this.date = date;
@@ -26,7 +27,7 @@ public class Transaction {
         this.transactionType = transactionType;
     }
 
-    public Transaction(int id, String description, String merchant, Date date, double amount, TransactionType transactionType) {
+    public Transaction(int id, String description, String merchant, Date date, BigDecimal amount, TransactionType transactionType) {
         this.id = id;
         this.description = description;
         this.merchant = merchant;
@@ -51,7 +52,7 @@ public class Transaction {
         return date;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
@@ -79,7 +80,7 @@ public class Transaction {
         this.date = date;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 }

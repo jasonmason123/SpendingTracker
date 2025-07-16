@@ -94,11 +94,6 @@ namespace SpendingTracker_API.Controllers
         [HttpPost("add")]
         public async Task<IActionResult> AddAsync([FromBody] TransactionDto transactionDto)
         {
-            if (transactionDto == null)
-            {
-                return BadRequest("Transaction data is required.");
-            }
-
             try
             {
                 var transaction = new Transaction

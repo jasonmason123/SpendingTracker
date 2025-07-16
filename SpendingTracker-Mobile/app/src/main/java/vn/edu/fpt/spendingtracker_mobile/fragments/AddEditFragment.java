@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -201,7 +202,7 @@ public class AddEditFragment extends Fragment
                     e.printStackTrace(); // handle the error properly in production
                 }
 
-                double amount = Double.parseDouble(amountStr);
+                BigDecimal amount = new BigDecimal(amountStr);
 
                 TransactionType transactionType = TransactionType.valueOf(
                     transactionTypeSpinner.getSelectedItem().toString().toUpperCase()
