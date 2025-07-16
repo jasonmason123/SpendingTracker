@@ -77,7 +77,7 @@ namespace SpendingTracker_API.Controllers
                     });
                 }
                 Console.WriteLine($"Failed to register user: {registrationResult.Message}");
-                return BadRequest($"Failed to register user: {registrationResult.Message}");
+                return BadRequest(registrationResult.Message);
             }
             catch (Exception ex)
             {

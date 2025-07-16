@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
@@ -26,13 +27,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import vn.edu.fpt.spendingtracker_mobile.R;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.AuthenticationApiConnector;
 import vn.edu.fpt.spendingtracker_mobile.dtos.AuthResponseDto;
 import vn.edu.fpt.spendingtracker_mobile.dtos.GoogleIdTokenDto;
 import vn.edu.fpt.spendingtracker_mobile.dtos.PasswordCredentialsDto;
-import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
+import vn.edu.fpt.spendingtracker_mobile.utils.HelperMethods;
 
 public class LoginFragment extends Fragment {
     // callback method implemented by MainActivity
@@ -42,6 +42,7 @@ public class LoginFragment extends Fragment {
     private LoginFragmentListener listener;
     private EditText emailEditText;
     private EditText passwordEditText;
+    private TextView errorMessageTextView;
     private Retrofit retrofit;
     private GoogleSignInClient mGoogleSignInClient;
     private AuthenticationApiConnector apiConnector;
@@ -68,6 +69,7 @@ public class LoginFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_login, container,false);
         emailEditText = (EditText) view.findViewById(R.id.emailEditText);
         passwordEditText = (EditText) view.findViewById(R.id.passwordEditText);
+        errorMessageTextView = (TextView) view.findViewById(R.id.errorMessageTextView);
         Button loginButton = (Button) view.findViewById(R.id.loginButton);
         loginButton.setOnClickListener(loginButtonClicked);
         Button loginWithGoogleButton = (Button) view.findViewById(R.id.loginWithGoogleButton);
@@ -76,11 +78,7 @@ public class LoginFragment extends Fragment {
         signupButton.setOnClickListener(signupButtonClicked);
 
         //Initialize api connector
-        retrofit = new Retrofit.Builder()
-                .baseUrl(AppConstants.API_DOMAIN)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
+        retrofit = HelperMethods.initializeRetrofit(getActivity(), false);
         apiConnector = retrofit.create(AuthenticationApiConnector.class);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -118,10 +116,7 @@ public class LoginFragment extends Fragment {
             if(email.length() != 0 && password.length() != 0) {
                 signup(email, password);
             } else {
-                new AlertDialog.Builder(requireContext())
-                        .setMessage(R.string.error_message)
-                        .setPositiveButton(R.string.ok, null)
-                        .show();
+                HelperMethods.showMessageDialog(R.string.error_message, requireContext());
             }
         }
     };
@@ -166,6 +161,9 @@ public class LoginFragment extends Fragment {
                     try {
                         String error = response.errorBody().string();
                         Log.e("Login", "Failed: " + error);
+                        if(errorMessageTextView.getVisibility() != View.VISIBLE)
+                            errorMessageTextView.setVisibility(View.VISIBLE);
+                        errorMessageTextView.setText(error);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -192,6 +190,9 @@ public class LoginFragment extends Fragment {
                     try {
                         String error = response.errorBody().string();
                         Log.e("Signup", "Failed: " + error);
+                        if(errorMessageTextView.getVisibility() != View.VISIBLE)
+                            errorMessageTextView.setVisibility(View.VISIBLE);
+                        errorMessageTextView.setText(error);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -214,7 +215,11 @@ public class LoginFragment extends Fragment {
                     listener.onLoginCompleted(auth.token); // notify activity
                 } else {
                     try {
+                        String error = response.errorBody().string();
                         Log.e("GoogleLogin", "Failed: " + response.errorBody().string());
+                        if(errorMessageTextView.getVisibility() != View.VISIBLE)
+                            errorMessageTextView.setVisibility(View.VISIBLE);
+                        errorMessageTextView.setText(error);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

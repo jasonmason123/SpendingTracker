@@ -5,6 +5,7 @@ package vn.edu.fpt.spendingtracker_mobile.fragments;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 
+import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import android.content.Context;
@@ -45,6 +46,7 @@ import vn.edu.fpt.spendingtracker_mobile.api_connector.TransactionApiConnector;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
 import vn.edu.fpt.spendingtracker_mobile.enums.TransactionType;
 import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
+import vn.edu.fpt.spendingtracker_mobile.utils.HelperMethods;
 
 public class AddEditFragment extends Fragment
 {
@@ -131,24 +133,8 @@ public class AddEditFragment extends Fragment
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         transactionTypeSpinner.setAdapter(adapter);
 
-        //Get auth token
-        SharedPreferences prefs =
-                getActivity().getSharedPreferences(
-                        AppConstants.AUTH_PREFERENCE_NAME,
-                        Context.MODE_PRIVATE);
-
-        //Attach auth token to request header
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new AuthInterceptor(prefs))
-                .build();
-
-        //Initialize api connector
-        retrofit = new Retrofit.Builder()
-                .baseUrl(AppConstants.API_DOMAIN)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create(AppConstants.GSON_CONFIG))
-                .build();
-
+        // Initialize apiConnector
+        retrofit = HelperMethods.initializeRetrofit(getActivity(), true);
         apiConnector = retrofit.create(TransactionApiConnector.class);
 
         transactionInfoBundle = getArguments(); // null if creating new transaction
@@ -214,45 +200,68 @@ public class AddEditFragment extends Fragment
             }
             else // required fields are blank, so display error dialog
             {
-                new AlertDialog.Builder(requireContext())
-                        .setMessage(R.string.error_message)
-                        .setPositiveButton(R.string.ok, null)
-                        .show();
+                showMessageDialog(R.string.error_message);
             }
         } // end method onClick
     }; // end OnClickListener saveContactButtonClicked
 
     private void saveTransaction(Transaction transaction) {
-        apiConnector.add(transaction).enqueue(new Callback<Transaction>() {
-            @Override
-            public void onResponse(Call<Transaction> call, Response<Transaction> response) {
-                if (response.isSuccessful()) {
-                    Log.d("SaveTransaction",
-                            response.code() + ": Transaction saved: " + response.body().getId());
-                    new AlertDialog.Builder(requireContext())
-                            .setMessage(R.string.transaction_saved_message)
-                            .setPositiveButton(R.string.ok, null)
-                            .show();
-                    // Optionally notify activity or pop back stack
-                    listener.onAddEditCompleted(rowID);
-                } else {
-                    new AlertDialog.Builder(requireContext())
-                            .setMessage(R.string.error_saving_transaction_message)
-                            .setPositiveButton(R.string.ok, null)
-                            .show();
-                    try {
-                        Log.e("SaveTransaction",
-                                response.code() + ": " + response.errorBody().string());
-                    } catch (IOException e) {
-                        Log.e("SaveTransaction", "Error parsing errorBody");
+        if(transactionInfoBundle != null) {
+            apiConnector.update((int) rowID, transaction).enqueue(new Callback<Transaction>() {
+                @Override
+                public void onResponse(Call<Transaction> call, Response<Transaction> response) {
+                    if (response.isSuccessful()) {
+                        Log.d("UpdateTransaction",
+                                response.code() + ": Transaction added: " + response.body().getId());
+                        showMessageDialog(R.string.transaction_saved_message);
+                        // Optionally notify activity or pop back stack
+                        listener.onAddEditCompleted(rowID);
+                    } else {
+                        showMessageDialog(R.string.error_saving_transaction_message);
+                        try {
+                            Log.e("UpdateTransaction",
+                                    response.code() + ": " + response.errorBody().string());
+                        } catch (IOException e) {
+                            Log.e("UpdateTransaction", "Error parsing errorBody");
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<Transaction> call, Throwable t) {
-                Log.e("SaveTransaction", "Error: " + t.getMessage());
-            }
-        });
+                @Override
+                public void onFailure(Call<Transaction> call, Throwable t) {
+                    Log.e("AddTransaction", "Error: " + t.getMessage());
+                }
+            });
+        } else {
+            apiConnector.add(transaction).enqueue(new Callback<Transaction>() {
+                @Override
+                public void onResponse(Call<Transaction> call, Response<Transaction> response) {
+                    if (response.isSuccessful()) {
+                        Log.d("AddTransaction",
+                                response.code() + ": Transaction updated: " + response.body().getId());
+                        showMessageDialog(R.string.transaction_saved_message);
+                        // Optionally notify activity or pop back stack
+                        listener.onAddEditCompleted(rowID);
+                    } else {
+                        showMessageDialog(R.string.error_saving_transaction_message);
+                        try {
+                            Log.e("AddTransaction",
+                                    response.code() + ": " + response.errorBody().string());
+                        } catch (IOException e) {
+                            Log.e("AddTransaction", "Error parsing errorBody");
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Transaction> call, Throwable t) {
+                    Log.e("SaveTransaction", "Error: " + t.getMessage());
+                }
+            });
+        }
+    }
+
+    private void showMessageDialog(@StringRes int messageId) {
+        HelperMethods.showMessageDialog(messageId, requireContext());
     }
 } // end class AddEditFragment

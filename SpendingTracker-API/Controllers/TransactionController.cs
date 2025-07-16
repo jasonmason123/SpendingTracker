@@ -134,6 +134,7 @@ namespace SpendingTracker_API.Controllers
                 {
                     Id = id,
                     Description = transactionDto.Description,
+                    Merchant = transactionDto.Merchant,
                     Date = transactionDto.Date,
                     Amount = transactionDto.Amount,
                     TransactionType = transactionDto.TransactionType,

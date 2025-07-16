@@ -5,12 +5,20 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import java.io.IOException;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import vn.edu.fpt.spendingtracker_mobile.SQLiteConnector;
+import vn.edu.fpt.spendingtracker_mobile.api_connector.TransactionApiConnector;
+import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
 import vn.edu.fpt.spendingtracker_mobile.fragments.DetailsFragment;
 import vn.edu.fpt.spendingtracker_mobile.R;
 
@@ -19,6 +27,7 @@ public class ConfirmDeleteDialogFragment extends DialogFragment {
     private static final String ARG_ROW_ID = "row_id";
     private long rowID;
     private DetailsFragment.DetailsFragmentListener listener;
+    private TransactionApiConnector apiConnector;
 
     public static ConfirmDeleteDialogFragment newInstance(long rowID) {
         ConfirmDeleteDialogFragment fragment = new ConfirmDeleteDialogFragment();
@@ -30,6 +39,10 @@ public class ConfirmDeleteDialogFragment extends DialogFragment {
 
     public void setListener(DetailsFragment.DetailsFragmentListener listener) {
         this.listener = listener;
+    }
+
+    public void setApiConnector(TransactionApiConnector apiConnector) {
+        this.apiConnector = apiConnector;
     }
 
     @NonNull
@@ -46,22 +59,27 @@ public class ConfirmDeleteDialogFragment extends DialogFragment {
         builder.setPositiveButton(R.string.button_delete, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int button) {
-                SQLiteConnector sqLiteConnector = new SQLiteConnector(requireContext());
-
-                new AsyncTask<Long, Void, Void>() {
+                apiConnector.delete((int) rowID).enqueue(new Callback<Transaction>() {
                     @Override
-                    protected Void doInBackground(Long... params) {
-                        sqLiteConnector.deleteContact(params[0]);
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Void result) {
-                        if (listener != null) {
+                    public void onResponse(Call<Transaction> call, Response<Transaction> response) {
+                        if (response.isSuccessful()) {
                             listener.onTransactionDeleted();
+                        } else {
+                            builder.setMessage(R.string.error_deleting_transaction_message);
+                            try {
+                                Log.e("DeleteTransaction",
+                                        response.code() + ": " + response.errorBody().string());
+                            } catch (IOException e) {
+                                Log.e("DeleteTransaction", "Error parsing errorBody");
+                            }
                         }
                     }
-                }.execute(rowID);
+
+                    @Override
+                    public void onFailure(Call<Transaction> call, Throwable t) {
+                        Log.e("DeleteTransaction", "Error: " + t.getMessage());
+                    }
+                });
             }
         });
 

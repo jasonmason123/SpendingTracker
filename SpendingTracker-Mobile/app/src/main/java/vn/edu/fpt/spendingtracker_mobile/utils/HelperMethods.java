@@ -1,10 +1,23 @@
 package vn.edu.fpt.spendingtracker_mobile.utils;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.FragmentActivity;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import vn.edu.fpt.spendingtracker_mobile.R;
+import vn.edu.fpt.spendingtracker_mobile.api_connector.AuthInterceptor;
 
 public class HelperMethods {
     private static final String ISO_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
@@ -26,5 +39,38 @@ public class HelperMethods {
         SimpleDateFormat sdf = new SimpleDateFormat(ISO_FORMAT, Locale.getDefault());
         sdf.setTimeZone(TimeZone.getTimeZone(AppConstants.UTC_NAME));
         return sdf.format(localDate);
+    }
+
+    public static Retrofit initializeRetrofit(FragmentActivity activity, boolean authRequired) {
+        if(authRequired) {
+            //Get auth token
+            SharedPreferences prefs =
+                    activity.getSharedPreferences(
+                            AppConstants.AUTH_PREFERENCE_NAME,
+                            Context.MODE_PRIVATE);
+
+            //Attach auth token to request header
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .addInterceptor(new AuthInterceptor(prefs))
+                    .build();
+
+            return new Retrofit.Builder()
+                    .baseUrl(AppConstants.API_DOMAIN)
+                    .client(client)
+                    .addConverterFactory(GsonConverterFactory.create(AppConstants.GSON_CONFIG))
+                    .build();
+        }
+
+        return new Retrofit.Builder()
+                .baseUrl(AppConstants.API_DOMAIN)
+                .addConverterFactory(GsonConverterFactory.create(AppConstants.GSON_CONFIG))
+                .build();
+    }
+
+    public static void showMessageDialog(@StringRes int messageId, Context context) {
+        new AlertDialog.Builder(context)
+                .setMessage(messageId)
+                .setPositiveButton(R.string.ok, null)
+                .show();
     }
 }

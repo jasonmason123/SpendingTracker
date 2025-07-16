@@ -55,7 +55,7 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
         {
             var existingTransaction = await GetAsync(transaction.Id);
 
-            if (existingTransaction == null)
+            if (existingTransaction == null || existingTransaction.UserId != _userRetriever.UserId)
             {
                 throw new InvalidOperationException("Transaction not found or does not belong to the user.");
             }

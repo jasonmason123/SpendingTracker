@@ -37,6 +37,7 @@ import vn.edu.fpt.spendingtracker_mobile.api_connector.AuthInterceptor;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.AuthenticationApiConnector;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.TransactionApiConnector;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
+import vn.edu.fpt.spendingtracker_mobile.enums.TransactionType;
 import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
 
 public class TransactionListFragment extends ListFragment
@@ -149,7 +150,10 @@ public class TransactionListFragment extends ListFragment
                     List<String> displayList = new ArrayList<>();
 
                     for (Transaction t : transactionList) {
-                        displayList.add(t.getDescription() + " - $" + t.getAmount());
+                        if(t.getTransactionType() == TransactionType.EXPENSE)
+                            displayList.add(t.getDescription() + " -" + t.getAmount() + " VNĐ");
+                        else if (t.getTransactionType() == TransactionType.INCOME)
+                            displayList.add(t.getDescription() + " +" + t.getAmount() + " VNĐ");
                     }
 
                     transactionAdapter = new ArrayAdapter<>(

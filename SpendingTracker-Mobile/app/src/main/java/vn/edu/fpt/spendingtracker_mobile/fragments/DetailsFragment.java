@@ -17,6 +17,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import okhttp3.OkHttpClient;
@@ -94,24 +97,8 @@ public class DetailsFragment extends Fragment
                 transactionId = arguments.getLong(MainActivity.TRANSACTION_ID);
         }
 
-        //Get auth token
-        SharedPreferences prefs =
-                getActivity().getSharedPreferences(
-                        AppConstants.AUTH_PREFERENCE_NAME,
-                        Context.MODE_PRIVATE);
-
-        //Attach auth token to request header
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new AuthInterceptor(prefs))
-                .build();
-
-        //Initialize api connector
-        retrofit = new Retrofit.Builder()
-                .baseUrl(AppConstants.API_DOMAIN)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
+        // Initialize apiConnector
+        retrofit = HelperMethods.initializeRetrofit(getActivity(), true);
         apiConnector = retrofit.create(TransactionApiConnector.class);
 
         // inflate DetailsFragment's layout
@@ -189,12 +176,20 @@ public class DetailsFragment extends Fragment
                 if (response.isSuccessful() && response.body() != null) {
                     Transaction t = response.body();
 
-                    // Parsing date to local date since server returns UTC date
-                    Date localDate = HelperMethods.utcToLocal(t.getDate().toString());
+                    // Transform date into shorter date string
+                    Instant instant = t.getDate().toInstant();
+                    ZoneId zone = ZoneId.systemDefault();
+                    LocalDateTime localDateTime = instant.atZone(zone).toLocalDateTime();
+
+                    int day = localDateTime.getDayOfMonth();
+                    int month = localDateTime.getMonthValue(); // 1-12
+                    int year = localDateTime.getYear();
+
+                    String dateString = day + "-" + month + "-" + year;
 
                     descriptionTextView.setText(t.getDescription());
                     merchantTextView.setText(t.getMerchant());
-                    dateTextView.setText(localDate.toString());
+                    dateTextView.setText(dateString);
                     amountTextView.setText(String.valueOf(t.getAmount()));
                     transactionTypeTextView.setText(t.getTransactionType().toString());
                 } else {
@@ -209,52 +204,13 @@ public class DetailsFragment extends Fragment
         });
     }
 
-    // performs database query outside GUI thread
-//    private class LoadContactTask extends AsyncTask<Long, Object, Cursor>
-//    {
-//        SQLiteConnector sqLiteConnector =
-//                new SQLiteConnector(getActivity());
-//
-//        // open database & get Cursor representing specified contact's data
-//        @Override
-//        protected Cursor doInBackground(Long... params)
-//        {
-//            sqLiteConnector.open();
-//            return sqLiteConnector.getOneTransaction(params[0]);
-//        }
-//
-//        // use the Cursor returned from the doInBackground method
-//        @Override
-//        protected void onPostExecute(Cursor result)
-//        {
-//            super.onPostExecute(result);
-//            result.moveToFirst(); // move to the first item
-//
-//            // get the column index for each data item
-//            int descriptionIndex = result.getColumnIndex("description");
-//            int merchantIndex = result.getColumnIndex("merchant");
-//            int dateIndex = result.getColumnIndex("date");
-//            int amountIndex = result.getColumnIndex("amount");
-//            int transactionTypeIndex = result.getColumnIndex("transactionType");
-//
-//            // fill TextViews with the retrieved data
-//            descriptionTextView.setText(result.getString(descriptionIndex));
-//            merchantTextView.setText(result.getString(merchantIndex));
-//            dateTextView.setText(result.getString(dateIndex));
-//            amountTextView.setText(result.getString(amountIndex));
-//            transactionTypeTextView.setText(result.getString(transactionTypeIndex));
-//
-//            result.close(); // close the result cursor
-//            sqLiteConnector.close(); // close database connection
-//        } // end method onPostExecute
-//    } // end class LoadContactTask
-
     // delete a contact
     private void deleteContact()
     {
         // use FragmentManager to display the confirmDelete DialogFragment
         ConfirmDeleteDialogFragment dialog = ConfirmDeleteDialogFragment.newInstance(transactionId);
         dialog.setListener(this.listener);
+        dialog.setApiConnector(apiConnector);
         dialog.show(getParentFragmentManager(), "confirmDelete");
     }
 } // end class DetailsFragment

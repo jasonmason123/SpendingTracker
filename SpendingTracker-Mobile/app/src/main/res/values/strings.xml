@@ -10,11 +10,11 @@
     <string name="hint_description">Description</string>
     <string name="hint_merchant">Merchant</string>
     <string name="hint_date">Date Recorded</string>
-    <string name="hint_amount">Amount</string>
+    <string name="hint_amount">Amount (VNĐ)</string>
     <string name="label_description">Description:</string>
     <string name="label_merchant">Merchant:</string>
     <string name="label_date">Date:</string>
-    <string name="label_amount">Amount (VND):</string>
+    <string name="label_amount">Amount (VNĐ):</string>
     <string name="label_transaction_type">Type:</string>
     <string name="confirm_title">Are You Sure?</string>
     <string name="confirm_message">This will permanently delete the transaction</string>
@@ -31,5 +31,6 @@
     <string name="menuitem_logout">Log out</string>
     <string name="transaction_saved_message">Transaction saved!</string>
     <string name="error_saving_transaction_message">Error saving transaction, please try again later</string>
+    <string name="error_deleting_transaction_message">Error deleting transaction, please try again later</string>
 
 </resources>
