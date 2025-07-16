@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import vn.edu.fpt.spendingtracker_mobile.enums.TransactionTypes;
+import vn.edu.fpt.spendingtracker_mobile.enums.TransactionType;
 
 public class SQLiteConnector
 {
@@ -48,7 +48,7 @@ public class SQLiteConnector
 
     // inserts a new transaction in the database
     public long insertTransaction (String description, String merchant, Date date,
-                                  double amount, TransactionTypes transactionType)
+                                  double amount, TransactionType transactionType)
     {
         //Parse date to yyyy-MM-dd HH:mm:ss string
         SimpleDateFormat datetimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
@@ -56,8 +56,8 @@ public class SQLiteConnector
 
         //If EXPENSE and amount is positive -> Set to negative
         //If INCOME and amount is negative -> Set to positive
-        if ((transactionType == TransactionTypes.EXPENSE && amount > 0) ||
-                (transactionType == TransactionTypes.INCOME && amount < 0))
+        if ((transactionType == TransactionType.EXPENSE && amount > 0) ||
+                (transactionType == TransactionType.INCOME && amount < 0))
         {
             amount *= -1;
         }
@@ -77,7 +77,7 @@ public class SQLiteConnector
 
     // updates an existing transaction in the database
     public void updateTransaction (long id, String description, String merchant, Date date,
-                                   double amount, TransactionTypes transactionType)
+                                   double amount, TransactionType transactionType)
     {
         //Parse date to yyyy-MM-dd string
         SimpleDateFormat datetimeFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -85,8 +85,8 @@ public class SQLiteConnector
 
         //If EXPENSE and amount is positive -> Set to negative
         //If INCOME and amount is negative -> Set to positive
-        if ((transactionType == TransactionTypes.EXPENSE && amount > 0) ||
-            (transactionType == TransactionTypes.INCOME && amount < 0))
+        if ((transactionType == TransactionType.EXPENSE && amount > 0) ||
+            (transactionType == TransactionType.INCOME && amount < 0))
         {
             amount *= -1;
         }

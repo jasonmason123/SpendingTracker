@@ -23,10 +23,10 @@ public interface TransactionApiConnector {
     Call<List<Transaction>> getList(@Query("searchString") String searchString, @Query("pageNumber") int pagNumber, @Query("pageSize") int pageSize);
 
     @POST("api/transaction/add")
-    Call<Transaction> add(@Body Transaction transaction);
+    Call<Transaction> add(@Body Transaction transactionDto);
 
-    @PUT("api/transaction/update")
-    Call<Transaction> update(@Body Transaction transaction);
+    @PUT("api/transaction/update/{id}")
+    Call<Transaction> update(@Path("id") int id, @Body Transaction transactionDto);
 
     @DELETE("api/transaction/delete/{id}")
     Call<Transaction> delete(@Path("id") int id);

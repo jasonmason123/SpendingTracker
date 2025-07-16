@@ -27,9 +27,11 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -40,9 +42,8 @@ import vn.edu.fpt.spendingtracker_mobile.R;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.AuthInterceptor;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.TransactionApiConnector;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
-import vn.edu.fpt.spendingtracker_mobile.enums.TransactionTypes;
+import vn.edu.fpt.spendingtracker_mobile.enums.TransactionType;
 import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
-import vn.edu.fpt.spendingtracker_mobile.utils.HelperMethods;
 
 public class AddEditFragment extends Fragment
 {
@@ -118,7 +119,7 @@ public class AddEditFragment extends Fragment
         });
 
         // Set spinner options from the enum TransactionTypes
-        String[] transactionTypes = Arrays.stream(TransactionTypes.values())
+        String[] transactionTypes = Arrays.stream(TransactionType.values())
                 .map(Enum::name)
                 .toArray(String[]::new);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -144,7 +145,7 @@ public class AddEditFragment extends Fragment
         retrofit = new Retrofit.Builder()
                 .baseUrl(AppConstants.API_DOMAIN)
                 .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(AppConstants.GSON_CONFIG))
                 .build();
 
         apiConnector = retrofit.create(TransactionApiConnector.class);
@@ -191,34 +192,6 @@ public class AddEditFragment extends Fragment
                 dateStr.length() != 0 && amountStr.length() != 0 &&
                 transactionTypeSpinner.getSelectedItem() != null)
             {
-                // AsyncTask to save contact, then notify listener
-//                AsyncTask<Object, Object, Object> saveContactTask =
-//                        new AsyncTask<Object, Object, Object>()
-//                        {
-//                            @Override
-//                            protected Object doInBackground(Object... params)
-//                            {
-//                                saveTransaction(); // save contact to the database
-//                                return null;
-//                            }
-//
-//                            @Override
-//                            protected void onPostExecute(Object result)
-//                            {
-//                                // hide soft keyboard
-//                                InputMethodManager imm = (InputMethodManager)
-//                                        getActivity().getSystemService(
-//                                                Context.INPUT_METHOD_SERVICE);
-//                                imm.hideSoftInputFromWindow(
-//                                        getView().getWindowToken(), 0);
-//
-//                                listener.onAddEditCompleted(rowID);
-//                            }
-//                        }; // end AsyncTask
-//
-//                // save the contact to the database using a separate thread
-//                saveContactTask.execute((Object[]) null);
-
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 // Parse to UTC date since server only accepts UTC date
                 Date date = null;
@@ -230,7 +203,7 @@ public class AddEditFragment extends Fragment
 
                 double amount = Double.parseDouble(amountStr);
 
-                TransactionTypes transactionType = TransactionTypes.valueOf(
+                TransactionType transactionType = TransactionType.valueOf(
                     transactionTypeSpinner.getSelectedItem().toString().toUpperCase()
                 );
 
@@ -253,12 +226,22 @@ public class AddEditFragment extends Fragment
             @Override
             public void onResponse(Call<Transaction> call, Response<Transaction> response) {
                 if (response.isSuccessful()) {
-                    Log.d("SaveTransaction", "Transaction saved: " + response.body().getId());
+                    Log.d("SaveTransaction",
+                            response.code() + ": Transaction saved: " + response.body().getId());
+                    new AlertDialog.Builder(requireContext())
+                            .setMessage(R.string.transaction_saved_message)
+                            .setPositiveButton(R.string.ok, null)
+                            .show();
                     // Optionally notify activity or pop back stack
-                    requireActivity().getSupportFragmentManager().popBackStack();
+                    listener.onAddEditCompleted(rowID);
                 } else {
+                    new AlertDialog.Builder(requireContext())
+                            .setMessage(R.string.error_saving_transaction_message)
+                            .setPositiveButton(R.string.ok, null)
+                            .show();
                     try {
-                        Log.e("SaveTransaction", "Failed: " + response.errorBody().string());
+                        Log.e("SaveTransaction",
+                                response.code() + ": " + response.errorBody().string());
                     } catch (IOException e) {
                         Log.e("SaveTransaction", "Error parsing errorBody");
                     }
@@ -271,46 +254,4 @@ public class AddEditFragment extends Fragment
             }
         });
     }
-
-    // saves contact information to the database
-//    private void saveTransaction()
-//    {
-//        // get DatabaseConnector to interact with the SQLite database
-//        SQLiteConnector sqliteConnector =
-//                new SQLiteConnector(getActivity());
-//
-//        //Format the date entered
-//        String dateStr = dateEditText.getText().toString();
-//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-//        Date date = null;
-//        try {
-//            date = format.parse(dateStr);
-//        } catch (ParseException e) {
-//            e.printStackTrace(); // handle the error properly in production
-//        }
-//
-//        if (transactionInfoBundle == null)
-//        {
-//            // insert the contact information into the database
-//            rowID = sqliteConnector.insertTransaction(
-//                    descriptionEditText.getText().toString(),
-//                    merchantEditText.getText().toString(),
-//                    date,
-//                    Double.parseDouble(amountEditText.getText().toString()),
-//                    TransactionTypes.valueOf(
-//                        transactionTypeSpinner.getSelectedItem().toString().toUpperCase()
-//                    ));
-//        }
-//        else
-//        {
-//            sqliteConnector.updateTransaction(rowID,
-//                descriptionEditText.getText().toString(),
-//                merchantEditText.getText().toString(),
-//                date,
-//                Double.parseDouble(amountEditText.getText().toString()),
-//                TransactionTypes.valueOf(
-//                    transactionTypeSpinner.getSelectedItem().toString().toUpperCase()
-//                ));
-//        }
-//    } // end method saveContact
 } // end class AddEditFragment

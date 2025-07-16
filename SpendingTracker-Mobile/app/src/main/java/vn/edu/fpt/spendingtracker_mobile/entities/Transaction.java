@@ -2,7 +2,7 @@ package vn.edu.fpt.spendingtracker_mobile.entities;
 
 import java.util.Date;
 
-import vn.edu.fpt.spendingtracker_mobile.enums.TransactionTypes;
+import vn.edu.fpt.spendingtracker_mobile.enums.TransactionType;
 
 public class Transaction {
     private int id;
@@ -10,7 +10,7 @@ public class Transaction {
     private String merchant;
     private Date date;
     private double amount;
-    private TransactionTypes transactionType;
+    private TransactionType transactionType;
     private Date createdAt;
     private Date updatedAt;
 
@@ -18,7 +18,7 @@ public class Transaction {
 
     }
 
-    public Transaction(String description, String merchant, Date date, double amount, TransactionTypes transactionType) {
+    public Transaction(String description, String merchant, Date date, double amount, TransactionType transactionType) {
         this.description = description;
         this.merchant = merchant;
         this.date = date;
@@ -26,7 +26,7 @@ public class Transaction {
         this.transactionType = transactionType;
     }
 
-    public Transaction(int id, String description, String merchant, Date date, double amount, TransactionTypes transactionType) {
+    public Transaction(int id, String description, String merchant, Date date, double amount, TransactionType transactionType) {
         this.id = id;
         this.description = description;
         this.merchant = merchant;
@@ -55,7 +55,7 @@ public class Transaction {
         return amount;
     }
 
-    public TransactionTypes getTransactionType() {
+    public TransactionType getTransactionType() {
         return transactionType;
     }
 

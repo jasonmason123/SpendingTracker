@@ -29,5 +29,7 @@
     <string name="button_login_with_Google">Login with Google</string>
     <string name="default_web_client_id">510994033480-gc1f2rmo7ss2iij9pc8ithuep9ivg00b.apps.googleusercontent.com</string>
     <string name="menuitem_logout">Log out</string>
+    <string name="transaction_saved_message">Transaction saved!</string>
+    <string name="error_saving_transaction_message">Error saving transaction, please try again later</string>
 
 </resources>
