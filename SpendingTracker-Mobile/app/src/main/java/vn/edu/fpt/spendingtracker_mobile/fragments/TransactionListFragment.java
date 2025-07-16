@@ -166,7 +166,9 @@ public class TransactionListFragment extends ListFragment
                     );
                     setListAdapter(transactionAdapter);
                 } else {
-                    Log.e("API", "Failed to load transactions: " + response.code());
+                    Log.e("API", "Failed to load transactions: "
+                            + response.code() + ": "
+                            + call.request().url());
                 }
             }
 

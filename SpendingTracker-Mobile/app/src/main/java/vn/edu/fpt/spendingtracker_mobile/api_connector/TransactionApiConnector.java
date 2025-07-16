@@ -13,7 +13,7 @@ import retrofit2.http.Query;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
 
 public interface TransactionApiConnector {
-    @GET("/api/transaction/get/{id}")
+    @GET("api/transaction/get/{id}")
     Call<Transaction> get(@Path("id") int id);
 
     @GET("api/transaction/get-list")

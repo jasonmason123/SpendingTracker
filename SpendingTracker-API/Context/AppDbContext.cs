@@ -17,6 +17,10 @@ namespace SpendingTracker_API.Context
         {
             base.OnModelCreating(modelBuilder);
             // Add any additional model configurations here
+
+            modelBuilder.Entity<AppUser>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
         }
     }
 }

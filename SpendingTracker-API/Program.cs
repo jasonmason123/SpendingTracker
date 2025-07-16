@@ -78,6 +78,15 @@ builder.Services.AddAuthentication(options =>
     options.SaveTokens = true;
 });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("JWT", policy =>
+    {
+        policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
+        policy.RequireAuthenticatedUser();
+    });
+});
+
 // Add memory cache for caching purposes
 builder.Services.AddMemoryCache();
 
