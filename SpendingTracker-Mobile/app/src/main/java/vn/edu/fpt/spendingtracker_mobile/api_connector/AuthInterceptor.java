@@ -32,6 +32,8 @@ public class AuthInterceptor implements Interceptor {
                 .header("Authorization", "Bearer " + token)
                 .build();
 
+        Log.i("Request url", newRequest.url().toString());
+
         RequestBody requestBody = newRequest.body();
         if(requestBody != null) {
             Buffer buffer = new Buffer();
