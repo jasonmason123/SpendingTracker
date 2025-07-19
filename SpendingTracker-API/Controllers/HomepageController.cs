@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SpendingTracker_API.DTOs.Web_Mobile;
+using SpendingTracker_API.Entities;
 using SpendingTracker_API.Repositories.FilterParams;
 using SpendingTracker_API.Repositories.UnitOfWork;
 using SpendingTracker_API.Utils.Enums;
