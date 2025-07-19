@@ -4,6 +4,9 @@ using SpendingTracker_API.DTOs.Web_Mobile;
 using SpendingTracker_API.Entities;
 using SpendingTracker_API.Utils.Messages;
 using SpendingTracker_API.Repositories.UnitOfWork;
+using System.Linq.Expressions;
+using SpendingTracker_API.Utils.Enums;
+using SpendingTracker_API.Repositories.FilterParams;
 
 namespace SpendingTracker_API.Controllers
 {
@@ -18,7 +21,7 @@ namespace SpendingTracker_API.Controllers
         }
 
         [HttpGet("get/{id}")]
-        public async Task<IActionResult> GetAsync(int id)
+        public async Task<ActionResult<TransactionDto>> GetAsync(int id)
         {
             try
             {
@@ -42,37 +45,35 @@ namespace SpendingTracker_API.Controllers
         }
 
         [HttpGet("get-list")]
-        public IActionResult GetList([FromQuery] int pageNumber, [FromQuery] int pageSize)
+        public ActionResult<IEnumerable<TransactionDto>> GetList([FromQuery] string? searchString, [FromQuery] int pageNumber, [FromQuery] int pageSize)
         {
             try
             {
-                var list = _unitOfWork.Transactions.GetList(pageNumber, pageSize);
-                var transactionList = list.Select(transaction => new TransactionDto
+                IEnumerable<Transaction> transactionList;
+                Expression<Func<Transaction, Transaction>> transactionSelector = selector => new Transaction
                 {
-                    Id = transaction.Id,
-                    Description = transaction.Description,
-                    Merchant = transaction.Merchant,
-                    Date = transaction.Date,
-                    Amount = transaction.Amount,
-                    TransactionType = transaction.TransactionType,
-                    CreatedAt = transaction.CreatedAt,
-                    UpdatedAt = transaction.UpdatedAt
-                }).ToList();
-                return Ok(transactionList);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
-            }
-        }
+                    Id = selector.Id,
+                    Description = selector.Description,
+                    Merchant = selector.Merchant,
+                    Date = selector.Date,
+                    Amount = selector.Amount,
+                    TransactionType = selector.TransactionType,
+                    CreatedAt = selector.CreatedAt,
+                    UpdatedAt = selector.UpdatedAt
+                };
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    transactionList = _unitOfWork.Transactions
+                        .Search(searchString, pageNumber, pageSize, transactionSelector);
+                }
+                else
+                {
+                    transactionList = _unitOfWork.Transactions
+                        .GetPagedList(pageNumber, pageSize, transactionSelector);
+                }
 
-        [HttpGet("search")]
-        public IActionResult Search([FromQuery] string searchString, [FromQuery] int pageNumber, [FromQuery] int pageSize)
-        {
-            try
-            {
-                var list = _unitOfWork.Transactions.Search(searchString, pageNumber, pageSize);
-                var transactionList = list.Select(transaction => new TransactionDto
+                // Convert to DTOs
+                var transactionListDto = transactionList.Select(transaction => new TransactionDto
                 {
                     Id = transaction.Id,
                     Description = transaction.Description,
@@ -82,8 +83,9 @@ namespace SpendingTracker_API.Controllers
                     TransactionType = transaction.TransactionType,
                     CreatedAt = transaction.CreatedAt,
                     UpdatedAt = transaction.UpdatedAt
-                }).ToList();
-                return Ok(transactionList);
+                });
+
+                return Ok(transactionListDto);
             }
             catch (Exception ex)
             {
@@ -92,7 +94,7 @@ namespace SpendingTracker_API.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddAsync([FromBody] TransactionDto transactionDto)
+        public async Task<ActionResult<TransactionDto>> AddAsync([FromBody] TransactionDto transactionDto)
         {
             try
             {
@@ -126,7 +128,7 @@ namespace SpendingTracker_API.Controllers
         }
 
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateAsync(int id, [FromBody] TransactionDto transactionDto)
+        public async Task<ActionResult<TransactionDto>> UpdateAsync(int id, [FromBody] TransactionDto transactionDto)
         {
             try
             {
@@ -176,6 +178,66 @@ namespace SpendingTracker_API.Controllers
                     return NoContent();
 
                 return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
+            }
+        }
+
+        [HttpGet("get-income-expense-by-period")]
+        public async Task<IActionResult> GetIncomeExpenseByPeriod([FromQuery] DateTime dateFrom, [FromQuery] DateTime dateTo)
+        {
+            try
+            {
+                var transactions = await _unitOfWork.Transactions.GetList(selector => new Transaction
+                {
+                    Amount = selector.Amount,
+                    TransactionType = selector.TransactionType,
+                }, new TransactionFilterParams
+                {
+                    DateFrom = dateFrom,
+                    DateTo = dateTo
+                });
+
+                var incomes = transactions
+                    .Where(t => t.TransactionType == TransactionType.INCOME)
+                    .Sum(t => t.Amount);
+
+                var expenses = transactions
+                    .Where(t => t.TransactionType == TransactionType.EXPENSE)
+                    .Sum(t => t.Amount);
+
+                return Ok(new
+                {
+                    Income = incomes,
+                    Expense = expenses,
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
+            }
+        }
+
+        [HttpGet("get-top-3-recent")]
+        public ActionResult<IEnumerable<TransactionDto>> GetTopThreeRecentTransactions()
+        {
+            try
+            {
+                var list = _unitOfWork.Transactions.GetPagedList(1, 3);
+                var transactionList = list.Select(transaction => new TransactionDto
+                {
+                    Id = transaction.Id,
+                    Description = transaction.Description,
+                    Merchant = transaction.Merchant,
+                    Date = transaction.Date,
+                    Amount = transaction.Amount,
+                    TransactionType = transaction.TransactionType,
+                    CreatedAt = transaction.CreatedAt,
+                    UpdatedAt = transaction.UpdatedAt
+                }).ToList();
+                return Ok(transactionList);
             }
             catch (Exception ex)
             {

@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpendingTracker_API.Context;
 using SpendingTracker_API.Entities;
-using SpendingTracker_API.Utils.Enums;
+using SpendingTracker_API.Repositories.FilterParams;
 using SpendingTracker_API.Utils.UserRetriever;
+using System.Linq.Expressions;
 using X.PagedList;
 using X.PagedList.Extensions;
 
@@ -25,22 +26,85 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
                 .FirstOrDefaultAsync(t => t.Id == id && t.UserId == _userRetriever.UserId);
         }
 
-        public IPagedList<Transaction> GetList(int pageNumber, int pageSize)
+        public async Task<IEnumerable<Transaction>> GetList(
+            Expression<Func<Transaction, Transaction>>? selector = null,
+            TransactionFilterParams? filterParams = null
+        )
         {
-            return _context.Transactions
+            var query = _context.Transactions
                 .Where(t => t.UserId == _userRetriever.UserId)
                 .OrderByDescending(t => t.Date)
-                .ToPagedList(pageNumber, pageSize);
+                .AsQueryable();
+
+            if (filterParams != null)
+            {
+                if (filterParams.DateFrom.HasValue)
+                {
+                    query = query.Where(t => t.Date >= filterParams.DateFrom.Value);
+                }
+                if (filterParams.DateTo.HasValue)
+                {
+                    query = query.Where(t => t.Date <= filterParams.DateTo.Value);
+                }
+
+                if (filterParams.TransactionType.HasValue)
+                {
+                    query = query.Where(t => t.TransactionType == filterParams.TransactionType.Value);
+                }
+            }
+
+            return await query.ToListAsync();
         }
 
-        public IPagedList<Transaction> Search(string searchString, int pageNumber, int pageSize)
+        public IPagedList<Transaction> GetPagedList(
+            int pageNumber,
+            int pageSize,
+            Expression<Func<Transaction, Transaction>>? selector = null,
+            TransactionFilterParams? filterParams = null
+        )
         {
-            return _context.Transactions
-                .Where(t => t.UserId == _userRetriever.UserId && 
-                            (t.Description.Contains(searchString) || 
+            var query = _context.Transactions
+                .Where(t => t.UserId == _userRetriever.UserId)
+                .OrderByDescending(t => t.Date)
+                .AsQueryable();
+
+            if(filterParams != null)
+            {
+                if (filterParams.DateFrom.HasValue)
+                {
+                    query = query.Where(t => t.Date >= filterParams.DateFrom.Value);
+                }
+
+                if (filterParams.DateTo.HasValue)
+                {
+                    query = query.Where(t => t.Date <= filterParams.DateTo.Value);
+                }
+
+                if (filterParams.TransactionType.HasValue)
+                {
+                    query = query.Where(t => t.TransactionType == filterParams.TransactionType.Value);
+                }
+            }
+
+            if(selector != null)
+                query = query.Select(selector);
+
+            return query.ToPagedList(pageNumber, pageSize);
+        }
+
+        public IPagedList<Transaction> Search(string searchString, int pageNumber, int pageSize, Expression<Func<Transaction, Transaction>>? selector = null)
+        {
+            var query = _context.Transactions
+                .Where(t => t.UserId == _userRetriever.UserId &&
+                            (t.Description.Contains(searchString) ||
                              t.Merchant.Contains(searchString)))
                 .OrderByDescending(t => t.Date)
-                .ToPagedList(pageNumber, pageSize);
+                .AsQueryable();
+
+            if (selector != null)
+                query = query.Select(selector);
+
+            return query.ToPagedList(pageNumber, pageSize);
         }
 
         public async Task<Transaction> AddAsync(Transaction transaction)
