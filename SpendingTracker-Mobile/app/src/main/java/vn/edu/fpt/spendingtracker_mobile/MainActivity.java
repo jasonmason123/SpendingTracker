@@ -2,58 +2,100 @@
 // Hosts Address Book app's fragments
 package vn.edu.fpt.spendingtracker_mobile;
 
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import vn.edu.fpt.spendingtracker_mobile.fragments.AddEditFragment;
 import vn.edu.fpt.spendingtracker_mobile.fragments.DetailsFragment;
+import vn.edu.fpt.spendingtracker_mobile.fragments.on_bottom_nav_fragments.HomeFragment;
 import vn.edu.fpt.spendingtracker_mobile.fragments.LoginFragment;
-import vn.edu.fpt.spendingtracker_mobile.fragments.TransactionListFragment;
+import vn.edu.fpt.spendingtracker_mobile.fragments.on_bottom_nav_fragments.SettingsFragment;
+import vn.edu.fpt.spendingtracker_mobile.fragments.on_bottom_nav_fragments.TransactionListFragment;
 import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
 
 public class MainActivity extends AppCompatActivity
 implements TransactionListFragment.TransactionListFragmentListener,
         DetailsFragment.DetailsFragmentListener,
         AddEditFragment.AddEditFragmentListener,
-        LoginFragment.LoginFragmentListener
+        LoginFragment.LoginFragmentListener,
+        SettingsFragment.SettingsFragmentListener
 {
     // keys for storing row ID in Bundle passed to a fragment
     public static final String TRANSACTION_ID = "transaction_id";
 
-    TransactionListFragment transactionListFragment; // displays transaction list
-    LoginFragment loginFragment;
+    private TransactionListFragment transactionListFragment; // displays transaction list
+    private BottomNavigationView bottomNavigationView;
 
-    // display ContactListFragment when MainActivity first loads
+    public BottomNavigationView getBottomNavigationView() {
+        return bottomNavigationView;
+    }
+
+    // display HomeFragment when MainActivity first loads
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // return if Activity is being restored, no need to recreate GUI
-        if (savedInstanceState != null)
+        // Initialize BottomNavigationView
+        bottomNavigationView = findViewById(R.id.bottomNavMenu);
+        if (bottomNavigationView == null) {
+            // Handle missing BottomNavigationView (e.g., log error or show fallback UI)
             return;
+        }
 
-        // check whether layout contains fragmentContainer (phone layout);
-        // ContactListFragment is always displayed
-        if (findViewById(R.id.fragmentContainer) != null)
-        {
-            // add the fragment to the FrameLayout
-            FragmentTransaction transaction =
-                    getSupportFragmentManager().beginTransaction();
-            SharedPreferences prefs =
-                    getSharedPreferences(AppConstants.AUTH_PREFERENCE_NAME, Context.MODE_PRIVATE);
-            if(prefs.getString(AppConstants.AUTH_TOKEN_NAME, null) == null) {
-                transaction.add(R.id.fragmentContainer, new LoginFragment());
-            } else {
-                transaction.add(R.id.fragmentContainer, new TransactionListFragment());
+        // Check if fragmentContainer exists (phone layout)
+        if (findViewById(R.id.fragmentContainer) != null) {
+            // Only set up initial fragment if not restoring state
+            if (savedInstanceState == null) {
+                // Check authentication status
+                SharedPreferences prefs = getSharedPreferences(AppConstants.AUTH_PREFERENCE_NAME, Context.MODE_PRIVATE);
+                Fragment initialFragment = prefs.getString(AppConstants.AUTH_TOKEN_NAME, null) == null
+                        ? new LoginFragment()
+                        : new HomeFragment();
+
+                // Add initial fragment
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragmentContainer, initialFragment)
+                        .commit();
             }
-            transaction.commit(); // causes Fragment to display
+
+            // Set up BottomNavigationView listener
+            bottomNavigationView.setOnItemSelectedListener(item -> {
+                Fragment selectedFragment = null;
+                int itemId = item.getItemId();
+
+                if (itemId == R.id.nav_home) {
+                    selectedFragment = new HomeFragment();
+                } else if (itemId == R.id.nav_transactions) {
+                    selectedFragment = new TransactionListFragment();
+                } else if (itemId == R.id.nav_statistics) {
+                    selectedFragment = new TransactionListFragment(); // Replace with actual fragment
+                } else if (itemId == R.id.nav_settings) {
+                    selectedFragment = new SettingsFragment();
+                }
+
+                if (selectedFragment != null) {
+                    // Ensure BottomNavigationView is visible for navigation
+                    bottomNavigationView.setVisibility(View.VISIBLE);
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragmentContainer, selectedFragment)
+                            .addToBackStack(null) // Optional: for back navigation
+                            .commit();
+                    return true;
+                }
+                return false;
+            });
         }
     }
 
@@ -171,14 +213,19 @@ implements TransactionListFragment.TransactionListFragmentListener,
     }
 
     @Override
-    public void onLoginCompleted(String authToken) {
+    public void onAuthenticationCompleted(String authToken, String email) {
         SharedPreferences prefs = getSharedPreferences(AppConstants.AUTH_PREFERENCE_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(AppConstants.AUTH_TOKEN_NAME, authToken).apply();
+        prefs.edit()
+                .putString(AppConstants.AUTH_TOKEN_NAME, authToken)
+                .putString(AppConstants.AUTH_EMAIL, email)
+                .apply();
 
         // Navigate to another fragment
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragmentContainer, new TransactionListFragment())
+                .replace(R.id.fragmentContainer, new HomeFragment())
                 .commit();
+
+        bottomNavigationView.setSelectedItemId(R.id.nav_home);
     }
 
     @Override

@@ -17,6 +17,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/hint_description"
             android:imeOptions="actionNext"
+            android:maxLength="@string/transaction_description_max_length"
             android:inputType="text" >
         </EditText>
 

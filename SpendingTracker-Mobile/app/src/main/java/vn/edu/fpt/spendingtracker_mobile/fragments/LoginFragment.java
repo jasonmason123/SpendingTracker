@@ -27,6 +27,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import vn.edu.fpt.spendingtracker_mobile.MyApp;
 import vn.edu.fpt.spendingtracker_mobile.R;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.AuthenticationApiConnector;
 import vn.edu.fpt.spendingtracker_mobile.dtos.AuthResponseDto;
@@ -34,10 +35,15 @@ import vn.edu.fpt.spendingtracker_mobile.dtos.GoogleIdTokenDto;
 import vn.edu.fpt.spendingtracker_mobile.dtos.PasswordCredentialsDto;
 import vn.edu.fpt.spendingtracker_mobile.utils.HelperMethods;
 
-public class LoginFragment extends Fragment {
+public class LoginFragment extends BaseFragment {
+    @Override
+    protected boolean shouldShowBottomNavigation() {
+        return false;
+    }
+
     // callback method implemented by MainActivity
     public interface LoginFragmentListener {
-        public void onLoginCompleted(String authToken);
+        public void onAuthenticationCompleted(String authToken, String email);
     }
     private LoginFragmentListener listener;
     private EditText emailEditText;
@@ -78,8 +84,7 @@ public class LoginFragment extends Fragment {
         signupButton.setOnClickListener(signupButtonClicked);
 
         //Initialize api connector
-        retrofit = HelperMethods.initializeRetrofit(getActivity(), false);
-        apiConnector = retrofit.create(AuthenticationApiConnector.class);
+        apiConnector = MyApp.getApiConnector(AuthenticationApiConnector.class);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -140,7 +145,7 @@ public class LoginFragment extends Fragment {
                 if (account != null) {
                     String idToken = account.getIdToken();
                     Log.d("GoogleLogin", "ID Token: " + idToken);
-                    loginWithGoogle(new GoogleIdTokenDto(idToken, true)); // 👈 Call your backend
+                    loginWithGoogle(new GoogleIdTokenDto(idToken, true, account.getEmail())); // 👈 Call your backend
                 }
             } catch (ApiException e) {
                 Log.e("GoogleLogin", "Sign-in failed: " + e.getMessage());
@@ -155,7 +160,7 @@ public class LoginFragment extends Fragment {
             public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     AuthResponseDto auth = response.body();
-                    listener.onLoginCompleted(auth.token);
+                    listener.onAuthenticationCompleted(auth.token, email);
                 } else {
                     // Handle invalid credentials, 401, etc.
                     try {
@@ -184,7 +189,7 @@ public class LoginFragment extends Fragment {
             public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     AuthResponseDto auth = response.body();
-                    listener.onLoginCompleted(auth.token);
+                    listener.onAuthenticationCompleted(auth.token, email);
                 } else {
                     // Handle invalid credentials, 401, etc.
                     try {
@@ -212,7 +217,7 @@ public class LoginFragment extends Fragment {
             public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     AuthResponseDto auth = response.body();
-                    listener.onLoginCompleted(auth.token); // notify activity
+                    listener.onAuthenticationCompleted(auth.token, token.email); // notify activity
                 } else {
                     try {
                         String error = response.errorBody().string();

@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/transactionListFragment"
-        android:name="vn.edu.fpt.spendingtracker_mobile.fragments.TransactionListFragment"
+        android:name="vn.edu.fpt.spendingtracker_mobile.fragments.on_bottom_nav_fragments.TransactionListFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_marginRight="@dimen/activity_horizontal_margin"

@@ -41,32 +41,6 @@ public class HelperMethods {
         return sdf.format(localDate);
     }
 
-    public static Retrofit initializeRetrofit(FragmentActivity activity, boolean authRequired) {
-        if(authRequired) {
-            //Get auth token
-            SharedPreferences prefs =
-                    activity.getSharedPreferences(
-                            AppConstants.AUTH_PREFERENCE_NAME,
-                            Context.MODE_PRIVATE);
-
-            //Attach auth token to request header
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .addInterceptor(new AuthInterceptor(prefs))
-                    .build();
-
-            return new Retrofit.Builder()
-                    .baseUrl(AppConstants.API_DOMAIN)
-                    .client(client)
-                    .addConverterFactory(GsonConverterFactory.create(AppConstants.GSON_CONFIG))
-                    .build();
-        }
-
-        return new Retrofit.Builder()
-                .baseUrl(AppConstants.API_DOMAIN)
-                .addConverterFactory(GsonConverterFactory.create(AppConstants.GSON_CONFIG))
-                .build();
-    }
-
     public static void showMessageDialog(@StringRes int messageId, Context context) {
         new AlertDialog.Builder(context)
                 .setMessage(messageId)

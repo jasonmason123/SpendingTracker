@@ -29,6 +29,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import vn.edu.fpt.spendingtracker_mobile.MainActivity;
+import vn.edu.fpt.spendingtracker_mobile.MyApp;
 import vn.edu.fpt.spendingtracker_mobile.R;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.AuthInterceptor;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.TransactionApiConnector;
@@ -37,8 +38,13 @@ import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
 import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
 import vn.edu.fpt.spendingtracker_mobile.utils.HelperMethods;
 
-public class DetailsFragment extends Fragment
+public class DetailsFragment extends BaseFragment
 {
+    @Override
+    protected boolean shouldShowBottomNavigation() {
+        return false;
+    }
+
     // callback methods implemented by MainActivity
     public interface DetailsFragmentListener
     {
@@ -47,7 +53,6 @@ public class DetailsFragment extends Fragment
 
         // called to pass Bundle of transaction's info for editing
         public void onEditTransaction(Bundle arguments);
-        public void onLogout();
     }
 
     private DetailsFragmentListener listener;
@@ -58,7 +63,6 @@ public class DetailsFragment extends Fragment
     private TextView dateTextView; // displays transaction's date
     private TextView amountTextView; // displays transaction's amount
     private TextView transactionTypeTextView; // displays transaction type
-    private Retrofit retrofit;
     private TransactionApiConnector apiConnector;
 
     // set DetailsFragmentListener when fragment attached
@@ -98,8 +102,7 @@ public class DetailsFragment extends Fragment
         }
 
         // Initialize apiConnector
-        retrofit = HelperMethods.initializeRetrofit(getActivity(), true);
-        apiConnector = retrofit.create(TransactionApiConnector.class);
+        apiConnector = MyApp.getApiConnector(TransactionApiConnector.class);
 
         // inflate DetailsFragment's layout
         View view =
@@ -159,9 +162,6 @@ public class DetailsFragment extends Fragment
         if(itemId == R.id.action_delete) {
             deleteContact();
             return true;
-        }
-        if(itemId == R.id.action_logout) {
-            listener.onLogout();
         }
 
         return super.onOptionsItemSelected(item);

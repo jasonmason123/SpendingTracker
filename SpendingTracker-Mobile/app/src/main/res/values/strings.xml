@@ -28,9 +28,12 @@
     <string name="button_login">Login</string>
     <string name="button_login_with_Google">Login with Google</string>
     <string name="default_web_client_id">510994033480-gc1f2rmo7ss2iij9pc8ithuep9ivg00b.apps.googleusercontent.com</string>
-    <string name="menuitem_logout">Log out</string>
+    <string name="button_text_logout">Log out</string>
     <string name="transaction_saved_message">Transaction saved!</string>
     <string name="error_saving_transaction_message">Error saving transaction, please try again later</string>
     <string name="error_deleting_transaction_message">Error deleting transaction, please try again later</string>
+    <string name="transaction_description_max_length">30</string>
+    <string name="text_no_transaction">No transactions found</string>
+    <string name="hint_search">Search</string>
 
 </resources>

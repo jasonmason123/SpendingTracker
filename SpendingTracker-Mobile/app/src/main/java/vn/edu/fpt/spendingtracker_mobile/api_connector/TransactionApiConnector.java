@@ -30,4 +30,7 @@ public interface TransactionApiConnector {
 
     @DELETE("api/transaction/delete/{id}")
     Call<Transaction> delete(@Path("id") int id);
+
+    @GET("api/transaction/get-top-3-recent")
+    Call<List<Transaction>> getTopThreeRecentTransactions();
 }

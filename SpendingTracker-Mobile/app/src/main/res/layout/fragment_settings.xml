@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settingFrameLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Email Field -->
+        <TextView
+            android:id="@+id/email_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:padding="8dp"
+            android:background="?attr/editTextBackground"
+            android:drawableStart="@drawable/ic_email"
+            android:drawablePadding="8dp" />
+
+        <!-- Logout Button -->
+        <Button
+            android:id="@+id/logout_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/button_text_logout"
+            android:textAllCaps="false"
+            style="@style/Widget.MaterialComponents.Button" />
+
+    </LinearLayout>
+</FrameLayout>

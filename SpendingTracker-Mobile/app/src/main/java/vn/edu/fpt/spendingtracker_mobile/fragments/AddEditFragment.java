@@ -6,10 +6,8 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import android.content.Context;
-import android.content.SharedPreferences;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,32 +28,30 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import vn.edu.fpt.spendingtracker_mobile.MainActivity;
+import vn.edu.fpt.spendingtracker_mobile.MyApp;
 import vn.edu.fpt.spendingtracker_mobile.R;
-import vn.edu.fpt.spendingtracker_mobile.api_connector.AuthInterceptor;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.TransactionApiConnector;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
 import vn.edu.fpt.spendingtracker_mobile.enums.TransactionType;
-import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
 import vn.edu.fpt.spendingtracker_mobile.utils.HelperMethods;
 
-public class AddEditFragment extends Fragment
+public class AddEditFragment extends BaseFragment
 {
+    @Override
+    protected boolean shouldShowBottomNavigation() {
+        return false;
+    }
+
     // callback method implemented by MainActivity
     public interface AddEditFragmentListener
     {
         // called after edit completed so contact can be redisplayed
         public void onAddEditCompleted(long rowID);
-        public void onLogout();
     }
 
     private AddEditFragmentListener listener;
@@ -69,7 +65,6 @@ public class AddEditFragment extends Fragment
     private EditText dateEditText;
     private EditText amountEditText;
     private Spinner transactionTypeSpinner;
-    private Retrofit retrofit;
     private TransactionApiConnector apiConnector;
 
     // set AddEditFragmentListener when Fragment attached
@@ -110,14 +105,14 @@ public class AddEditFragment extends Fragment
             Calendar calendar = Calendar.getInstance();
 
             new DatePickerDialog(
-                    v.getContext(),
-                    (datePicker, year, month, dayOfMonth) -> {
-                        String selectedDate = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth);
-                        dateEditText.setText(selectedDate);
-                    },
-                    calendar.get(Calendar.YEAR),
-                    calendar.get(Calendar.MONTH),
-                    calendar.get(Calendar.DAY_OF_MONTH)
+                v.getContext(),
+                (datePicker, year, month, dayOfMonth) -> {
+                    String selectedDate = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth);
+                    dateEditText.setText(selectedDate);
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
             ).show();
         });
 
@@ -134,8 +129,7 @@ public class AddEditFragment extends Fragment
         transactionTypeSpinner.setAdapter(adapter);
 
         // Initialize apiConnector
-        retrofit = HelperMethods.initializeRetrofit(getActivity(), true);
-        apiConnector = retrofit.create(TransactionApiConnector.class);
+        apiConnector = MyApp.getApiConnector(TransactionApiConnector.class);
 
         transactionInfoBundle = getArguments(); // null if creating new transaction
 
