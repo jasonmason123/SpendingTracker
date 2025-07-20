@@ -94,15 +94,29 @@ namespace SpendingTracker_API.Controllers
                     DateTo = DateTime.SpecifyKind(new DateTime(year, 12, 31, 23, 59, 59), DateTimeKind.Utc)
                 });
 
+                var months = Enumerable.Range(1, 12).ToList();
+
                 var incomes = yearlyTransactions
                     .Where(x => x.TransactionType == TransactionType.INCOME)
                     .GroupBy(t => t.Date.Month)
                     .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount));
 
+                // Ensure all months are represented in the dictionary, even if they have no transactions
+                incomes = months.ToDictionary(
+                    month => month,
+                    month => incomes.ContainsKey(month) ? incomes[month] : 0
+                );
+
                 var expenses = yearlyTransactions
                     .Where(x => x.TransactionType == TransactionType.EXPENSE)
                     .GroupBy(t => t.Date.Month)
                     .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount));
+                
+                // Ensure all months are represented in the dictionary, even if they have no transactions
+                expenses = months.ToDictionary(
+                    month => month,
+                    month => expenses.ContainsKey(month) ? expenses[month] : 0
+                );
 
                 return Ok(new MonthlyAmountsByYearDto
                 {
