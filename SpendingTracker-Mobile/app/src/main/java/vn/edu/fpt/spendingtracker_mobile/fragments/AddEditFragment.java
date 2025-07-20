@@ -195,7 +195,7 @@ public class AddEditFragment extends BaseFragment
                 descriptionOriginalString.equals(description) &&
                 merchantOriginalString.equals(merchant) &&
                 dateOriginalString.equals(dateStr) &&
-                amountStr.equals(amountStr)) {
+                amountOriginalString.equals(amountStr)) {
 
                 // Show message when nothing was changed and stop the method
                 HelperMethods.showMessageDialog(R.string.no_edit_message, requireContext());
