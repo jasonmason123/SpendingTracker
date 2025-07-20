@@ -46,5 +46,11 @@
     <string name="text_no_new_transaction_yet">No new transactions yet</string>
     <string name="network_error_message">Please check your Internet connection or try again.\nYou can report this issue to: buiminhson940@gmail.com</string>
     <string name="api_error_message">There has been an issue in the app, please report this issue to: buiminhson940@gmail.com.\nThank you for your cooperation!</string>
+    <string name="hint_select_year">Select Year</string>
+    <string name="topIncomeText">Top Income:</string>
+    <string name="topExpenseText">Top Expense:</string>
+    <string name="inThisYearText">In this year:</string>
+    <string name="selectedYearText">Selected Year:</string>
+    <string name="no_edit_message">You haven\'t changed any field</string>
 
 </resources>

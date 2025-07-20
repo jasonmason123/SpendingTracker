@@ -185,15 +185,10 @@ public class HomeFragment extends BaseFragment {
                         topTransactions.addAll(response.body()); // Add new data
                         transactionAdapter.notifyDataSetChanged();
                     } else {
-                        Log.e("API", "Failed to load transactions: "
+                        Log.e("getThreeRecentTransactions", "Failed to load transactions: "
                                 + response.code() + ": "
                                 + call.request().url());
                     }
-                }
-
-                @Override
-                public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                    super.onFailure(call, t);
                 }
             });
     }

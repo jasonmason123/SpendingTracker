@@ -19,6 +19,7 @@ import vn.edu.fpt.spendingtracker_mobile.fragments.DetailsFragment;
 import vn.edu.fpt.spendingtracker_mobile.fragments.on_bottom_nav_fragments.HomeFragment;
 import vn.edu.fpt.spendingtracker_mobile.fragments.LoginFragment;
 import vn.edu.fpt.spendingtracker_mobile.fragments.on_bottom_nav_fragments.SettingsFragment;
+import vn.edu.fpt.spendingtracker_mobile.fragments.on_bottom_nav_fragments.StatisticsFragment;
 import vn.edu.fpt.spendingtracker_mobile.fragments.on_bottom_nav_fragments.TransactionListFragment;
 import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
 
@@ -80,7 +81,7 @@ implements TransactionListFragment.TransactionListFragmentListener,
                 } else if (itemId == R.id.nav_transactions) {
                     selectedFragment = new TransactionListFragment();
                 } else if (itemId == R.id.nav_statistics) {
-                    selectedFragment = new TransactionListFragment(); // Replace with actual fragment
+                    selectedFragment = new StatisticsFragment();
                 } else if (itemId == R.id.nav_settings) {
                     selectedFragment = new SettingsFragment();
                 }

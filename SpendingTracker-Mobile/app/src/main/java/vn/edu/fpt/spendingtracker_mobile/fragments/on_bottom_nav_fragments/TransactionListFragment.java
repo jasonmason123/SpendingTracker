@@ -143,7 +143,7 @@ public class TransactionListFragment extends BaseFragment
             public void onClick(View view) {
                 if (!isLoading) {
                     // Load more data here
-                    fetchTransactionsFromApi(null, false);
+                    fetchTransactionsFromApi(searchString, false);
                 }
             }
         });

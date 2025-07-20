@@ -202,11 +202,6 @@ public class DetailsFragment extends BaseFragment
                     // handle error (e.g. show toast or error text)
                 }
             }
-
-            @Override
-            public void onFailure(Call<Transaction> call, Throwable t) {
-                super.onFailure(call, t);
-            }
         });
     }
 

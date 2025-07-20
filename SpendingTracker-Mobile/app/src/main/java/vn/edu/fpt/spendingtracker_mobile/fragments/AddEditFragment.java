@@ -71,6 +71,10 @@ public class AddEditFragment extends BaseFragment
     private EditText amountEditText;
     private Spinner transactionTypeSpinner;
     private TransactionApiConnector apiConnector;
+    private String descriptionOriginalString;
+    private String merchantOriginalString;
+    private String dateOriginalString;
+    private String amountOriginalString;
 
     // set AddEditFragmentListener when Fragment attached
     @Override
@@ -140,14 +144,26 @@ public class AddEditFragment extends BaseFragment
 
         if (transactionInfoBundle != null)
         {
+            String description = transactionInfoBundle.getString("description");
+            String merchant = transactionInfoBundle.getString("merchant");
+            String dateStr = transactionInfoBundle.getString("date");
+            String amountStr = transactionInfoBundle.getString("amount");
+            String transactionTypeStr = transactionInfoBundle.getString("transactionType");
+
+            // Set original strings to check if any data has been changed on update
+            descriptionOriginalString = description;
+            merchantOriginalString = merchant;
+            dateOriginalString = dateStr;
+            amountOriginalString = amountStr;
+
             rowID = transactionInfoBundle.getLong(MainActivity.TRANSACTION_ID);
-            descriptionEditText.setText(transactionInfoBundle.getString("description"));
-            merchantEditText.setText(transactionInfoBundle.getString("merchant"));
-            dateEditText.setText(transactionInfoBundle.getString("date"));
-            amountEditText.setText(transactionInfoBundle.getString("amount"));
-            String transactionType = transactionInfoBundle.getString("transactionType");
-            if (transactionType != null && adapter != null) {
-                int position = adapter.getPosition(transactionType);
+            // Set TextView content
+            descriptionEditText.setText(description);
+            merchantEditText.setText(merchant);
+            dateEditText.setText(dateStr);
+            amountEditText.setText(amountStr);
+            if (transactionTypeStr != null && adapter != null) {
+                int position = adapter.getPosition(transactionTypeStr);
                 if (position >= 0) {
                     transactionTypeSpinner.setSelection(position);
                 }
@@ -174,33 +190,45 @@ public class AddEditFragment extends BaseFragment
             String dateStr = dateEditText.getText().toString().trim();
             String amountStr = amountEditText.getText().toString().trim();
 
-            if (description.length() != 0 && merchant.length() != 0 &&
-                dateStr.length() != 0 && amountStr.length() != 0 &&
-                transactionTypeSpinner.getSelectedItem() != null)
-            {
-                SimpleDateFormat format =
-                        new SimpleDateFormat(SIMPLE_DATE_FORMAT, Locale.getDefault());
-                Date date = null;
-                try {
-                    date = format.parse(dateStr);
-                } catch (ParseException e) {
-                    e.printStackTrace(); // handle the error properly in production
-                }
+            // Check if anything was changed during update
+            if(transactionInfoBundle != null &&
+                descriptionOriginalString.equals(description) &&
+                merchantOriginalString.equals(merchant) &&
+                dateOriginalString.equals(dateStr) &&
+                amountStr.equals(amountStr)) {
 
-                BigDecimal amount = new BigDecimal(amountStr);
-
-                TransactionType transactionType = TransactionType.valueOf(
-                    transactionTypeSpinner.getSelectedItem().toString().toUpperCase()
-                );
-
-                saveTransaction(
-                    new Transaction(
-                        description, merchant, date, amount, transactionType));
+                // Show message when nothing was changed and stop the method
+                HelperMethods.showMessageDialog(R.string.no_edit_message, requireContext());
+                return;
             }
-            else // required fields are blank, so display error dialog
-            {
+
+            // required fields are blank, so display error dialog
+            if(description.length() == 0 || merchant.length() == 0 ||
+                    dateStr.length() == 0 || amountStr.length() == 0 ||
+                    transactionTypeSpinner.getSelectedItem() == null) {
+
                 showMessageDialog(R.string.error_message);
+                return;
             }
+
+            SimpleDateFormat format =
+                    new SimpleDateFormat(SIMPLE_DATE_FORMAT, Locale.getDefault());
+            Date date = null;
+            try {
+                date = format.parse(dateStr);
+            } catch (ParseException e) {
+                e.printStackTrace(); // handle the error properly in production
+            }
+
+            BigDecimal amount = new BigDecimal(amountStr);
+
+            TransactionType transactionType = TransactionType.valueOf(
+                    transactionTypeSpinner.getSelectedItem().toString().toUpperCase()
+            );
+
+            saveTransaction(
+                new Transaction(description, merchant, date,
+                                    amount, transactionType));
         } // end method onClick
     }; // end OnClickListener saveContactButtonClicked
 
@@ -251,11 +279,6 @@ public class AddEditFragment extends BaseFragment
                             Log.e("AddTransaction", "Error parsing errorBody");
                         }
                     }
-                }
-
-                @Override
-                public void onFailure(Call<Transaction> call, Throwable t) {
-                    Log.e("AddTransaction", "Error: " + t.getMessage());
                 }
             });
         }

@@ -30,6 +30,7 @@ import retrofit2.Retrofit;
 import vn.edu.fpt.spendingtracker_mobile.MyApp;
 import vn.edu.fpt.spendingtracker_mobile.R;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.AuthenticationApiConnector;
+import vn.edu.fpt.spendingtracker_mobile.api_connector.api_callback.ApiCallback;
 import vn.edu.fpt.spendingtracker_mobile.dtos.AuthResponseDto;
 import vn.edu.fpt.spendingtracker_mobile.dtos.GoogleIdTokenDto;
 import vn.edu.fpt.spendingtracker_mobile.dtos.PasswordCredentialsDto;
@@ -184,7 +185,7 @@ public class LoginFragment extends BaseFragment {
 
     private void signup(String email, String password) {
         PasswordCredentialsDto credentials = new PasswordCredentialsDto(email, password);
-        apiConnector.signUp(credentials).enqueue(new Callback<AuthResponseDto>() {
+        apiConnector.signUp(credentials).enqueue(new ApiCallback<AuthResponseDto>(requireContext()) {
             @Override
             public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -203,16 +204,11 @@ public class LoginFragment extends BaseFragment {
                     }
                 }
             }
-
-            @Override
-            public void onFailure(Call<AuthResponseDto> call, Throwable t) {
-                Log.e("Login", "Network or parse error: " + t.getMessage());
-            }
         });
     }
 
     private void loginWithGoogle(GoogleIdTokenDto token) {
-        apiConnector.googleSignIn(token).enqueue(new Callback<AuthResponseDto>() {
+        apiConnector.googleSignIn(token).enqueue(new ApiCallback<AuthResponseDto>(requireContext()) {
             @Override
             public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -229,11 +225,6 @@ public class LoginFragment extends BaseFragment {
                         e.printStackTrace();
                     }
                 }
-            }
-
-            @Override
-            public void onFailure(Call<AuthResponseDto> call, Throwable t) {
-                Log.e("GoogleLogin", "Error: " + t.getMessage());
             }
         });
     }
