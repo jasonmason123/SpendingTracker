@@ -2,6 +2,7 @@ package vn.edu.fpt.spendingtracker_mobile.entities;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Objects;
 
 import vn.edu.fpt.spendingtracker_mobile.enums.TransactionType;
 
@@ -82,5 +83,18 @@ public class Transaction {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Transaction that = (Transaction) o;
+        return id == that.id; // compare by unique identifier
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

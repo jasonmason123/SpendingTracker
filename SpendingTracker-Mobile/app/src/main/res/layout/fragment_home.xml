@@ -3,12 +3,34 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/homeLinearLayout"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="@dimen/activity_horizontal_margin"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/earningsExpensesText"
+        android:id="@+id/monthTextView"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/inThisMonthTextView"
+        android:textSize="18sp"
+        android:text="@string/inThisMonthText"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/earningsTextView"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/expensesTextView"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_width="match_parent"
@@ -19,6 +41,7 @@
         android:textSize="16sp"
         android:textColor="#FF5722"
         android:layout_marginTop="8dp"
+        android:textStyle="bold"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
@@ -26,6 +49,14 @@
         android:id="@+id/recentTransactionsText"
         android:textSize="16sp"
         android:layout_marginTop="16dp"
+        android:text="@string/recent_transaction_header_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/transactionRecyclerView"
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 </LinearLayout>

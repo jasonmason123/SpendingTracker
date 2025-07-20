@@ -1,5 +1,7 @@
 package vn.edu.fpt.spendingtracker_mobile.api_connector;
 
+import androidx.annotation.Nullable;
+
 import java.util.List;
 
 import retrofit2.Call;
@@ -17,10 +19,11 @@ public interface TransactionApiConnector {
     Call<Transaction> get(@Path("id") int id);
 
     @GET("api/transaction/get-list")
-    Call<List<Transaction>> getList(@Query("pageNumber") int pagNumber, @Query("pageSize") int pageSize);
-
-    @GET("api/transaction/search")
-    Call<List<Transaction>> getList(@Query("searchString") String searchString, @Query("pageNumber") int pagNumber, @Query("pageSize") int pageSize);
+    Call<List<Transaction>> getPagedList(
+            @Query("searchString") @Nullable String searchString,
+            @Query("pageNumber") int pageNumber,
+            @Query("pageSize") int pageSize
+    );
 
     @POST("api/transaction/add")
     Call<Transaction> add(@Body Transaction transactionDto);
@@ -30,7 +33,4 @@ public interface TransactionApiConnector {
 
     @DELETE("api/transaction/delete/{id}")
     Call<Transaction> delete(@Path("id") int id);
-
-    @GET("api/transaction/get-top-3-recent")
-    Call<List<Transaction>> getTopThreeRecentTransactions();
 }

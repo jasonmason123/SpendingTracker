@@ -27,7 +27,8 @@ implements TransactionListFragment.TransactionListFragmentListener,
         DetailsFragment.DetailsFragmentListener,
         AddEditFragment.AddEditFragmentListener,
         LoginFragment.LoginFragmentListener,
-        SettingsFragment.SettingsFragmentListener
+        SettingsFragment.SettingsFragmentListener,
+        HomeFragment.HomeFragmentListener
 {
     // keys for storing row ID in Bundle passed to a fragment
     public static final String TRANSACTION_ID = "transaction_id";

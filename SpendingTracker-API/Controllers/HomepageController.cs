@@ -25,7 +25,7 @@ namespace SpendingTracker_API.Controllers
         {
             try
             {
-                var transactions = await _unitOfWork.Transactions.GetList(selector => new Transaction
+                var transactions = await _unitOfWork.Transactions.GetListAsync(selector => new Transaction
                 {
                     Amount = selector.Amount,
                     TransactionType = selector.TransactionType,

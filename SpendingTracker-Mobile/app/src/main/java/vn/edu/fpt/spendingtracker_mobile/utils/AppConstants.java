@@ -16,6 +16,7 @@ public class AppConstants {
     public static final SimpleDateFormat simpleDateFormat =
             new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
     public static final String UTC_NAME = "UTC";
+    public static final String ISO_UTC_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     public static final Gson GSON_CONFIG = new GsonBuilder()
             .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             .enableComplexMapKeySerialization()

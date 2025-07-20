@@ -26,7 +26,7 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
                 .FirstOrDefaultAsync(t => t.Id == id && t.UserId == _userRetriever.UserId);
         }
 
-        public async Task<IEnumerable<Transaction>> GetList(
+        public async Task<IEnumerable<Transaction>> GetListAsync(
             Expression<Func<Transaction, Transaction>>? selector = null,
             TransactionFilterParams? filterParams = null
         )

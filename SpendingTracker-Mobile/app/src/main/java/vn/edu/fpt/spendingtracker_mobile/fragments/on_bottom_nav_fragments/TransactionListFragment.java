@@ -3,10 +3,12 @@
 package vn.edu.fpt.spendingtracker_mobile.fragments.on_bottom_nav_fragments;
 
 import android.app.Activity;
-import androidx.fragment.app.ListFragment;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,31 +17,30 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.math.BigDecimal;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 import vn.edu.fpt.spendingtracker_mobile.MyApp;
 import vn.edu.fpt.spendingtracker_mobile.R;
 import vn.edu.fpt.spendingtracker_mobile.adapter.TransactionAdapter;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.TransactionApiConnector;
+import vn.edu.fpt.spendingtracker_mobile.api_connector.api_callback.ApiCallback;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
-import vn.edu.fpt.spendingtracker_mobile.enums.TransactionType;
 import vn.edu.fpt.spendingtracker_mobile.fragments.BaseFragment;
+import vn.edu.fpt.spendingtracker_mobile.utils.HelperMethods;
 
 public class TransactionListFragment extends BaseFragment
 {
@@ -60,9 +61,17 @@ public class TransactionListFragment extends BaseFragment
 
     private TransactionListFragmentListener listener;
     private List<Transaction> transactionList = new ArrayList<>();
+    private Set<Integer> existingIds = new HashSet<>();
     private TransactionAdapter transactionAdapter;
     private ProgressBar loadingSpinner;
     private TextView emptyTextView;
+    private EditText searchEditText;
+    private TextView noNewTransactionYetTextView;
+    private Button loadMoreButton;
+    private String searchString;
+    private int pageNumber = 1;
+    private boolean isLoading;
+    private final int PAGE_SIZE = 10;
 
     private TransactionApiConnector apiConnector;
 
@@ -100,6 +109,25 @@ public class TransactionListFragment extends BaseFragment
 
         loadingSpinner = view.findViewById(R.id.loadingSpinner);
         emptyTextView = view.findViewById(R.id.emptyTextView);
+        searchEditText = view.findViewById(R.id.searchEditText);
+        noNewTransactionYetTextView = view.findViewById(R.id.noMoreYetTextView);
+        loadMoreButton = view.findViewById(R.id.loadMoreButton);
+
+        searchEditText.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                String searchText = searchEditText.getText().toString().trim();
+                searchString = searchText;
+
+                fetchTransactionsFromApi(searchString, true);
+
+                // Hide keyboard
+                InputMethodManager imm = (InputMethodManager) requireContext()
+                                            .getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), 0);
+                return true;
+            }
+            return false;
+        });
 
         RecyclerView recyclerView = view.findViewById(R.id.transactionRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -109,6 +137,16 @@ public class TransactionListFragment extends BaseFragment
             listener.onTransactionSelected(transactionId);
         });
         recyclerView.setAdapter(transactionAdapter);
+
+        loadMoreButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!isLoading) {
+                    // Load more data here
+                    fetchTransactionsFromApi(null, false);
+                }
+            }
+        });
     }
 
     // when fragment resumes, use a GetContactsTask to load contacts
@@ -116,7 +154,7 @@ public class TransactionListFragment extends BaseFragment
     public void onResume()
     {
         super.onResume();
-        fetchTransactionsFromApi();
+        fetchTransactionsFromApi(searchString, true);
     }
 
     // display this fragment's menu items
@@ -140,37 +178,91 @@ public class TransactionListFragment extends BaseFragment
         return super.onOptionsItemSelected(item); // call super's method
     }
 
-    private void fetchTransactionsFromApi() {
+    private void fetchTransactionsFromApi(String searchString, boolean replaceOldData) {
+        isLoading = true;
         loadingSpinner.setVisibility(View.VISIBLE);
-        apiConnector.getList(1, 10).enqueue(new Callback<List<Transaction>>() {
-            @Override
-            public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
-                loadingSpinner.setVisibility(View.GONE);
-                if (response.isSuccessful() && response.body() != null) {
-                    transactionList.clear(); // Clear the old data
-                    transactionList.addAll(response.body()); // Add new data
-                    transactionAdapter.notifyDataSetChanged();
-                    if(transactionList.isEmpty()) {
-                        emptyTextView.setVisibility(View.VISIBLE);
-                    }
-                } else {
-                    Log.e("API", "Failed to load transactions: "
-                            + response.code() + ": "
-                            + call.request().url());
-                }
-            }
+        loadMoreButton.setEnabled(false);
 
-            @Override
-            public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                loadingSpinner.setVisibility(View.GONE);
-                Log.e("API", "Network error: " + t.getMessage());
-            }
-        });
+        // Reset pageNumber to 1 when replacing old data
+        if(replaceOldData && pageNumber != 1)
+            pageNumber = 1;
+
+        apiConnector.getPagedList(searchString, pageNumber, PAGE_SIZE)
+            .enqueue(new ApiCallback<List<Transaction>>(requireContext()) {
+                @Override
+                public void onResponse(
+                        Call<List<Transaction>> call,
+                        Response<List<Transaction>> response
+                ) {
+                    Log.i("fetchTransactionsFromApi", "fetching page: " + pageNumber);
+                    loadingSpinner.setVisibility(View.GONE);
+
+                    if (response.isSuccessful() && response.body() != null) {
+                        List<Transaction> newData = response.body();
+
+                        if (replaceOldData) {
+                            transactionList.clear(); // Clear the old data
+                            existingIds.clear();
+                        }
+
+                        if (transactionList.isEmpty() && newData.isEmpty()) {
+                            emptyTextView.setVisibility(View.VISIBLE);
+                        } else {
+                            boolean hasNewData = false;
+
+                            for (Transaction t : newData) {
+                                if (!existingIds.contains(t.getId())) {
+                                    transactionList.add(t);
+                                    existingIds.add(t.getId());
+                                    hasNewData = true;
+                                }
+                            }
+                            emptyTextView.setVisibility(View.GONE);
+                            transactionAdapter.notifyDataSetChanged();
+
+                            // Only increment pageNumber if server returns the list whose number of items matches the page size
+                            if (newData.size() == PAGE_SIZE) {
+                                pageNumber += 1;
+                            }
+
+                            // Toggle no new data yet message
+                            if(!hasNewData) {
+                                noNewTransactionYetTextView.setVisibility(View.VISIBLE);
+
+                                // Hide after 3 seconds
+                                noNewTransactionYetTextView.postDelayed(() -> {
+                                    noNewTransactionYetTextView.setVisibility(View.GONE);
+                                }, 3000); // 3000 milliseconds = 3 seconds
+                            }
+                        }
+                    } else {
+                        Log.e("API", "Failed to load transactions: "
+                                + response.code() + ": "
+                                + call.request().url());
+                    }
+
+                    isLoading = false;
+                    loadMoreButton.setEnabled(true);
+                }
+
+                @Override
+                public void onFailure(Call<List<Transaction>> call, Throwable t) {
+                    super.onFailure(call, t);
+                    loadingSpinner.setVisibility(View.GONE);
+                    isLoading = false;
+                    emptyTextView.setVisibility(View.VISIBLE);
+                }
+            });
     }
 
     // update data set
     public void updateTransactionList()
     {
-        fetchTransactionsFromApi();
+        // Remove search string before refreshing data
+        if(searchString != null) {
+            searchString = null;
+            searchEditText.setText(null);
+        }
+        fetchTransactionsFromApi(null, true);
     }
 } // end class TransactionListFragment

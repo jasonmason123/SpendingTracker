@@ -17,10 +17,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Locale;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -33,6 +35,7 @@ import vn.edu.fpt.spendingtracker_mobile.MyApp;
 import vn.edu.fpt.spendingtracker_mobile.R;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.AuthInterceptor;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.TransactionApiConnector;
+import vn.edu.fpt.spendingtracker_mobile.api_connector.api_callback.ApiCallback;
 import vn.edu.fpt.spendingtracker_mobile.dialog_fragment.ConfirmDeleteDialogFragment;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
 import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
@@ -170,7 +173,7 @@ public class DetailsFragment extends BaseFragment
     private void loadTransactionById(long id) {
         int idInt = (int) id;
         Call<Transaction> call = apiConnector.get(idInt);
-        call.enqueue(new Callback<Transaction>() {
+        call.enqueue(new ApiCallback<Transaction>(requireContext()) {
             @Override
             public void onResponse(Call<Transaction> call, Response<Transaction> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -187,10 +190,13 @@ public class DetailsFragment extends BaseFragment
 
                     String dateString = day + "-" + month + "-" + year;
 
+                    Locale locale = new Locale("vi", "VN");
+                    NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(locale);
+
                     descriptionTextView.setText(t.getDescription());
                     merchantTextView.setText(t.getMerchant());
                     dateTextView.setText(dateString);
-                    amountTextView.setText(String.valueOf(t.getAmount()));
+                    amountTextView.setText(currencyFormat.format(t.getAmount()));
                     transactionTypeTextView.setText(t.getTransactionType().toString());
                 } else {
                     // handle error (e.g. show toast or error text)
@@ -199,7 +205,7 @@ public class DetailsFragment extends BaseFragment
 
             @Override
             public void onFailure(Call<Transaction> call, Throwable t) {
-                // handle network error
+                super.onFailure(call, t);
             }
         });
     }

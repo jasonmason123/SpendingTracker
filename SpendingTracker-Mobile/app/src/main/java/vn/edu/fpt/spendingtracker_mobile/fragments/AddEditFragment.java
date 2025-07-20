@@ -36,8 +36,10 @@ import vn.edu.fpt.spendingtracker_mobile.MainActivity;
 import vn.edu.fpt.spendingtracker_mobile.MyApp;
 import vn.edu.fpt.spendingtracker_mobile.R;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.TransactionApiConnector;
+import vn.edu.fpt.spendingtracker_mobile.api_connector.api_callback.ApiCallback;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
 import vn.edu.fpt.spendingtracker_mobile.enums.TransactionType;
+import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
 import vn.edu.fpt.spendingtracker_mobile.utils.HelperMethods;
 
 public class AddEditFragment extends BaseFragment
@@ -53,6 +55,9 @@ public class AddEditFragment extends BaseFragment
         // called after edit completed so contact can be redisplayed
         public void onAddEditCompleted(long rowID);
     }
+
+    private final String DATE_PICKER_STRING_FORMAT = "%02d-%02d-%04d";
+    private final String SIMPLE_DATE_FORMAT = "dd-MM-yyyy";
 
     private AddEditFragmentListener listener;
 
@@ -107,7 +112,7 @@ public class AddEditFragment extends BaseFragment
             new DatePickerDialog(
                 v.getContext(),
                 (datePicker, year, month, dayOfMonth) -> {
-                    String selectedDate = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth);
+                    String selectedDate = String.format(DATE_PICKER_STRING_FORMAT, dayOfMonth, month + 1, year);
                     dateEditText.setText(selectedDate);
                 },
                 calendar.get(Calendar.YEAR),
@@ -173,8 +178,8 @@ public class AddEditFragment extends BaseFragment
                 dateStr.length() != 0 && amountStr.length() != 0 &&
                 transactionTypeSpinner.getSelectedItem() != null)
             {
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                // Parse to UTC date since server only accepts UTC date
+                SimpleDateFormat format =
+                        new SimpleDateFormat(SIMPLE_DATE_FORMAT, Locale.getDefault());
                 Date date = null;
                 try {
                     date = format.parse(dateStr);
@@ -206,7 +211,7 @@ public class AddEditFragment extends BaseFragment
                 public void onResponse(Call<Transaction> call, Response<Transaction> response) {
                     if (response.isSuccessful()) {
                         Log.d("UpdateTransaction",
-                                response.code() + ": Transaction added: " + response.body().getId());
+                                response.code() + ": Transaction updated: " + response.body().getId());
                         showMessageDialog(R.string.transaction_saved_message);
                         // Optionally notify activity or pop back stack
                         listener.onAddEditCompleted(rowID);
@@ -223,16 +228,17 @@ public class AddEditFragment extends BaseFragment
 
                 @Override
                 public void onFailure(Call<Transaction> call, Throwable t) {
-                    Log.e("AddTransaction", "Error: " + t.getMessage());
+                    showMessageDialog(R.string.error_saving_transaction_message);
+                    Log.e("UpdateTransaction", "Error: " + t.getMessage());
                 }
             });
         } else {
-            apiConnector.add(transaction).enqueue(new Callback<Transaction>() {
+            apiConnector.add(transaction).enqueue(new ApiCallback<Transaction>(requireContext()) {
                 @Override
                 public void onResponse(Call<Transaction> call, Response<Transaction> response) {
                     if (response.isSuccessful()) {
                         Log.d("AddTransaction",
-                                response.code() + ": Transaction updated: " + response.body().getId());
+                                response.code() + ": Transaction added: " + response.body().getId());
                         showMessageDialog(R.string.transaction_saved_message);
                         // Optionally notify activity or pop back stack
                         listener.onAddEditCompleted(rowID);
@@ -249,7 +255,7 @@ public class AddEditFragment extends BaseFragment
 
                 @Override
                 public void onFailure(Call<Transaction> call, Throwable t) {
-                    Log.e("SaveTransaction", "Error: " + t.getMessage());
+                    Log.e("AddTransaction", "Error: " + t.getMessage());
                 }
             });
         }

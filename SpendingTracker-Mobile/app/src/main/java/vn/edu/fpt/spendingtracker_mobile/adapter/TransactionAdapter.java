@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.MessageFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
@@ -55,18 +56,21 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        Locale locale = new Locale("vi", "VN");
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(locale);
+
         Transaction t = transactionList.get(position);
         holder.title.setText(t.getDescription());
         holder.date.setText(AppConstants.simpleDateFormat.format(t.getDate()));
         holder.amount.setText(
-                (t.getTransactionType() == TransactionType.EXPENSE ?
-                        "-" + String.valueOf(t.getAmount()) :
-                        "+" + String.valueOf(t.getAmount()))
-                        + " VNĐ");
+            (t.getTransactionType() == TransactionType.EXPENSE ?
+                    "-" + currencyFormat.format(t.getAmount()) :
+                    "+" + currencyFormat.format(t.getAmount())));
 
         // Set color for amount text view
         int color = ContextCompat.getColor(holder.itemView.getContext(),
-                t.getTransactionType() == TransactionType.EXPENSE ? R.color.red : R.color.green);
+                t.getTransactionType() == TransactionType.EXPENSE
+                        ? R.color.red : R.color.green);
         holder.amount.setTextColor(color);
 
         holder.bind(t.getId(), listener);
