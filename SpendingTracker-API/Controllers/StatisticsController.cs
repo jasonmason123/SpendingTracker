@@ -83,31 +83,38 @@ namespace SpendingTracker_API.Controllers
         [HttpGet("amounts/monthly-by-year")]
         public async Task<IActionResult> GetMonthlyAmountsByYear([FromQuery] int year)
         {
-            var yearlyTransactions = await _unitOfWork.Transactions.GetListAsync(selector: selector => new Transaction
+            try
             {
-                Amount = selector.Amount,
-            }, new TransactionFilterParams
+                var yearlyTransactions = await _unitOfWork.Transactions.GetListAsync(selector: selector => new Transaction
+                {
+                    Amount = selector.Amount,
+                }, new TransactionFilterParams
+                {
+                    DateFrom = DateTime.SpecifyKind(new DateTime(year, 1, 1), DateTimeKind.Utc),
+                    DateTo = DateTime.SpecifyKind(new DateTime(year, 12, 31, 23, 59, 59), DateTimeKind.Utc)
+                });
+
+                var incomes = yearlyTransactions
+                    .Where(x => x.TransactionType == TransactionType.INCOME)
+                    .GroupBy(t => t.Date.Month)
+                    .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount));
+
+                var expenses = yearlyTransactions
+                    .Where(x => x.TransactionType == TransactionType.EXPENSE)
+                    .GroupBy(t => t.Date.Month)
+                    .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount));
+
+                return Ok(new MonthlyAmountsByYearDto
+                {
+                    Year = year,
+                    MonthlyIncomes = incomes,
+                    MonthlyExpenses = expenses
+                });
+            }
+            catch (Exception ex)
             {
-                DateFrom = new DateTime(year, 1, 1),
-                DateTo = new DateTime(year, 12, 31)
-            });
-
-            var incomes = yearlyTransactions
-                .Where(x => x.TransactionType == TransactionType.INCOME)
-                .GroupBy(t => t.Date.Month)
-                .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount));
-
-            var expenses = yearlyTransactions
-                .Where(x => x.TransactionType == TransactionType.EXPENSE)
-                .GroupBy(t => t.Date.Month)
-                .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount));
-
-            return Ok(new MonthlyAmountsByYearDto
-            {
-                Year = year,
-                MonthlyIncomes = incomes,
-                MonthlyExpenses = expenses
-            });
+                return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
+            }
         }
     }
 }
