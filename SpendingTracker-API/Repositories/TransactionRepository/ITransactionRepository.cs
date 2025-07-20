@@ -8,7 +8,7 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
     public interface ITransactionRepository
     {
         public Task<Transaction> GetAsync(int id);
-        public Task<IEnumerable<Transaction>> GetListAsync(Expression<Func<Transaction, Transaction>>? selector = null, TransactionFilterParams? filterParams = null);
+        public Task<List<Transaction>> GetListAsync(Expression<Func<Transaction, Transaction>>? selector = null, TransactionFilterParams? filterParams = null);
         public IPagedList<Transaction> GetPagedList(int pageNumber, int pageSize, Expression<Func<Transaction, Transaction>>? selector = null, TransactionFilterParams? filterParams = null);
         public IPagedList<Transaction> Search(string searchString, int pageNumber, int pageSize, Expression<Func<Transaction, Transaction>>? selector = null);
         public Task<Transaction> AddAsync(Transaction transaction);

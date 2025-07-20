@@ -9,12 +9,12 @@ using SpendingTracker_API.Utils.Messages;
 
 namespace SpendingTracker_API.Controllers
 {
-    [ApiController, Route("api/homepage"), Authorize]
-    public class HomepageController : ControllerBase
+    [ApiController, Route("api/statistics"), Authorize]
+    public class StatisticsController : ControllerBase
     {
         private readonly IAppUnitOfWork _unitOfWork;
 
-        public HomepageController(IAppUnitOfWork unitOfWork)
+        public StatisticsController(IAppUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
@@ -78,6 +78,36 @@ namespace SpendingTracker_API.Controllers
             {
                 return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
             }
+        }
+
+        [HttpGet("amounts/monthly-by-year")]
+        public async Task<IActionResult> GetMonthlyAmountsByYear([FromQuery] int year)
+        {
+            var yearlyTransactions = await _unitOfWork.Transactions.GetListAsync(selector: selector => new Transaction
+            {
+                Amount = selector.Amount,
+            }, new TransactionFilterParams
+            {
+                DateFrom = new DateTime(year, 1, 1),
+                DateTo = new DateTime(year, 12, 31)
+            });
+
+            var incomes = yearlyTransactions
+                .Where(x => x.TransactionType == TransactionType.INCOME)
+                .GroupBy(t => t.Date.Month)
+                .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount));
+
+            var expenses = yearlyTransactions
+                .Where(x => x.TransactionType == TransactionType.EXPENSE)
+                .GroupBy(t => t.Date.Month)
+                .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount));
+
+            return Ok(new MonthlyAmountsByYearDto
+            {
+                Year = year,
+                MonthlyIncomes = incomes,
+                MonthlyExpenses = expenses
+            });
         }
     }
 }

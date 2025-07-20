@@ -5,8 +5,6 @@ using SpendingTracker_API.Entities;
 using SpendingTracker_API.Utils.Messages;
 using SpendingTracker_API.Repositories.UnitOfWork;
 using System.Linq.Expressions;
-using SpendingTracker_API.Utils.Enums;
-using SpendingTracker_API.Repositories.FilterParams;
 
 namespace SpendingTracker_API.Controllers
 {
