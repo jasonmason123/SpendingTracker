@@ -153,6 +153,15 @@ public class AddEditFragment extends BaseFragment
             String amountStr = transactionInfoBundle.getString("amount");
             String transactionTypeStr = transactionInfoBundle.getString("transactionType");
 
+            // Refine amountStr by removing currency unit and separator character
+            if(amountStr != null) {
+                amountStr = amountStr
+                        .replace(".", "")
+                        .replace("đ", "")
+                        .replace("₫", "")
+                        .trim();
+            }
+
             // Set original strings to check if any data has been changed on update
             descriptionOriginalString = description;
             merchantOriginalString = merchant;

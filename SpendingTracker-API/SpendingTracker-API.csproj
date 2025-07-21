@@ -23,4 +23,8 @@
     <PackageReference Include="X.PagedList" Version="10.5.7" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\images\" />
+  </ItemGroup>
+
 </Project>

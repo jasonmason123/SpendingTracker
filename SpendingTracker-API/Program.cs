@@ -129,6 +129,9 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+// Serve static files from wwwroot
+app.UseStaticFiles();
+
 app.MapControllers();
 
 app.MapRazorPages();
