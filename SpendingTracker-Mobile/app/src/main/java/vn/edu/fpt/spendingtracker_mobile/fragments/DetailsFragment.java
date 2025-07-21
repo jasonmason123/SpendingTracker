@@ -4,10 +4,6 @@ package vn.edu.fpt.spendingtracker_mobile.fragments;
 
 import android.app.Activity;
 
-import androidx.fragment.app.Fragment;
-
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,31 +17,29 @@ import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.Locale;
 
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import vn.edu.fpt.spendingtracker_mobile.MainActivity;
 import vn.edu.fpt.spendingtracker_mobile.MyApp;
 import vn.edu.fpt.spendingtracker_mobile.R;
-import vn.edu.fpt.spendingtracker_mobile.api_connector.AuthInterceptor;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.TransactionApiConnector;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.api_callback.ApiCallback;
 import vn.edu.fpt.spendingtracker_mobile.dialog_fragment.ConfirmDeleteDialogFragment;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
-import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
-import vn.edu.fpt.spendingtracker_mobile.utils.HelperMethods;
+import vn.edu.fpt.spendingtracker_mobile.fragments.base_fragment.BaseFragment;
 
 public class DetailsFragment extends BaseFragment
 {
     @Override
     protected boolean shouldShowBottomNavigation() {
         return false;
+    }
+
+    @Override
+    protected boolean shouldDisplayBackButton() {
+        return true;
     }
 
     // callback methods implemented by MainActivity

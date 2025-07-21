@@ -12,7 +12,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -34,11 +33,17 @@ import vn.edu.fpt.spendingtracker_mobile.api_connector.api_callback.ApiCallback;
 import vn.edu.fpt.spendingtracker_mobile.dtos.AuthResponseDto;
 import vn.edu.fpt.spendingtracker_mobile.dtos.GoogleIdTokenDto;
 import vn.edu.fpt.spendingtracker_mobile.dtos.PasswordCredentialsDto;
+import vn.edu.fpt.spendingtracker_mobile.fragments.base_fragment.BaseFragment;
 import vn.edu.fpt.spendingtracker_mobile.utils.HelperMethods;
 
 public class LoginFragment extends BaseFragment {
     @Override
     protected boolean shouldShowBottomNavigation() {
+        return false;
+    }
+
+    @Override
+    protected boolean shouldDisplayBackButton() {
         return false;
     }
 

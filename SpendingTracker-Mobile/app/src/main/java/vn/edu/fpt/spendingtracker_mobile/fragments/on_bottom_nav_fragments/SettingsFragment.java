@@ -11,13 +11,18 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import vn.edu.fpt.spendingtracker_mobile.R;
-import vn.edu.fpt.spendingtracker_mobile.fragments.BaseFragment;
+import vn.edu.fpt.spendingtracker_mobile.fragments.base_fragment.BaseFragment;
 import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
 
 public class SettingsFragment extends BaseFragment {
     @Override
     protected boolean shouldShowBottomNavigation() {
         return true;
+    }
+
+    @Override
+    protected boolean shouldDisplayBackButton() {
+        return false;
     }
 
     // callback method implemented by MainActivity

@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 
 import androidx.annotation.StringRes;
-import androidx.fragment.app.Fragment;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -31,7 +30,6 @@ import java.util.Locale;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 import vn.edu.fpt.spendingtracker_mobile.MainActivity;
 import vn.edu.fpt.spendingtracker_mobile.MyApp;
 import vn.edu.fpt.spendingtracker_mobile.R;
@@ -39,7 +37,7 @@ import vn.edu.fpt.spendingtracker_mobile.api_connector.TransactionApiConnector;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.api_callback.ApiCallback;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
 import vn.edu.fpt.spendingtracker_mobile.enums.TransactionType;
-import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
+import vn.edu.fpt.spendingtracker_mobile.fragments.base_fragment.BaseFragment;
 import vn.edu.fpt.spendingtracker_mobile.utils.HelperMethods;
 
 public class AddEditFragment extends BaseFragment
@@ -47,6 +45,11 @@ public class AddEditFragment extends BaseFragment
     @Override
     protected boolean shouldShowBottomNavigation() {
         return false;
+    }
+
+    @Override
+    protected boolean shouldDisplayBackButton() {
+        return true;
     }
 
     // callback method implemented by MainActivity

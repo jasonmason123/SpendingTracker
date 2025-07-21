@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 import vn.edu.fpt.spendingtracker_mobile.MyApp;
 import vn.edu.fpt.spendingtracker_mobile.R;
@@ -34,7 +33,7 @@ import vn.edu.fpt.spendingtracker_mobile.api_connector.HomepageApiConnector;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.api_callback.ApiCallback;
 import vn.edu.fpt.spendingtracker_mobile.dtos.IncomeExpenseDto;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
-import vn.edu.fpt.spendingtracker_mobile.fragments.BaseFragment;
+import vn.edu.fpt.spendingtracker_mobile.fragments.base_fragment.BaseFragment;
 import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
 
 public class HomeFragment extends BaseFragment {
@@ -58,6 +57,11 @@ public class HomeFragment extends BaseFragment {
     @Override
     protected boolean shouldShowBottomNavigation() {
         return true;
+    }
+
+    @Override
+    protected boolean shouldDisplayBackButton() {
+        return false;
     }
 
     @Override

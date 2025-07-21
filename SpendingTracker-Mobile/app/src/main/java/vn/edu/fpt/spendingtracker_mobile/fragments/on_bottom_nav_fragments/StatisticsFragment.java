@@ -44,7 +44,7 @@ import vn.edu.fpt.spendingtracker_mobile.api_connector.StatisticsApiConnector;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.api_callback.ApiCallback;
 import vn.edu.fpt.spendingtracker_mobile.dtos.IncomeExpenseDto;
 import vn.edu.fpt.spendingtracker_mobile.dtos.MonthlyAmountsByYearDto;
-import vn.edu.fpt.spendingtracker_mobile.fragments.BaseFragment;
+import vn.edu.fpt.spendingtracker_mobile.fragments.base_fragment.BaseFragment;
 import vn.edu.fpt.spendingtracker_mobile.utils.AppConstants;
 import vn.edu.fpt.spendingtracker_mobile.utils.LocaleCurrencyFormatter;
 
@@ -67,6 +67,11 @@ public class StatisticsFragment extends BaseFragment {
     @Override
     protected boolean shouldShowBottomNavigation() {
         return true;
+    }
+
+    @Override
+    protected boolean shouldDisplayBackButton() {
+        return false;
     }
 
     @Nullable

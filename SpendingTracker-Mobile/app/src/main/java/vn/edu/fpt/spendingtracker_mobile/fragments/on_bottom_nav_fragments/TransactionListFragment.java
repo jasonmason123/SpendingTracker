@@ -4,7 +4,6 @@ package vn.edu.fpt.spendingtracker_mobile.fragments.on_bottom_nav_fragments;
 
 import android.app.Activity;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,14 +23,12 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 import vn.edu.fpt.spendingtracker_mobile.MyApp;
 import vn.edu.fpt.spendingtracker_mobile.R;
@@ -39,14 +36,18 @@ import vn.edu.fpt.spendingtracker_mobile.adapter.TransactionAdapter;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.TransactionApiConnector;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.api_callback.ApiCallback;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
-import vn.edu.fpt.spendingtracker_mobile.fragments.BaseFragment;
-import vn.edu.fpt.spendingtracker_mobile.utils.HelperMethods;
+import vn.edu.fpt.spendingtracker_mobile.fragments.base_fragment.BaseFragment;
 
 public class TransactionListFragment extends BaseFragment
 {
     @Override
     protected boolean shouldShowBottomNavigation() {
         return true;
+    }
+
+    @Override
+    protected boolean shouldDisplayBackButton() {
+        return false;
     }
 
     // callback methods implemented by MainActivity

@@ -240,4 +240,10 @@ implements TransactionListFragment.TransactionListFragmentListener,
                 .replace(R.id.fragmentContainer, new LoginFragment())
                 .commit();
     }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
 }
