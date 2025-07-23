@@ -1,11 +1,12 @@
 ﻿@page
 @model SpendingTracker_API.Pages.IndexModel
 @{
+    ViewData["Title"] = "Spending Tracker API";
 }
 <h1>Welcome to Spending Tracker API</h1>
 <p>This is Spending Tracker API server.</p>
 <p>The Spending Tracker app is a smaller prototype of the in-development Personal Financial Management App of Bui Minh Son</p>
-<p>This prototype implemented features</p>
+<p>Implemented features include:</p>
 <ul>
     <li>User authentication and authorization via JWT</li>
     <li>CRUD operations for Transaction tracking</li>
@@ -30,6 +31,13 @@
             <p style="margin-top: 8px;">@item.Title</p>
         </div>
     }
+</div>
+
+<div>
+    <b>GitHub: </b>
+    <a href="https://github.com/jasonmason123/SpendingTracker">
+        https://github.com/jasonmason123/SpendingTracker
+    </a>
 </div>
 
 <p>Have a nice day <3</p>
