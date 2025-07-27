@@ -18,7 +18,7 @@ namespace SpendingTracker_API.Controllers
     public class AuthenticationController : ControllerBase
     {
         private const string IS_LOGGED_IN_COOKIE_KEY = "isLoggedIn";
-        private const string WEB_INDEX_ROUTE = "http://localhost:5173/web";
+        private const string WEB_INDEX_ROUTE = "http://localhost:5173/web"; // TODO: Set this to "/web" in production
 
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _configuration;
@@ -155,7 +155,6 @@ namespace SpendingTracker_API.Controllers
         [HttpGet("google/web-sign-in")]
         public IActionResult GoogleWebSignIn([FromQuery(Name = "remember")] bool? remember)
         {
-            Console.WriteLine(Request.Scheme);
             var redirectUrl = $"{Request.Scheme}://{Request.Host.Value}{Request.PathBase.Value}/api/auth/google/web-sign-in/callback";
             if (remember == true)
             {
@@ -232,7 +231,7 @@ namespace SpendingTracker_API.Controllers
             // Add IsLoggedIn cookie
             Response.Cookies.Append(IS_LOGGED_IN_COOKIE_KEY, "true", new CookieOptions
             {
-                Secure = true,
+                Secure = false, // TODO: Set to true in production
                 SameSite = SameSiteMode.None,
                 Expires = expirationDateUtc
             });
