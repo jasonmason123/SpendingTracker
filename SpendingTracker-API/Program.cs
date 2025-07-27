@@ -103,6 +103,26 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 
+// Configure cookie policy options
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.Secure = CookieSecurePolicy.None; // TODO: Setting to Always in production
+});
+
+const string DevServerPolicyName = "DevServerPolicyName";
+// Configure CORS policy to allow requests from the frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(DevServerPolicyName, policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // your React dev server
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials(); // this allows cookies
+    });
+});
+
 // Add memory cache for caching purposes
 builder.Services.AddMemoryCache();
 
@@ -143,6 +163,10 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
 });
+
+app.UseCors(DevServerPolicyName);
+
+app.UseCookiePolicy();
 
 //app.UseHttpsRedirection();
 

@@ -232,7 +232,7 @@ namespace SpendingTracker_API.Controllers
             Response.Cookies.Append(IS_LOGGED_IN_COOKIE_KEY, "true", new CookieOptions
             {
                 Secure = false, // TODO: Set to true in production
-                SameSite = SameSiteMode.None,
+                SameSite = SameSiteMode.Lax, // TODO: Set to None in production
                 Expires = expirationDateUtc
             });
         }
