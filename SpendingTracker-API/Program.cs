@@ -84,7 +84,6 @@ builder.Services.AddAuthentication(options =>
     };
 })
 .AddCookie("External")
-.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
 .AddGoogle(options =>
 {
     options.ClientId = Environment.GetEnvironmentVariable(EnvNames.GOOGLE_CLIENT_ID) ?? "";
@@ -93,12 +92,12 @@ builder.Services.AddAuthentication(options =>
     options.Scope.Add("email");
     options.Scope.Add("profile");
     options.SaveTokens = true;
-});
+})
+.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
 
 builder.Services.AddAuthorization(options =>
 {
     options.DefaultPolicy = new AuthorizationPolicyBuilder()
-        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
         .RequireAuthenticatedUser()
         .Build();
 });
@@ -106,8 +105,8 @@ builder.Services.AddAuthorization(options =>
 // Configure cookie policy options
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
-    options.MinimumSameSitePolicy = SameSiteMode.Lax;
-    options.Secure = CookieSecurePolicy.None; // TODO: Setting to Always in production
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.Secure = CookieSecurePolicy.Always;
 });
 
 const string DevServerPolicyName = "DevServerPolicyName";
@@ -164,9 +163,9 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
 });
 
-app.UseCors(DevServerPolicyName);
-
 app.UseCookiePolicy();
+
+app.UseCors(DevServerPolicyName);
 
 //app.UseHttpsRedirection();
 
