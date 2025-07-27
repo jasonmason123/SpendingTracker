@@ -1,4 +1,6 @@
 ﻿using Google.Apis.Auth;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SpendingTracker_API.Authentication.PasswordAuthentication;
@@ -6,19 +8,28 @@ using SpendingTracker_API.DTOs.Web_Mobile;
 using SpendingTracker_API.Entities;
 using SpendingTracker_API.Services.AuthTokenService;
 using SpendingTracker_API.Utils.Messages;
+using System.Security.Claims;
+using SpendingTracker_API.Utils.Enums;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Newtonsoft.Json.Linq;
 
 namespace SpendingTracker_API.Controllers
 {
     [ApiController, Route("api/auth")]
     public class AuthenticationController : ControllerBase
     {
+        private const string IS_LOGGED_IN_COOKIE_KEY = "isLoggedIn";
+        private const string WEB_INDEX_ROUTE = "/web";
+
         private readonly UserManager<AppUser> _userManager;
+        private readonly IConfiguration _configuration;
         private readonly IPasswordAuth _passwordAuth;
         private readonly IAuthTokenService _authTokenService;
 
-        public AuthenticationController(UserManager<AppUser> userManager, IPasswordAuth passwordAuth, IAuthTokenService authTokenService)
+        public AuthenticationController(UserManager<AppUser> userManager, IConfiguration configuration, IPasswordAuth passwordAuth, IAuthTokenService authTokenService)
         {
             _userManager = userManager;
+            _configuration = configuration;
             _passwordAuth = passwordAuth;
             _authTokenService = authTokenService;
         }
@@ -92,7 +103,7 @@ namespace SpendingTracker_API.Controllers
         // 3.Google returns a signed ID Token(JWT) to the Android app.
         // 4. The app sends the ID Token to the backend server.
         [HttpPost("google/mobile-sign-in")]
-        public async Task<IActionResult> GoogleSignIn([FromBody] GoogleIdTokenDto dto)
+        public async Task<IActionResult> GoogleMobileSignIn([FromBody] GoogleIdTokenDto dto)
         {
             GoogleJsonWebSignature.Payload payload;
 
@@ -138,6 +149,92 @@ namespace SpendingTracker_API.Controllers
             {
                 message = "Signed in successfully",
                 token = jwtToken,
+            });
+        }
+
+        // Oauth workflow for web, using cookies:
+        [HttpGet("google/web-sign-in")]
+        public IActionResult GoogleWebSignIn([FromQuery(Name = "remember")] bool? remember)
+        {
+            var redirectUrl = $"{Request.Scheme}://{Request.Host.Value}{Request.PathBase.Value}/api/auth/google/web-sign-in/callback";
+            if (remember == true)
+            {
+                redirectUrl += "?remember=true";
+            }
+            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet("google/web-sign-in/callback")]
+        public async Task<IActionResult> GoogleCallback([FromQuery(Name = "remember")] bool? remember)
+        {
+            var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+            if (!result.Succeeded)
+            {
+                return Redirect($"{WEB_INDEX_ROUTE}/sign-in?error=OAuth%20failed");
+            }
+
+            var claims = result.Principal?.Identities.FirstOrDefault()?.Claims;
+            var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+            if (string.IsNullOrEmpty(email))
+            {
+                return Redirect($"{WEB_INDEX_ROUTE}/sign-in?error=Unable%20t%20get%20email%20from%20OAuth%20provider");
+            }
+
+            //if user exists, login
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                await SetAuthCookies(user, remember ?? false);
+                return Redirect(WEB_INDEX_ROUTE);
+            }
+
+            //if user not exist, register
+            var newUser = new AppUser
+            {
+                Email = email,
+                UserName = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value ?? email,
+                CreatedAt = DateTime.Now,
+                FlagDel = FlagBoolean.FALSE,
+            };
+
+            await _userManager.CreateAsync(newUser);
+
+            await SetAuthCookies(newUser, remember ?? false);
+            return Redirect(WEB_INDEX_ROUTE);
+        }
+
+        // Helper methods to set auth cookies
+        private async Task SetAuthCookies(AppUser user, bool remember = false)
+        {
+            var expirationInMinutesString = _configuration["JwtSettings:ExpirationInMinutes"] ?? "";
+            var expirationInMinutes = int.Parse(expirationInMinutesString);
+            var expirationDateUtc = DateTimeOffset.UtcNow.AddMinutes(expirationInMinutes);
+
+            var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                principal,
+                new AuthenticationProperties
+                {
+                    IsPersistent = remember,
+                    ExpiresUtc = remember ? expirationDateUtc : null
+                });
+
+            // Add IsLoggedIn cookie
+            Response.Cookies.Append(IS_LOGGED_IN_COOKIE_KEY, "true", new CookieOptions
+            {
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = expirationDateUtc
             });
         }
     }
