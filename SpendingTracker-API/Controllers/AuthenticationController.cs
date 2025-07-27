@@ -155,6 +155,7 @@ namespace SpendingTracker_API.Controllers
         [HttpGet("google/web-sign-in")]
         public IActionResult GoogleWebSignIn([FromQuery(Name = "remember")] bool? remember)
         {
+            Console.WriteLine(Request.Scheme);
             var redirectUrl = $"{Request.Scheme}://{Request.Host.Value}{Request.PathBase.Value}/api/auth/google/web-sign-in/callback";
             if (remember == true)
             {
