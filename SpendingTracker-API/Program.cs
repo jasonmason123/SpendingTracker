@@ -106,7 +106,7 @@ builder.Services.AddAuthorization(options =>
 // Configure cookie policy options
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
-    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.MinimumSameSitePolicy = SameSiteMode.Lax;
     options.Secure = CookieSecurePolicy.None; // TODO: Setting to Always in production
 });
 
