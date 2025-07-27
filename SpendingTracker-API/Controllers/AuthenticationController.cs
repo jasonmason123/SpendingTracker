@@ -11,7 +11,6 @@ using SpendingTracker_API.Utils.Messages;
 using System.Security.Claims;
 using SpendingTracker_API.Utils.Enums;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Newtonsoft.Json.Linq;
 
 namespace SpendingTracker_API.Controllers
 {
@@ -19,7 +18,7 @@ namespace SpendingTracker_API.Controllers
     public class AuthenticationController : ControllerBase
     {
         private const string IS_LOGGED_IN_COOKIE_KEY = "isLoggedIn";
-        private const string WEB_INDEX_ROUTE = "/web";
+        private const string WEB_INDEX_ROUTE = "http://localhost:5173/web";
 
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _configuration;
