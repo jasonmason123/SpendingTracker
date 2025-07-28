@@ -169,7 +169,7 @@ app.MapWhen(context => context.Request.Path.StartsWithSegments("/app"), appBuild
     {
         FileProvider = new PhysicalFileProvider(
             Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "app")),
-        RequestPath = "" // no extra prefix, because path already starts with "/app"
+        RequestPath = "/app"
     });
 
     // Fallback to index.html for SPA routes
@@ -205,6 +205,6 @@ app.MapControllers();
 app.MapRazorPages();
 
 // Serve React app for any non-API routes
-app.MapFallbackToFile("index.html");
+app.MapFallbackToFile(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "app", "index.html"));
 
 app.Run();
