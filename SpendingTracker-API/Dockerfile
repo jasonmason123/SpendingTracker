@@ -13,16 +13,6 @@ COPY ["SpendingTracker-API.csproj", "."]
 RUN dotnet restore "./SpendingTracker-API.csproj"
 COPY . .
 WORKDIR "/src/."
-
-# Build React app
-WORKDIR "/src/WebApp"
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get install -y nodejs
-RUN npm install
-RUN npm run build
-
-# Build .NET app
-WORKDIR "/src/."
 RUN dotnet build "./SpendingTracker-API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
