@@ -15,9 +15,6 @@ COPY ["SpendingTracker-API.csproj", "."]
 RUN dotnet restore "./SpendingTracker-API.csproj"
 COPY . .
 
-# Clean up previous builds
-RUN rm -rf /src/wwwroot/app/*
-
 # Build React app (already outputs to /wwwroot/app, configured in vite.config.ts)
 WORKDIR "/src/WebApp"
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
