@@ -2,10 +2,12 @@ import { useState } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 
+import owner from "/images/user/owner.jpg";
+
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const SIGN_OUT_URL = "/api/auth/signout";
+  const SIGN_OUT_URL = "/api/auth/sign-out";
 
   function handleSignOut() {
     fetch(SIGN_OUT_URL, {
@@ -42,7 +44,7 @@ export default function UserDropdown() {
         className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
       >
         <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
-          <img src="/app/images/user/owner.jpg" alt="User" />
+          <img src={owner} alt="User" />
         </span>
 
         <span className="block mr-1 font-medium text-theme-sm">Musharof</span>

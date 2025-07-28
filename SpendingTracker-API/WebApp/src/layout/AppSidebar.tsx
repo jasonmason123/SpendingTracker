@@ -10,12 +10,14 @@ import {
   ListIcon,
   PageIcon,
   PieChartIcon,
-  PlugInIcon,
   TableIcon,
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
+import logo from "/images/logo/logo.svg";
+import logoDark from "/images/logo/logo-dark.svg";
+import logoIcon from "/images/logo/logo-icon.svg";
 
 type NavItem = {
   name: string;
@@ -85,18 +87,10 @@ const sections: Section[] = [
         subItems: [
           { name: "Alerts", path: "/alerts" },
           { name: "Avatar", path: "/avatars" },
-          { name: "Badge", path: "/badge" },
+          { name: "Badge", path: "/badges" },
           { name: "Buttons", path: "/buttons" },
           { name: "Images", path: "/images" },
           { name: "Videos", path: "/videos" },
-        ],
-      },
-      {
-        icon: <PlugInIcon />,
-        name: "Authentication",
-        subItems: [
-          { name: "Sign In", path: "/signin" },
-          { name: "Sign Up", path: "/signup" },
         ],
       },
     ]
@@ -198,14 +192,14 @@ const AppSidebar: React.FC = () => {
             <>
               <img
                 className="dark:hidden"
-                src="/images/logo/logo.svg"
+                src={logo}
                 alt="Logo"
                 width={150}
                 height={40}
               />
               <img
                 className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
+                src={logoDark}
                 alt="Logo"
                 width={150}
                 height={40}
@@ -213,7 +207,7 @@ const AppSidebar: React.FC = () => {
             </>
           ) : (
             <img
-              src="/images/logo/logo-icon.svg"
+              src={logoIcon}
               alt="Logo"
               width={32}
               height={32}

@@ -2,6 +2,7 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
 import Avatar from "../../components/ui/avatar/Avatar";
 import PageMeta from "../../components/common/PageMeta";
+import user01 from "/images/user/user-01.jpg";
 
 export default function Avatars() {
   return (
@@ -17,43 +18,43 @@ export default function Avatars() {
         <ComponentCard title="Default Avatar">
           {/* Default Avatar (No Status) */}
           <div className="flex flex-col items-center justify-center gap-5 sm:flex-row">
-            <Avatar src="/images/user/user-01.jpg" size="xsmall" />
-            <Avatar src="/images/user/user-01.jpg" size="small" />
-            <Avatar src="/images/user/user-01.jpg" size="medium" />
-            <Avatar src="/images/user/user-01.jpg" size="large" />
-            <Avatar src="/images/user/user-01.jpg" size="xlarge" />
-            <Avatar src="/images/user/user-01.jpg" size="xxlarge" />
+            <Avatar src={user01} size="xsmall" />
+            <Avatar src={user01} size="small" />
+            <Avatar src={user01} size="medium" />
+            <Avatar src={user01} size="large" />
+            <Avatar src={user01} size="xlarge" />
+            <Avatar src={user01} size="xxlarge" />
           </div>
         </ComponentCard>
         <ComponentCard title="Avatar with online indicator">
           <div className="flex flex-col items-center justify-center gap-5 sm:flex-row">
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="xsmall"
               status="online"
             />
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="small"
               status="online"
             />
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="medium"
               status="online"
             />
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="large"
               status="online"
             />
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="xlarge"
               status="online"
             />
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="xxlarge"
               status="online"
             />
@@ -62,32 +63,32 @@ export default function Avatars() {
         <ComponentCard title="Avatar with Offline indicator">
           <div className="flex flex-col items-center justify-center gap-5 sm:flex-row">
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="xsmall"
               status="offline"
             />
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="small"
               status="offline"
             />
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="medium"
               status="offline"
             />
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="large"
               status="offline"
             />
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="xlarge"
               status="offline"
             />
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="xxlarge"
               status="offline"
             />
@@ -96,24 +97,24 @@ export default function Avatars() {
         <ComponentCard title="Avatar with busy indicator">
           <div className="flex flex-col items-center justify-center gap-5 sm:flex-row">
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="xsmall"
               status="busy"
             />
-            <Avatar src="/images/user/user-01.jpg" size="small" status="busy" />
+            <Avatar src={user01} size="small" status="busy" />
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="medium"
               status="busy"
             />
-            <Avatar src="/images/user/user-01.jpg" size="large" status="busy" />
+            <Avatar src={user01} size="large" status="busy" />
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="xlarge"
               status="busy"
             />
             <Avatar
-              src="/images/user/user-01.jpg"
+              src={user01}
               size="xxlarge"
               status="busy"
             />

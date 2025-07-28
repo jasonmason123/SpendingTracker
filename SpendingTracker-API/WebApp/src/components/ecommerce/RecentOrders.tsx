@@ -7,6 +7,13 @@ import {
 } from "../ui/table";
 import Badge from "../ui/badge/Badge";
 
+// Import images
+import product01 from "/images/product/product-01.jpg";
+import product02 from "/images/product/product-02.jpg";
+import product03 from "/images/product/product-03.jpg";
+import product04 from "/images/product/product-04.jpg";
+import product05 from "/images/product/product-05.jpg";
+
 // Define the TypeScript interface for the table rows
 interface Product {
   id: number; // Unique identifier for each product
@@ -14,7 +21,6 @@ interface Product {
   variants: string; // Number of variants (e.g., "1 Variant", "2 Variants")
   category: string; // Category of the product
   price: string; // Price of the product (as a string with currency symbol)
-  // status: string; // Status of the product
   image: string; // URL or path to the product image
   status: "Delivered" | "Pending" | "Canceled"; // Status of the product
 }
@@ -28,7 +34,7 @@ const tableData: Product[] = [
     category: "Laptop",
     price: "$2399.00",
     status: "Delivered",
-    image: "/images/product/product-01.jpg", // Replace with actual image URL
+    image: product01,
   },
   {
     id: 2,
@@ -37,7 +43,7 @@ const tableData: Product[] = [
     category: "Watch",
     price: "$879.00",
     status: "Pending",
-    image: "/images/product/product-02.jpg", // Replace with actual image URL
+    image: product02, // Replace with actual image URL
   },
   {
     id: 3,
@@ -46,7 +52,7 @@ const tableData: Product[] = [
     category: "SmartPhone",
     price: "$1869.00",
     status: "Delivered",
-    image: "/images/product/product-03.jpg", // Replace with actual image URL
+    image: product03, // Replace with actual image URL
   },
   {
     id: 4,
@@ -55,7 +61,7 @@ const tableData: Product[] = [
     category: "Electronics",
     price: "$1699.00",
     status: "Canceled",
-    image: "/images/product/product-04.jpg", // Replace with actual image URL
+    image: product04, // Replace with actual image URL
   },
   {
     id: 5,
@@ -64,7 +70,7 @@ const tableData: Product[] = [
     category: "Accessories",
     price: "$240.00",
     status: "Delivered",
-    image: "/images/product/product-05.jpg", // Replace with actual image URL
+    image: product05, // Replace with actual image URL
   },
 ];
 

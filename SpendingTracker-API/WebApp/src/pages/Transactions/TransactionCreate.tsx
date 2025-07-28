@@ -5,8 +5,8 @@ import Select from "../../components/form/Select";
 import { Transaction, TransactionType } from "../../types";
 import Button from "../../components/ui/button/Button";
 import Input from "../../components/form/input/InputField";
-import TextArea from "../../components/form/input/TextArea";
-import FileInput from "../../components/form/input/FileInput";
+// import TextArea from "../../components/form/input/TextArea";
+// import FileInput from "../../components/form/input/FileInput";
 
 const transactionTypes = [
   { value: TransactionType.INCOME + "", label: "Thu nhập" },
@@ -127,7 +127,7 @@ export default function TransactionCreate({
             </div>
           </div>
 
-          <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+          {/* <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
             <div className="gap-6 lg:flex-row lg:items-start lg:justify-between">
               <div>
                 <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 mb-6">
@@ -139,16 +139,16 @@ export default function TransactionCreate({
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
 
-          <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+          {/* <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
             <div className="gap-6 lg:flex-row lg:items-start lg:justify-between">
               <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 mb-6">
                 Ghi chú
               </h4>
               <TextArea placeholder="Ghi ghi chú của bạn tại đây..." />
             </div>
-          </div>
+          </div> */}
 
           <div className="flex justify-end gap-4">
             <Button size="sm" variant="outline">

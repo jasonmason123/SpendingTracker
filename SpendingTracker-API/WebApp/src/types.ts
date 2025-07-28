@@ -50,7 +50,7 @@ export interface Transaction {
 
 //Filter params
 export interface BaseFilterParams {
-  search?: string;
+  searchString?: string;
   pageNumber: number;
   pageSize: number;
 }

@@ -11,7 +11,6 @@ using SpendingTracker_API.Utils.Messages;
 using System.Security.Claims;
 using SpendingTracker_API.Utils.Enums;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using static Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp;
 
 namespace SpendingTracker_API.Controllers
 {

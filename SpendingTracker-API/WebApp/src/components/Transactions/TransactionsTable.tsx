@@ -63,6 +63,8 @@ export default function TransactionsTable({
         credentials: "include",
       });
 
+      console.error("Res:", res);
+
       const rawData = await res.json();
       
       if (!res.ok) {
@@ -93,7 +95,7 @@ export default function TransactionsTable({
     setFilterParam({
       pageNumber: 1,
       pageSize: 10,
-      search: searchStr,
+      searchString: searchStr,
     });
   }
 
@@ -103,7 +105,7 @@ export default function TransactionsTable({
     setFilterParam({
       ...filterParams,
       pageNumber: 1,
-      search: "",
+      searchString: "",
     });
   }
 

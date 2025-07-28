@@ -2,6 +2,8 @@ import GridShape from "../../components/common/GridShape";
 import { Link } from "react-router";
 import PageMeta from "../../components/common/PageMeta";
 import PublicRoute from "../../components/auth/PublicRoute";
+import error404 from "/images/error/404.svg";
+import error404Dark from "/images/error/404-dark.svg";
 
 export default function NotFound() {
   return (
@@ -17,9 +19,9 @@ export default function NotFound() {
             ERROR
           </h1>
 
-          <img src="/images/error/404.svg" alt="404" className="dark:hidden" />
+          <img src={error404} alt="404" className="dark:hidden" />
           <img
-            src="/images/error/404-dark.svg"
+            src={error404Dark}
             alt="404"
             className="hidden dark:block"
           />
