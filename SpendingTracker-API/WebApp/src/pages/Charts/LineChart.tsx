@@ -1,6 +1,6 @@
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
-import LineChartOne from "../../components/charts/line/LineChartOne";
+import LineChartOne from "../../components/chart_components/line/LineChartOne";
 import PageMeta from "../../components/common/PageMeta";
 import { APP_BASE_URL } from "../../types";
 
