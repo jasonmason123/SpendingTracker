@@ -9,15 +9,26 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+
+# Copy everything and restore .NET
 COPY ["SpendingTracker-API.csproj", "."]
 RUN dotnet restore "./SpendingTracker-API.csproj"
 COPY . .
-WORKDIR "/src/."
-RUN dotnet build "./SpendingTracker-API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+# Build React app (already outputs to /wwwroot/app)
+WORKDIR "/src/WebApp"
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+RUN apt-get install -y nodejs
+RUN npm install
+RUN npm run build
+
+# Build .NET app
+WORKDIR "/src"
+RUN dotnet build "SpendingTracker-API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./SpendingTracker-API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "SpendingTracker-API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
