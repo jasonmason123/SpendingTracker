@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -115,7 +116,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(DevServerPolicyName, policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // your React dev server
+        policy.WithOrigins(
+                "http://localhost:5173", // your React dev server
+                "https://your-app-name.onrender.com" // your Render domain
+              )
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials(); // this allows cookies
@@ -157,6 +161,26 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Serve React app static files when URL starts with "/app"
+app.MapWhen(context => context.Request.Path.StartsWithSegments("/app"), appBuilder =>
+{
+    // Serve static files from "wwwroot/app"
+    appBuilder.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(
+            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "app")),
+        RequestPath = "" // no extra prefix, because path already starts with "/app"
+    });
+
+    // Fallback to index.html for SPA routes
+    appBuilder.Run(async context =>
+    {
+        context.Response.ContentType = "text/html";
+        await context.Response.SendFileAsync(
+            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "app", "index.html"));
+    });
+});
+
 // Trust proxy headers for forwarded headers
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
@@ -179,5 +203,8 @@ app.UseStaticFiles();
 app.MapControllers();
 
 app.MapRazorPages();
+
+// Serve React app for any non-API routes
+app.MapFallbackToFile("index.html");
 
 app.Run();

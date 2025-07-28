@@ -11,6 +11,7 @@ using SpendingTracker_API.Utils.Messages;
 using System.Security.Claims;
 using SpendingTracker_API.Utils.Enums;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using static Google.Apis.Auth.OAuth2.Web.AuthorizationCodeWebApp;
 
 namespace SpendingTracker_API.Controllers
 {
@@ -34,15 +35,28 @@ namespace SpendingTracker_API.Controllers
         }
 
         [HttpPost("sign-in")]
-        public async Task<IActionResult> DefaultSignIn([FromBody] PasswordCredentialsDto passwordCredentials)
+        public async Task<IActionResult> DefaultSignIn(
+            [FromBody] PasswordCredentialsDto passwordCredentials,
+            [FromQuery] bool? remember = false,
+            [FromQuery] bool? isWeb = false
+        )
         {
             try
             {
                 var authResult = await _passwordAuth.AuthenticateAsync(passwordCredentials);
                 if (authResult.Succeed)
                 {
+
+                    // If it's a web request, set cookies and return Ok
+                    if(isWeb == true)
+                    {
+                        await SetAuthCookies(authResult.User, remember ?? false);
+                        Console.WriteLine("Signed in successfully");
+                        return Ok();
+                    }
                     var jwtToken = _authTokenService.GenerateToken(authResult.User);
                     Console.WriteLine("Signed in successfully");
+
                     return Ok(new
                     {
                         message = "Signed in successfully",
@@ -71,15 +85,28 @@ namespace SpendingTracker_API.Controllers
         }
 
         [HttpPost("sign-up")]
-        public async Task<IActionResult> DefaultSignUp([FromBody] PasswordCredentialsDto passwordCredentials)
+        public async Task<IActionResult> DefaultSignUp(
+            [FromBody] PasswordCredentialsDto passwordCredentials,
+            [FromQuery] bool? isWeb = false
+        )
         {
             try
             {
                 var registrationResult = await _passwordAuth.RegisterAsync(passwordCredentials, false);
                 if (registrationResult.Succeed)
                 {
-                    Console.WriteLine("Registration completed");
+
+                    // If it's a web request, set cookies and return Ok
+                    if (isWeb == true)
+                    {
+                        await SetAuthCookies(registrationResult.User, false);
+                        Console.WriteLine("Registration completed");
+                        return Ok();
+                    }
+
                     var jwtToken = _authTokenService.GenerateToken(registrationResult.User);
+                    Console.WriteLine("Registration completed");
+
                     return Ok(new
                     {
                         message = "Signed up successfully",
@@ -233,7 +260,7 @@ namespace SpendingTracker_API.Controllers
             {
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = expirationDateUtc
+                Expires = remember ? expirationDateUtc : null
             });
         }
     }

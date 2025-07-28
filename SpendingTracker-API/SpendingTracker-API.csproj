@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -23,8 +23,16 @@
     <PackageReference Include="X.PagedList" Version="10.5.7" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\images\" />
-  </ItemGroup>
+  <Target Name="CopyReactBuild" AfterTargets="Publish">
+    <Exec Command="npm install" WorkingDirectory="WebApp" />
+    <Exec Command="npm run build" WorkingDirectory="WebApp" />
+    <RemoveDir Directories="$(ProjectDir)wwwroot" />
+
+	<ItemGroup>
+	  <ReactDistFiles Include="WebApp\build\**\*;WebApp\dist\**\*" Exclude="WebApp\**\node_modules\**\*" />
+	</ItemGroup>
+	  
+    <Copy SourceFiles="@(ReactDistFiles)" DestinationFolder="$(ProjectDir)wwwroot\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>

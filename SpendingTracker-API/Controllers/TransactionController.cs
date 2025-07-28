@@ -55,9 +55,7 @@ namespace SpendingTracker_API.Controllers
                     Merchant = selector.Merchant,
                     Date = selector.Date,
                     Amount = selector.Amount,
-                    TransactionType = selector.TransactionType,
-                    CreatedAt = selector.CreatedAt,
-                    UpdatedAt = selector.UpdatedAt
+                    TransactionType = selector.TransactionType
                 };
                 if (!string.IsNullOrEmpty(searchString))
                 {
@@ -78,9 +76,7 @@ namespace SpendingTracker_API.Controllers
                     Merchant = transaction.Merchant,
                     Date = transaction.Date,
                     Amount = transaction.Amount,
-                    TransactionType = transaction.TransactionType,
-                    CreatedAt = transaction.CreatedAt,
-                    UpdatedAt = transaction.UpdatedAt
+                    TransactionType = transaction.TransactionType
                 });
 
                 return Ok(transactionListDto);

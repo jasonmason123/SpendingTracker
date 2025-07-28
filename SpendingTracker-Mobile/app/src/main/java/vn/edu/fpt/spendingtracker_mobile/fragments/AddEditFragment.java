@@ -64,7 +64,7 @@ public class AddEditFragment extends BaseFragment
 
     private AddEditFragmentListener listener;
 
-    private long rowID; // database row ID of the contact
+    private long transactionId; // database row ID of the contact
     private Bundle transactionInfoBundle; // arguments for editing a transaction
 
     // EditTexts for contact information
@@ -168,7 +168,7 @@ public class AddEditFragment extends BaseFragment
             dateOriginalString = dateStr;
             amountOriginalString = amountStr;
 
-            rowID = transactionInfoBundle.getLong(MainActivity.TRANSACTION_ID);
+            transactionId = transactionInfoBundle.getLong(MainActivity.TRANSACTION_ID);
             // Set TextView content
             descriptionEditText.setText(description);
             merchantEditText.setText(merchant);
@@ -246,7 +246,7 @@ public class AddEditFragment extends BaseFragment
 
     private void saveTransaction(Transaction transaction) {
         if(transactionInfoBundle != null) {
-            apiConnector.update((int) rowID, transaction).enqueue(new Callback<Transaction>() {
+            apiConnector.update((int) transactionId, transaction).enqueue(new Callback<Transaction>() {
                 @Override
                 public void onResponse(Call<Transaction> call, Response<Transaction> response) {
                     if (response.isSuccessful()) {
@@ -254,7 +254,7 @@ public class AddEditFragment extends BaseFragment
                                 response.code() + ": Transaction updated: " + response.body().getId());
                         showMessageDialog(R.string.transaction_saved_message);
                         // Optionally notify activity or pop back stack
-                        listener.onAddEditCompleted(rowID);
+                        listener.onAddEditCompleted(transactionId);
                     } else {
                         showMessageDialog(R.string.error_saving_transaction_message);
                         try {
@@ -281,7 +281,7 @@ public class AddEditFragment extends BaseFragment
                                 response.code() + ": Transaction added: " + response.body().getId());
                         showMessageDialog(R.string.transaction_saved_message);
                         // Optionally notify activity or pop back stack
-                        listener.onAddEditCompleted(rowID);
+                        listener.onAddEditCompleted(transactionId);
                     } else {
                         showMessageDialog(R.string.error_saving_transaction_message);
                         try {

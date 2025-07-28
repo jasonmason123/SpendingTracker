@@ -199,7 +199,7 @@ implements TransactionListFragment.TransactionListFragmentListener,
 
     // update GUI after new contact or updated contact saved
     @Override
-    public void onAddEditCompleted(long rowID)
+    public void onAddEditCompleted(long transactionId)
     {
         // removes top of back stack (returns to previous page)
         getSupportFragmentManager().popBackStack();
@@ -210,7 +210,7 @@ implements TransactionListFragment.TransactionListFragmentListener,
             transactionListFragment.updateTransactionList(); // refresh contacts
 
             // on tablet, display contact that was just added or edited
-            displayTransaction(rowID, R.id.rightPaneContainer);
+            displayTransaction(transactionId, R.id.rightPaneContainer);
         }
     }
 

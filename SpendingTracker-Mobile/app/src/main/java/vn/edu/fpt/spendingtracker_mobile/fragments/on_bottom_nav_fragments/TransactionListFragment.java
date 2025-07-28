@@ -54,7 +54,7 @@ public class TransactionListFragment extends BaseFragment
     public interface TransactionListFragmentListener
     {
         // called when user selects a contact
-        public void onTransactionSelected(long rowID);
+        public void onTransactionSelected(long transactionId);
 
         // called when user decides to add a contact
         public void onAddTransaction();
