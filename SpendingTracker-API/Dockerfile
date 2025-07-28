@@ -16,7 +16,6 @@ RUN dotnet restore "./SpendingTracker-API.csproj"
 COPY . .
 
 # Build React app (already outputs to /wwwroot/app, configured in vite.config.ts)
-# vite build will also override the old content in /wwwroot/app
 WORKDIR "/src/WebApp"
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get install -y nodejs
