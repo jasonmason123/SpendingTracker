@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../context/AuthContext";
-import { APP_BASE_URL } from "../../types";
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth();
@@ -9,7 +8,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      navigate(APP_BASE_URL + "/sign-in");
+      navigate("/sign-in");
     }
   }, [isAuthenticated, loading, navigate]);
 
