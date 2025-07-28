@@ -38,55 +38,10 @@ const sections: Section[] = [
         name: "Dashboard",
         path: "/",
       },
-    ]
-  },
-  {
-    name: "Sổ tài chính",
-    items: [
-      {
-        icon: <i className="fa-solid fa-money-check-dollar"></i>,
-        name: "Tài khoản",
-        path: "/accounts",
-      },
       {
         icon: <i className="fa-solid fa-money-bill"></i>,
         name: "Giao dịch",
         path: "/transactions",
-      },
-    ]
-  },
-  {
-    name: "Thu nhập",
-    items: [
-      {
-        icon: <i className="fa-solid fa-arrow-trend-up"></i>,
-        name: "Thu nhập",
-        path: "/incomes",
-      },
-    ]
-  },
-  {
-    name: "Ngân sách",
-    items: [
-      {
-        icon: <i className="fa-solid fa-receipt"></i>,
-        name: "Hóa đơn",
-        path: "/bills",
-      },
-      {
-        icon: <i className="fa-solid fa-wallet"></i>,
-        name: "Danh mục",
-        path: "/budgets",
-      },
-      {
-        icon: <i className="fa-solid fa-piggy-bank"></i>,
-        name: "Để dành",
-        path: "/goals",
-      },
-      {
-        icon: <i className="fa-solid fa-calendar"></i>,
-        name: "Calendar",
-        path: "/calendar",
       },
     ]
   },
