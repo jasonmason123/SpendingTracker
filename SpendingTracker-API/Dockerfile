@@ -1,36 +1,33 @@
 #See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
+# ASP.NET runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER app
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+# Build .NET app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Copy everything and restore .NET
+# Copy csproj and restore
 COPY ["SpendingTracker-API.csproj", "."]
 RUN dotnet restore "./SpendingTracker-API.csproj"
+
+# Copy the rest (includes your built React assets in wwwroot/app)
 COPY . .
 
-# Build React app (already outputs to /wwwroot/app, configured in vite.config.ts)
-WORKDIR "/src/WebApp"
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get install -y nodejs
-RUN npm install
-RUN npm run build
-
-# Build .NET app
-WORKDIR "/src"
+# Build backend
 RUN dotnet build "SpendingTracker-API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "SpendingTracker-API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+# Final image
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
 ENTRYPOINT ["dotnet", "SpendingTracker-API.dll"]
