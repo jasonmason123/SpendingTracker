@@ -63,8 +63,6 @@ export default function TransactionsTable({
         credentials: "include",
       });
 
-      console.error("Res:", res);
-
       const rawData = await res.json();
       
       if (!res.ok) {

@@ -84,9 +84,10 @@ namespace SpendingTracker_API.Authentication.PasswordAuthentication
 
         public async Task<RegistrationResult> RegisterAsync(PasswordCredentialsDto passwordCredentials, bool requiresVerification = false)
         {
+            var username = passwordCredentials.Email.Split("@")[0];
             var user = new AppUser
             {
-                UserName = passwordCredentials.Email,
+                UserName = username,
                 Email = passwordCredentials.Email,
                 EmailConfirmed = !requiresVerification,
             };

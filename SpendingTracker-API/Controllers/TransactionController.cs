@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 
 namespace SpendingTracker_API.Controllers
 {
-    [ApiController, Route("api/transaction"), Authorize]
+    [ApiController, Route("api/transactions"), Authorize]
     public class TransactionController : ControllerBase
     {
         private readonly IAppUnitOfWork _unitOfWork;

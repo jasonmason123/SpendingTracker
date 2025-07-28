@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 
 import owner from "/images/user/owner.jpg";
+import { APP_BASE_URL } from "../../types";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
 
   const SIGN_OUT_URL = "/api/auth/sign-out";
+
+  const [userInfo, setUserInfo] = useState({ username: "", email: "" });
 
   function handleSignOut() {
     fetch(SIGN_OUT_URL, {
@@ -19,7 +22,7 @@ export default function UserDropdown() {
     })
       .then((response) => {
         if (response.ok) {
-          window.location.href = "/sign-in";
+          window.location.href = `${APP_BASE_URL}/sign-in`;
         } else {
           console.error("Failed to sign out");
         }
@@ -32,10 +35,31 @@ export default function UserDropdown() {
   function toggleDropdown() {
     setIsOpen(!isOpen);
   }
-
+  
   function closeDropdown() {
     setIsOpen(false);
   }
+
+  function getUserInfo() {
+    const cookie = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("userInfo="));
+    if (!cookie) return null;
+
+    try {
+      const base64 = cookie.split("=")[1];
+      const json = atob(base64);
+      const info = JSON.parse(json);
+      setUserInfo({ username: info.username, email: info.email });
+    } catch (err) {
+      console.error("Failed to parse userInfo cookie", err);
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    getUserInfo();
+  }, []);
 
   return (
     <div className="relative">
@@ -47,7 +71,7 @@ export default function UserDropdown() {
           <img src={owner} alt="User" />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">Musharof</span>
+        <span className="block mr-1 font-medium text-theme-sm">{userInfo.username}</span>
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
@@ -75,10 +99,10 @@ export default function UserDropdown() {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            Musharof Chowdhury
+            {userInfo.username}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            randomuser@pimjo.com
+            {userInfo.email}
           </span>
         </div>
 

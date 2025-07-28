@@ -11,6 +11,8 @@ using SpendingTracker_API.Utils.Messages;
 using System.Security.Claims;
 using SpendingTracker_API.Utils.Enums;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Text;
+using System.Text.Json;
 
 namespace SpendingTracker_API.Controllers
 {
@@ -18,6 +20,7 @@ namespace SpendingTracker_API.Controllers
     public class AuthenticationController : ControllerBase
     {
         private const string IS_LOGGED_IN_COOKIE_KEY = "isLoggedIn";
+        private const string USER_INFO_COOKIE_KEY = "userInfo";
         private const string WEB_INDEX_ROUTE = "/app";
 
         private readonly UserManager<AppUser> _userManager;
@@ -270,6 +273,21 @@ namespace SpendingTracker_API.Controllers
                     IsPersistent = remember,
                     ExpiresUtc = remember ? expirationDateUtc : null
                 });
+
+            // Add base64 userInfo cookie
+            var userObj = new
+            {
+                username = user.UserName,
+                email = user.Email
+            };
+            var json = JsonSerializer.Serialize(userObj);
+            var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+            Response.Cookies.Append(USER_INFO_COOKIE_KEY, base64, new CookieOptions
+            {
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = remember ? expirationDateUtc : null
+            });
 
             // Add IsLoggedIn cookie
             Response.Cookies.Append(IS_LOGGED_IN_COOKIE_KEY, "true", new CookieOptions

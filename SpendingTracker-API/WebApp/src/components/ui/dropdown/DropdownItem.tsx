@@ -32,7 +32,7 @@ export const DropdownItem: React.FC<DropdownItemProps> = ({
 
   if (tag === "a" && to) {
     return (
-      <Link to={to.startsWith("/") ? "/" + to : to} className={combinedClasses} onClick={handleClick}>
+      <Link to={to} className={combinedClasses} onClick={handleClick}>
         {children}
       </Link>
     );
