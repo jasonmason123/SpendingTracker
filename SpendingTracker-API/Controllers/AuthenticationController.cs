@@ -19,7 +19,7 @@ namespace SpendingTracker_API.Controllers
     public class AuthenticationController : ControllerBase
     {
         private const string IS_LOGGED_IN_COOKIE_KEY = "isLoggedIn";
-        private const string WEB_INDEX_ROUTE = "http://localhost:5173/web"; // TODO: Set this to "/web" in production
+        private const string WEB_INDEX_ROUTE = "/app";
 
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _configuration;
@@ -229,6 +229,23 @@ namespace SpendingTracker_API.Controllers
 
             await SetAuthCookies(newUser, remember ?? false);
             return Redirect(WEB_INDEX_ROUTE);
+        }
+
+        [HttpGet("sign-out")]
+        public async Task<IActionResult> SignOut()
+        {
+            try
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                Response.Cookies.Delete(IS_LOGGED_IN_COOKIE_KEY);
+                Console.WriteLine("Signed out successfully");
+                return Ok(new { message = "Signed out successfully" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Sign-out error: {ex}");
+                return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
+            }
         }
 
         // Helper methods to set auth cookies

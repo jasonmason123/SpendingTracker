@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Input from "../form/input/InputField";
+import { Link } from "react-router";
 
 
 export default function ForgotPasswordForm() {
@@ -71,6 +72,11 @@ export default function ForgotPasswordForm() {
             >
               Gửi mã xác thực
             </button>
+            <div className="pt-2 text-center">
+              <Link to="/sign-in" className="text-brand-500 hover:underline">
+                Quay lại đăng nhập
+              </Link>
+            </div>
           </form>
         )}
       </div>
