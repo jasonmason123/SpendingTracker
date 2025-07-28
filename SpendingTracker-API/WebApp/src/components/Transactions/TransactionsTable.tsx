@@ -58,7 +58,7 @@ export default function TransactionsTable({
     setLoading(true);
     const queryString = buildQueryString(filterParam);
     try {
-      const res = await fetch(`/api/transactions/list?${queryString}`, {
+      const res = await fetch(`/api/transactions/get-list?${queryString}`, {
         method: "GET",
         credentials: "include",
       });
