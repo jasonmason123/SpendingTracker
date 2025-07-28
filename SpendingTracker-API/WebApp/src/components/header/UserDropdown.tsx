@@ -3,6 +3,8 @@ import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { APP_BASE_URL } from "../../types";
 
+import avatar from "/images/user/avatar.jpg";
+
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -66,7 +68,7 @@ export default function UserDropdown() {
         className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
       >
         <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
-          <img src="/app/images/user/avatar.jpg" alt="User" />
+          <img src={avatar} alt="User" />
         </span>
 
         <span className="block mr-1 font-medium text-theme-sm">{userInfo.username}</span>
