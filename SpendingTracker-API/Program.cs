@@ -63,6 +63,14 @@ builder.Services.AddAuthentication(options =>
     policy.ForwardDefaultSelector = context =>
     {
         var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(authHeader))
+        {
+            Console.WriteLine($"Authorization header found, using JWT authentication scheme: {authHeader}");
+        }
+        else
+        {
+            Console.WriteLine("No Authorization header found, using Cookie authentication scheme.");
+        }
         return !string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ")
             ? JwtBearerDefaults.AuthenticationScheme
             : CookieAuthenticationDefaults.AuthenticationScheme;
