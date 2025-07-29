@@ -69,6 +69,7 @@ export default function TransactionsTable({
         console.error("Unexpected response format or server error:", rawData);
       } else {
         const data = rawData as PagedListResult<Transaction>;
+        console.log("Fetched transactions:", data);
         setTransactions(data.items ?? []);
         itemCount != data.totalItemCount && setItemCount(data.totalItemCount);
         pageCount != data.pageCount && setPageCount(data.pageCount);

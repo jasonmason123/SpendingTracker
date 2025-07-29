@@ -18,16 +18,20 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.FileProviders;
+using DotNetEnv;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Load environment variables from .env file on local development
+Env.Load();
 
 // Add configurations.
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 builder.Configuration.AddEnvironmentVariables();
 
 // Added host configuration (Bind host to 0.0.0.0 to match Render's configuration)
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+//var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+//builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Add services to the container.
 builder.Services.AddScoped<IAppUnitOfWork, EfUnitOfWork>();
@@ -52,10 +56,10 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 // Add authentication
-builder.Services.AddAuthentication(options =>
+builder.Services.AddAuthentication(scheme =>
 {
-    options.DefaultAuthenticateScheme = "SmartScheme";
-    options.DefaultChallengeScheme = "SmartScheme";
+    scheme.DefaultAuthenticateScheme = "SmartScheme"; // Use the custom policy scheme
+    scheme.DefaultChallengeScheme = "SmartScheme"; // Use the custom policy scheme
 })
 .AddPolicyScheme("SmartScheme", "Smart Scheme", policy =>
 {
@@ -63,18 +67,15 @@ builder.Services.AddAuthentication(options =>
     policy.ForwardDefaultSelector = context =>
     {
         var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-        if (!string.IsNullOrEmpty(authHeader))
-        {
-            Console.WriteLine($"Authorization header found, using JWT authentication scheme: {authHeader}");
-        }
-        else
-        {
-            Console.WriteLine("No Authorization header found, using Cookie authentication scheme.");
-        }
         return !string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ")
             ? JwtBearerDefaults.AuthenticationScheme
             : CookieAuthenticationDefaults.AuthenticationScheme;
     };
+})
+.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+{
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 })
 .AddJwtBearer(options =>
 {
@@ -101,8 +102,7 @@ builder.Services.AddAuthentication(options =>
     options.Scope.Add("email");
     options.Scope.Add("profile");
     options.SaveTokens = true;
-})
-.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
+});
 
 builder.Services.AddAuthorization(options =>
 {
@@ -118,6 +118,26 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.Secure = CookieSecurePolicy.Always;
 });
 
+// ===== Configure Identity =======
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/app/sign-in";
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Always use secure cookies
+
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
+    };
+
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        return Task.CompletedTask;
+    };
+});
+
 // Configure CORS policy to allow requests from the frontend
 const string CommonPolicyName = "CommonPolicy";
 builder.Services.AddCors(options =>
@@ -125,7 +145,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(CommonPolicyName, policy =>
     {
         policy.WithOrigins(
-                "http://localhost:5173",
+                "http://localhost:7027",
                 "https://spendingtracker-bsov.onrender.com"
               )
               .AllowAnyMethod()
@@ -202,7 +222,6 @@ app.UseCors(CommonPolicyName);
 //app.UseHttpsRedirection();
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 // Serve static files from wwwroot

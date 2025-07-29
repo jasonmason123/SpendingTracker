@@ -13,6 +13,7 @@ using SpendingTracker_API.Utils.Enums;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SpendingTracker_API.Controllers
 {
@@ -88,14 +89,14 @@ namespace SpendingTracker_API.Controllers
 
         [HttpPost("sign-up")]
         public async Task<IActionResult> DefaultSignUp(
-            [FromBody] PasswordCredentialsDto passwordCredentials,
+            [FromBody] RegistrationCredentialsDto passwordCredentials,
             [FromQuery] bool? isWeb = false
         )
         {
             try
             {
                 var registrationResult = await _passwordAuth.RegisterAsync(passwordCredentials, false);
-                if (registrationResult.Succeed)
+                if (registrationResult.Succeeded)
                 {
 
                     // If it's a web request, set cookies and return Ok
@@ -155,7 +156,7 @@ namespace SpendingTracker_API.Controllers
             var user = await _userManager.FindByEmailAsync(email);
             if(user == null)
             {
-                var credentials = new PasswordCredentialsDto
+                var credentials = new RegistrationCredentialsDto
                 {
                     Email = email,
                 };
@@ -163,7 +164,7 @@ namespace SpendingTracker_API.Controllers
                 // Create a new user if they don't exist
                 var result = await _passwordAuth.RegisterAsync(credentials, false);
 
-                if (!result.Succeed)
+                if (!result.Succeeded)
                 {
                     return BadRequest("Failed to register user.");
                 }
@@ -196,50 +197,57 @@ namespace SpendingTracker_API.Controllers
         [HttpGet("google/web-sign-in/callback")]
         public async Task<IActionResult> GoogleCallback([FromQuery(Name = "remember")] bool? remember)
         {
-            var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
-            if (!result.Succeeded)
+            try
             {
-                return Redirect($"{WEB_INDEX_ROUTE}/sign-in?error=OAuth%20failed");
-            }
+                var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+                if (!result.Succeeded)
+                {
+                    return Redirect($"{WEB_INDEX_ROUTE}/sign-in?error=OAuth%20failed");
+                }
 
-            var claims = result.Principal?.Identities.FirstOrDefault()?.Claims;
-            var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+                var claims = result.Principal?.Identities.FirstOrDefault()?.Claims;
+                var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            if (string.IsNullOrEmpty(email))
-            {
-                return Redirect($"{WEB_INDEX_ROUTE}/sign-in?error=Unable%20t%20get%20email%20from%20OAuth%20provider");
-            }
+                if (string.IsNullOrEmpty(email))
+                {
+                    return Redirect($"{WEB_INDEX_ROUTE}/sign-in?error=Unable%20t%20get%20email%20from%20OAuth%20provider");
+                }
 
-            //if user exists, login
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user != null)
-            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    //if user not exist, register
+                    var registrationCredentials = new RegistrationCredentialsDto
+                    {
+                        Email = email,
+                        Username = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value
+                    };
+
+                    var createdResult = await _passwordAuth.RegisterAsync(registrationCredentials);
+                    if (!createdResult.Succeeded)
+                    {
+                        Console.WriteLine($"[ERROR] Failed to create user: {createdResult.Message}");
+                        return BadRequest(createdResult.Message);
+                    }
+                }
+
                 await SetAuthCookies(user, remember ?? false);
                 return Redirect(WEB_INDEX_ROUTE);
             }
-
-            //if user not exist, register
-            var newUser = new AppUser
+            catch (Exception ex)
             {
-                Email = email,
-                UserName = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value ?? email,
-                CreatedAt = DateTime.Now,
-                FlagDel = FlagBoolean.FALSE,
-            };
-
-            await _userManager.CreateAsync(newUser);
-
-            await SetAuthCookies(newUser, remember ?? false);
-            return Redirect(WEB_INDEX_ROUTE);
+                Console.WriteLine($"Sign-out error: {ex}");
+                return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
+            }
         }
 
+        [Authorize]
         [HttpGet("sign-out")]
         public async Task<IActionResult> SignOut()
         {
             try
             {
-                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                Response.Cookies.Delete(IS_LOGGED_IN_COOKIE_KEY);
+                await RemoveAuthCookies();
                 Console.WriteLine("Signed out successfully");
                 return Ok(new { message = "Signed out successfully" });
             }
@@ -296,6 +304,13 @@ namespace SpendingTracker_API.Controllers
                 SameSite = SameSiteMode.None,
                 Expires = remember ? expirationDateUtc : null
             });
+        }
+
+        private async Task RemoveAuthCookies()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            Response.Cookies.Delete(IS_LOGGED_IN_COOKIE_KEY);
+            Response.Cookies.Delete(USER_INFO_COOKIE_KEY);
         }
     }
 }

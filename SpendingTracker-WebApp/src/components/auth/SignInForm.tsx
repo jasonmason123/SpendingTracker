@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
+import { APP_BASE_URL } from "../../types";
 
 
 export default function SignInForm() {
@@ -18,6 +19,7 @@ export default function SignInForm() {
     email: "",
     password: "",
   });
+  const navigate = useNavigate();
 
   const SIGN_IN_ROUTE = `/api/auth/sign-in?isWeb=true`;
   const SIGN_IN_WITH_GOOGLE_ROUTE = `/api/auth/google/web-sign-in`;
@@ -42,7 +44,7 @@ export default function SignInForm() {
       });
       
       if(res.ok) {
-        window.location.href = "/";
+        navigate(APP_BASE_URL);
       } else {
         setErrorMessage("Email hoặc mật khẩu chưa chính xác. Vui lòng thử lại.");
         setIsEmailValid(false);

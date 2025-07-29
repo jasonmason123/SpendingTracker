@@ -5,10 +5,12 @@ using SpendingTracker_API.Entities;
 using SpendingTracker_API.Utils.Messages;
 using SpendingTracker_API.Repositories.UnitOfWork;
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using X.PagedList;
 
 namespace SpendingTracker_API.Controllers
 {
-    [ApiController, Route("api/transactions"), Authorize]
+    [ApiController, Route("api/transactions"), Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     public class TransactionController : ControllerBase
     {
         private readonly IAppUnitOfWork _unitOfWork;
@@ -38,16 +40,17 @@ namespace SpendingTracker_API.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error: /get/{id} - {ex}");
                 return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
             }
         }
 
         [HttpGet("get-list")]
-        public ActionResult<IEnumerable<TransactionDto>> GetList([FromQuery] string? searchString, [FromQuery] int pageNumber, [FromQuery] int pageSize)
+        public ActionResult<IEnumerable<TransactionDto>> GetList([FromQuery] string? searchString, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                IEnumerable<Transaction> transactionList;
+                IPagedList<Transaction> transactionList;
                 Expression<Func<Transaction, Transaction>> transactionSelector = selector => new Transaction
                 {
                     Id = selector.Id,
@@ -83,6 +86,7 @@ namespace SpendingTracker_API.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error: /get-list - {ex}");
                 return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
             }
         }
@@ -117,6 +121,7 @@ namespace SpendingTracker_API.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error: /add - {ex}");
                 return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
             }
         }
@@ -153,10 +158,12 @@ namespace SpendingTracker_API.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                Console.WriteLine($"InvalidOperationException: /update/{id} - {ex}");
                 return NotFound("Transaction not found or does not belong to the user.");
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error: /update/{id} - {ex}");
                 return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
             }
         }
@@ -175,6 +182,7 @@ namespace SpendingTracker_API.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error: /delete/{id} - {ex}");
                 return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
             }
         }

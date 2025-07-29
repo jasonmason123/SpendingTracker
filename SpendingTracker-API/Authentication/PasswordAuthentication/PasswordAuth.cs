@@ -4,14 +4,15 @@ using Newtonsoft.Json.Linq;
 using SpendingTracker_API.DTOs.Web_Mobile;
 using SpendingTracker_API.Entities;
 using SpendingTracker_API.Services.NotificationService;
-using SpendingTracker_API.Utils;
-using SpendingTracker_API.Utils.Enums;
 using SpendingTracker_API.Utils.Messages;
+using System.Text;
 
 namespace SpendingTracker_API.Authentication.PasswordAuthentication
 {
     public class PasswordAuth : IPasswordAuth
     {
+        private const string ALLOWED_CHARACTERS_FOR_USERNAME = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+
         private readonly UserManager<AppUser> _userManager;
         private readonly INotificationService _notificationService;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -82,25 +83,33 @@ namespace SpendingTracker_API.Authentication.PasswordAuthentication
             }
         }
 
-        public async Task<RegistrationResult> RegisterAsync(PasswordCredentialsDto passwordCredentials, bool requiresVerification = false)
+        public async Task<RegistrationResult> RegisterAsync(RegistrationCredentialsDto registrationCredentials, bool requiresVerification = false)
         {
-            var username = passwordCredentials.Email.Split("@")[0];
+            if(registrationCredentials.Username == null)
+            {
+                registrationCredentials.Username = registrationCredentials.Email.Split("@")[0];
+            }
+
+            // Refine username before saving
+            var refinedUsername = registrationCredentials.Username.Replace(" ", "_");
+            refinedUsername = new string(refinedUsername.Where(c => ALLOWED_CHARACTERS_FOR_USERNAME.Contains(c)).ToArray());
+
             var user = new AppUser
             {
-                UserName = username,
-                Email = passwordCredentials.Email,
+                UserName = refinedUsername,
+                Email = registrationCredentials.Email,
                 EmailConfirmed = !requiresVerification,
             };
 
             IdentityResult result;
 
-            if (string.IsNullOrEmpty(passwordCredentials.Password))
+            if (string.IsNullOrEmpty(registrationCredentials.Password))
             {
                 result = await _userManager.CreateAsync(user);
             }
             else
             {
-                result = await _userManager.CreateAsync(user, passwordCredentials.Password);
+                result = await _userManager.CreateAsync(user, registrationCredentials.Password);
             }
             
             if (result.Succeeded && requiresVerification)
@@ -139,7 +148,7 @@ namespace SpendingTracker_API.Authentication.PasswordAuthentication
 
                 return new RegistrationResult
                 {
-                    Succeed = true,
+                    Succeeded = true,
                     User = user,
                     ConfirmationToken = token,
                     Message = "Registration successful. Please verify your email.",
@@ -149,19 +158,25 @@ namespace SpendingTracker_API.Authentication.PasswordAuthentication
             {
                 return new RegistrationResult
                 {
-                    Succeed = true,
+                    Succeeded = true,
                     User = user,
                     ConfirmationToken = null,
                     Message = "Registration successful without email verification."
                 };
             }
 
+            var stringBuilder = new StringBuilder();
+            foreach (var error in result.Errors)
+            {
+                stringBuilder.AppendLine(error.Description);
+            }
+
             return new RegistrationResult
             {
-                Succeed = false,
+                Succeeded = false,
                 User = null,
                 ConfirmationToken = null,
-                Message = string.Join(", ", result.Errors.Select(e => e.Description))
+                Message = stringBuilder.ToString()
             };
         }
 
