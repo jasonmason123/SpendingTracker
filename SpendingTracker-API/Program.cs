@@ -110,15 +110,15 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.Secure = CookieSecurePolicy.Always;
 });
 
-const string DevServerPolicyName = "DevServerPolicyName";
 // Configure CORS policy to allow requests from the frontend
+const string CommonPolicyName = "CommonPolicy";
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(DevServerPolicyName, policy =>
+    options.AddPolicy(CommonPolicyName, policy =>
     {
         policy.WithOrigins(
-                "http://localhost:5173", // your React dev server
-                "https://your-app-name.onrender.com" // your Render domain
+                "http://localhost:5173",
+                "https://spendingtracker-bsov.onrender.com"
               )
               .AllowAnyMethod()
               .AllowAnyHeader()
@@ -189,7 +189,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.UseCookiePolicy();
 
-app.UseCors(DevServerPolicyName);
+app.UseCors(CommonPolicyName);
 
 //app.UseHttpsRedirection();
 
