@@ -9,10 +9,10 @@ import Label from "../../components/form/Label";
 import { useModal } from "../../hooks/useModal";
 import { useEffect, useState } from "react";
 import TransactionOverallCard from "../../components/Transactions/TransactionOverallCard";
-import MetaDataCard from "../../components/MetaDataCard";
 import TransactionInfoCard from "../../components/Transactions/TransactionInfoCard";
-import TransactionNoteCard from "../../components/Transactions/TransactionNoteCard";
-import TransactionAttachmentCard from "../../components/Transactions/TransactionAttachmentCard";
+// import MetaDataCard from "../../components/MetaDataCard";
+// import TransactionNoteCard from "../../components/Transactions/TransactionNoteCard";
+// import TransactionAttachmentCard from "../../components/Transactions/TransactionAttachmentCard";
 import ComponentCard from "../../components/common/ComponentCard";
 
 export default function TransactionDetails() {
@@ -42,12 +42,12 @@ export default function TransactionDetails() {
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
-      const data = await response.json();
+      const data: Transaction = await response.json();
       setTransaction({
         ...data,
-        date: new Date(data.dateRecorded),
-        createdAt: new Date(data.dateCreated),
-        dateUpdated: data.dateUpdated && new Date(data.dateUpdated),
+        date: data.date && new Date(data.date),
+        createdAt: data.createdAt && new Date(data.createdAt),
+        updatedAt: data.updatedAt && new Date(data.updatedAt),
       });
       console.log("Transaction data fetched:", data);
     } catch (error) {
@@ -85,9 +85,9 @@ export default function TransactionDetails() {
             >
               <TransactionOverallCard transaction={transaction} />
               <TransactionInfoCard transaction={transaction} />
-              <TransactionAttachmentCard transaction={transaction} />
+              {/* <TransactionAttachmentCard transaction={transaction} />
               <TransactionNoteCard transaction={transaction} />
-              <MetaDataCard entity={transaction} />
+              <MetaDataCard entity={transaction} /> */}
             </ComponentCard>
           )}
         </div>

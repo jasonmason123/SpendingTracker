@@ -9,7 +9,6 @@ using SpendingTracker_API.Entities;
 using SpendingTracker_API.Services.AuthTokenService;
 using SpendingTracker_API.Utils.Messages;
 using System.Security.Claims;
-using SpendingTracker_API.Utils.Enums;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Text;
 using System.Text.Json;
@@ -241,7 +240,8 @@ namespace SpendingTracker_API.Controllers
             }
         }
 
-        [Authorize]
+        // Only web app can sign out with this endpoint
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpGet("sign-out")]
         public async Task<IActionResult> SignOut()
         {

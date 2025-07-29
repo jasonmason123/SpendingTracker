@@ -21,16 +21,15 @@ export default function TransactionOverallCard({ transaction }: TransactionOvera
             ) : null}
           </div>
           <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {/* Category name here (income, bill, budget, etc.) */}
               <div className="text-lg font-bold">
                   {transaction.description}
               </div>
               <div className="text-sm text-gray-400">
-                  <b>{(transaction.date && transaction.date.toLocaleDateString("vi-VN", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                  }))}</b>
+                <b>{(transaction.date && transaction.date.toLocaleDateString("vi-VN", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                }))}</b>
               </div>
           </span>
         </div>

@@ -35,6 +35,7 @@ import vn.edu.fpt.spendingtracker_mobile.R;
 import vn.edu.fpt.spendingtracker_mobile.adapter.TransactionAdapter;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.TransactionApiConnector;
 import vn.edu.fpt.spendingtracker_mobile.api_connector.api_callback.ApiCallback;
+import vn.edu.fpt.spendingtracker_mobile.dtos.PagedListResult;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
 import vn.edu.fpt.spendingtracker_mobile.fragments.base_fragment.BaseFragment;
 
@@ -189,17 +190,17 @@ public class TransactionListFragment extends BaseFragment
             pageNumber = 1;
 
         apiConnector.getPagedList(searchString, pageNumber, PAGE_SIZE)
-            .enqueue(new ApiCallback<List<Transaction>>(requireContext()) {
+            .enqueue(new ApiCallback<PagedListResult<Transaction>>(requireContext()) {
                 @Override
                 public void onResponse(
-                        Call<List<Transaction>> call,
-                        Response<List<Transaction>> response
+                        Call<PagedListResult<Transaction>> call,
+                        Response<PagedListResult<Transaction>> response
                 ) {
                     Log.i("fetchTransactionsFromApi", "fetching page: " + pageNumber);
                     loadingSpinner.setVisibility(View.GONE);
 
                     if (response.isSuccessful() && response.body() != null) {
-                        List<Transaction> newData = response.body();
+                        List<Transaction> newData = response.body().items;
 
                         if (replaceOldData) {
                             transactionList.clear(); // Clear the old data
@@ -247,7 +248,7 @@ public class TransactionListFragment extends BaseFragment
                 }
 
                 @Override
-                public void onFailure(Call<List<Transaction>> call, Throwable t) {
+                public void onFailure(Call<PagedListResult<Transaction>> call, Throwable t) {
                     super.onFailure(call, t);
                     loadingSpinner.setVisibility(View.GONE);
                     isLoading = false;

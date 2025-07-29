@@ -6,16 +6,14 @@ TableFooter,
 TableRow,
 } from "../ui/table";
   
-import {  PagedListResult, Transaction, TransactionFilterParams, TransactionType } from "../../types";
+import {  DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE, PagedListResult, Transaction, TransactionFilterParams, TransactionType } from "../../types";
 import { useEffect, useState } from "react";
 import React from "react";
-import Button from "../ui/button/Button";
-import { useModal } from "../../hooks/useModal";
-import TransactionFilterModal from "./TransactionFilterModal";
 import { useNavigate } from "react-router";
 import { buildQueryString } from "../../utils";
 import Pagination from "../tables/Pagination";
-import { APP_BASE_URL } from "../../types";
+import DatePicker from "../form/date-picker"; // Add this import if not present
+import flatpickr from "flatpickr"; // Add this import if not present
 
 interface TransactionTableProps {
   isSearchAndFilterIncluded?: boolean;
@@ -36,14 +34,14 @@ export default function TransactionsTable({
   const [searchStr, setSearchStr] = useState<string>("");
   const [itemCount, setItemCount] = useState<number>(0);
   const [pageCount, setPageCount] = useState<number>(0);
-  const [filtersUsed, setFiltersUsed] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>(defaultTransactions ?? []);
   const [loading, setLoading] = useState<boolean>(false);
   const [filterParam, setFilterParam] = useState<TransactionFilterParams>({
     pageNumber: 1,
     pageSize: 10,
   });
-  const { isOpen, openModal, closeModal } = useModal();
+  const [dateRange, setDateRange] = useState<[Date | undefined, Date | undefined]>([undefined, undefined]);
+  const datePickerRef = React.useRef<flatpickr.Instance | null>(null);
 
   const groupedTransactions = transactions?.reduce((acc, transaction) => {
     const dateKey = transaction.date &&
@@ -69,7 +67,6 @@ export default function TransactionsTable({
         console.error("Unexpected response format or server error:", rawData);
       } else {
         const data = rawData as PagedListResult<Transaction>;
-        console.log("Fetched transactions:", data);
         setTransactions(data.items ?? []);
         itemCount != data.totalItemCount && setItemCount(data.totalItemCount);
         pageCount != data.pageCount && setPageCount(data.pageCount);
@@ -92,19 +89,9 @@ export default function TransactionsTable({
   const onSearch = (searchStr: string) => {
     handleClearFilters();
     setFilterParam({
-      pageNumber: 1,
-      pageSize: 10,
+      pageNumber: DEFAULT_PAGE_NUMBER,
+      pageSize: DEFAULT_PAGE_SIZE,
       searchString: searchStr,
-    });
-  }
-
-  //If filter, search will not be applied, pageNumber will be reset to 1
-  const onFilter = (filterParams: TransactionFilterParams) => {
-    setSearchStr("");
-    setFilterParam({
-      ...filterParams,
-      pageNumber: 1,
-      searchString: "",
     });
   }
 
@@ -119,65 +106,81 @@ export default function TransactionsTable({
     setFilterParam({
       ...filterParam,
       pageSize: pageSize,
+      pageNumber: DEFAULT_PAGE_NUMBER, // Reset to first page when page size changes
     });
   }
 
   const onSelect = (transactionUid: string) => {
-    navigate(`${APP_BASE_URL}/transactions/${transactionUid}/details`);
-  }
-
-  const updateFiltersUsed = (filterNames: string[]) => {
-    setFiltersUsed(filterNames.length);
+    navigate(`/transactions/${transactionUid}/details`);
   }
 
   const handleClearFilters = () => {
+    handleClearDateRange();
     setFilterParam({
       pageNumber: 1,
       pageSize: 10,
     });
-    setFiltersUsed(0);
   }
-  
+
+  // Handler for date range change
+  const handleDateRangeChange = (selectedDates: Date[]) => {
+    if (selectedDates.length === 2) {
+      setDateRange([selectedDates[0], selectedDates[1]]);
+      setFilterParam({
+        ...filterParam,
+        dateFrom: selectedDates[0].toISOString(),
+        dateTo: selectedDates[1].toISOString(),
+        pageNumber: DEFAULT_PAGE_NUMBER,
+      });
+    } else {
+      setDateRange([undefined, undefined]);
+      setFilterParam({
+        ...filterParam,
+        dateFrom: undefined,
+        dateTo: undefined,
+        pageNumber: DEFAULT_PAGE_NUMBER,
+      });
+    }
+  };
+
+  // Handler to clear the date range
+  const handleClearDateRange = () => {
+    datePickerRef.current?.clear();
+    setDateRange([undefined, undefined]);
+    setFilterParam({
+      ...filterParam,
+      dateFrom: undefined,
+      dateTo: undefined,
+      pageNumber: DEFAULT_PAGE_NUMBER,
+    });
+  };
+
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
       <div className="max-w-full overflow-x-auto">
         {isSearchAndFilterIncluded && (
           <div className="p-4 flex justify-between items-center border-b border-gray-100 dark:border-white/[0.05] flex-col sm:flex-row gap-4">
             <div className="w-full sm:w-auto flex items-center gap-4 justify-center sm:justify-end">
-              <div className="relative">
-                <Button
-                  onClick={openModal}
-                  variant="outline"
-                  size="sm"
-                  startIcon={<i className="fa-solid fa-filter"></i>}
-                >
-                  Bộ lọc
-                </Button>
-                {filtersUsed > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-gray-200 text-gray-800 dark:bg-gray-500 dark:text-white text-xs px-2 py-0.5 rounded-full">
-                    {filtersUsed}
+              <div className="relative flex items-center gap-2">
+                {/* Date Range Picker */}
+                <DatePicker
+                  id="dateRange"
+                  mode="range"
+                  confirmOnly={true}
+                  onChange={handleDateRangeChange}
+                  placeholder="Tìm trong khoảng ngày"
+                  instanceRef={(fp) => (datePickerRef.current = fp)}
+                />
+                {(dateRange[0] || dateRange[1]) && (
+                  <span
+                    className="text-xs text-blue-500 underline cursor-pointer"
+                    onClick={handleClearDateRange}
+                  >
+                    Xóa
                   </span>
                 )}
               </div>
-
-              {filtersUsed > 0 && (
-                <button
-                  onClick={handleClearFilters}
-                  className="text-sm text-blue-500 hover:underline"
-                >
-                  Xóa bộ lọc
-                </button>
-              )}
             </div>
-
-            <TransactionFilterModal
-              isOpen={isOpen}
-              filterParams={filterParam}
-              onClose={closeModal}
-              onFilter={onFilter}
-              onUpdateFiltersUsed={updateFiltersUsed}
-              className="max-w-[900px]"
-            />
 
             <form className="w-full sm:w-1/4"
               onSubmit={(e) => {
@@ -236,7 +239,10 @@ export default function TransactionsTable({
                 </TableRow>
               ) : (
                 Object.entries(groupedTransactions).map(([date, group]) => {
-                  const dayTotal = group.reduce((sum, t) => sum + (t.amount ?? 0), 0);
+                  const dayTotal = group.reduce((sum, t) => {
+                    const amount = t.amount ?? 0;
+                    return t.transactionType === TransactionType.EXPENSE ? sum - amount : sum + amount;
+                  }, 0);
                   return (
                     <React.Fragment key={date}>
                       <TableRow>
@@ -246,7 +252,10 @@ export default function TransactionsTable({
                         >
                           <div className="flex justify-between items-center w-full">
                             <span>{date}</span>
-                            <span className={dayTotal >= 0 ? "text-green-500" : "text-red-500"}>
+                            <span className={dayTotal >= 0 ?
+                              "text-green-500" :
+                              "text-gray-600 dark:text-gray-300"}
+                            >
                               {dayTotal >= 0 && '+'}
                               {dayTotal.toLocaleString("vi-VN", {
                                 style: "currency",
@@ -290,8 +299,13 @@ export default function TransactionsTable({
                                   </span>
                                 </div>
                                 <div>
-                                  <span className={`text-sm font-bold ${transaction.amount && transaction.amount < 0 ? "text-gray-600 dark:text-gray-300" : "text-green-500"}`}>
-                                    {transaction.amount !== undefined && transaction.amount > 0 ? '+' : ''}
+                                  <span className={`text-sm font-bold ${
+                                    transaction.transactionType === TransactionType.EXPENSE ?
+                                      "text-red-500" :
+                                      "text-green-500"}`}
+                                  >
+                                    {transaction.amount !== undefined &&
+                                      transaction.transactionType === TransactionType.INCOME ? '+' : '-'}
                                     {transaction?.amount?.toLocaleString("vi-VN", {
                                       style: "currency",
                                       currency: "VND",

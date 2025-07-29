@@ -52,34 +52,25 @@ export default function TransactionCreate({
                 <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
                   Thông tin chung
                 </h4>
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-7 2xl:gap-x-32">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
                   <div>
                     <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                      Tài khoản nguồn<span className="text-red-500">*</span>
+                      Mô tả ngắn<span className="text-red-500">*</span>
                     </p>
                     <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      <Select
-                        required
-                        placeholder="Chọn tài khoản nguồn"
-                        options={[]}
-                        onChange={() => {}}
-                      />
+                      <Input required placeholder="VD: Đi ăn ngoài" maxLength={40} />
                     </p>
                   </div>
 
                   <div>
                     <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                      {newTransaction &&
-                      newTransaction.transactionType == TransactionType.INCOME
-                        ? "Khoản nhận về (VNĐ)"
-                        : "Khoản đã chi (VNĐ)"}
-                      <span className="text-red-500">*</span>
+                      Bên giao dịch<span className="text-red-500">*</span>
                     </p>
-                    <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      <Input required placeholder="10000" />
-                    </p>
+                    <div className="text-sm font-medium text-gray-800 dark:text-white/90">
+                      <Input placeholder="Người, tổ chức giao dịch" />
+                    </div>
                   </div>
-
+                  
                   <div>
                     <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                       Loại giao dịch<span className="text-red-500">*</span>
@@ -100,27 +91,24 @@ export default function TransactionCreate({
                       />
                     </div>
                   </div>
-
+                  
                   <div>
                     <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                      Bên giao dịch
+                      {newTransaction &&
+                      newTransaction.transactionType == TransactionType.INCOME
+                        ? "Khoản nhận về (VNĐ)"
+                        : "Khoản đã chi (VNĐ)"}
+                      <span className="text-red-500">*</span>
                     </p>
-                    <div className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      <Input placeholder="Người, tổ chức giao dịch" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                      Danh mục
-                    </p>
-                    <div className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      <Select
-                        placeholder="Chọn giao dịch"
-                        options={[]}
-                        onChange={() => {}}
+                    <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                      <Input
+                        required
+                        placeholder={(10000).toLocaleString("vi-VN", {
+                          style: "currency",
+                          currency: "VND"
+                        })}
                       />
-                    </div>
+                    </p>
                   </div>
                 </div>
               </div>

@@ -17,15 +17,6 @@ export default function TransactionInfoCard({ transaction }: TransactionInfoCard
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-7 2xl:gap-x-32">
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Tài khoản nguồn
-              </p>
-              <p className="text-sm font-bold text-gray-800 dark:text-white/90">
-                {transaction?.merchant}
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                 {transaction.transactionType === TransactionType.INCOME
                     && (transaction.amount && transaction.amount > 0) ? "Khoản nhận về" : "Khoản đã chi"}
               </p>
@@ -56,12 +47,12 @@ export default function TransactionInfoCard({ transaction }: TransactionInfoCard
               </p>
               <p className="text-sm font-bold text-gray-800 dark:text-white/90">
                 <Badge
-                    size="sm"
-                    className={
-                      transaction.transactionType === TransactionType.INCOME ? "border-green-500"
-                      : transaction.transactionType === TransactionType.EXPENSE ? "border-red-500"
-                      : ""
-                    }
+                  size="sm"
+                  className={
+                    transaction.transactionType === TransactionType.INCOME ? "border-green-500"
+                    : transaction.transactionType === TransactionType.EXPENSE ? "border-red-500"
+                    : ""
+                  }
                 >
                   {transaction.transactionType === TransactionType.INCOME ? "Thu nhập" :
                    transaction.transactionType === TransactionType.EXPENSE ? "Chi tiêu" : null
@@ -72,23 +63,10 @@ export default function TransactionInfoCard({ transaction }: TransactionInfoCard
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Đối tác giao dịch
+                Bên giao dịch
               </p>
               <p className="text-sm font-bold text-gray-800 dark:text-white/90">
                 {transaction?.merchant}
-              </p>
-            </div>
-
-            <div>
-              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                Khoản
-              </p>
-              <p className="text-sm font-bold text-gray-800 dark:text-white/90">
-                {
-                  transaction.transactionType === TransactionType.INCOME ? "Thu nhập" :
-                  transaction.transactionType === TransactionType.EXPENSE ? "Chi tiêu" :
-                  null
-                }
               </p>
             </div>
           </div>

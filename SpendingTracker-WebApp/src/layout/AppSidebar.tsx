@@ -14,7 +14,6 @@ import {
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import SidebarWidget from "./SidebarWidget";
 import logo from "/images/logo/logo.svg";
 import logoDark from "/images/logo/logo-dark.svg";
 import logoIcon from "/images/logo/logo-icon.svg";
@@ -336,7 +335,6 @@ const AppSidebar: React.FC = () => {
             </div>
           </div>
         </nav>
-        {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
       </div>
     </aside>
   );

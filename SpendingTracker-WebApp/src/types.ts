@@ -55,9 +55,10 @@ export interface BaseFilterParams {
   pageSize: number;
 }
 
+// Use ISO8601 format for date strings
 export interface TransactionFilterParams extends BaseFilterParams {
-  dateFrom?: Date;
-  dateTo?: Date;
+  dateFrom?: string;
+  dateTo?: string;
   transactionType?: TransactionType;
 }
 

@@ -94,10 +94,11 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
 
         public IPagedList<Transaction> Search(string searchString, int pageNumber, int pageSize, Expression<Func<Transaction, Transaction>>? selector = null)
         {
+            // PostgreSQL ILIKE for case-insensitive search
             var query = _context.Transactions
                 .Where(t => t.UserId == _userRetriever.UserId &&
-                            (t.Description.Contains(searchString) ||
-                             t.Merchant.Contains(searchString)))
+                            (EF.Functions.ILike(t.Description, $"%{searchString}%") ||
+                             EF.Functions.ILike(t.Merchant, $"%{searchString}%")))
                 .OrderByDescending(t => t.Date)
                 .AsQueryable();
 

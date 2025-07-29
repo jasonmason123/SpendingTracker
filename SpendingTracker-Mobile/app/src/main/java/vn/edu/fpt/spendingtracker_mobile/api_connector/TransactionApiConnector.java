@@ -12,6 +12,7 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import vn.edu.fpt.spendingtracker_mobile.dtos.PagedListResult;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
 
 public interface TransactionApiConnector {
@@ -19,7 +20,7 @@ public interface TransactionApiConnector {
     Call<Transaction> get(@Path("id") int id);
 
     @GET("api/transaction/get-list")
-    Call<List<Transaction>> getPagedList(
+    Call<PagedListResult<Transaction>> getPagedList(
             @Query("searchString") @Nullable String searchString,
             @Query("pageNumber") int pageNumber,
             @Query("pageSize") int pageSize

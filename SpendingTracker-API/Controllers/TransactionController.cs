@@ -5,12 +5,13 @@ using SpendingTracker_API.Entities;
 using SpendingTracker_API.Utils.Messages;
 using SpendingTracker_API.Repositories.UnitOfWork;
 using System.Linq.Expressions;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using X.PagedList;
+using X.PagedList.Extensions;
+using SpendingTracker_API.Repositories.FilterParams;
 
 namespace SpendingTracker_API.Controllers
 {
-    [ApiController, Route("api/transactions"), Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [ApiController, Route("api/transactions"), Authorize]
     public class TransactionController : ControllerBase
     {
         private readonly IAppUnitOfWork _unitOfWork;
@@ -20,7 +21,7 @@ namespace SpendingTracker_API.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet("get/{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<TransactionDto>> GetAsync(int id)
         {
             try
@@ -46,7 +47,12 @@ namespace SpendingTracker_API.Controllers
         }
 
         [HttpGet("get-list")]
-        public ActionResult<IEnumerable<TransactionDto>> GetList([FromQuery] string? searchString, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public ActionResult<PagedListResult<TransactionDto>> GetList(
+            [FromQuery] string? searchString,
+            [FromQuery] TransactionFilterParams? filterParams,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10
+        )
         {
             try
             {
@@ -68,11 +74,11 @@ namespace SpendingTracker_API.Controllers
                 else
                 {
                     transactionList = _unitOfWork.Transactions
-                        .GetPagedList(pageNumber, pageSize, transactionSelector);
+                        .GetPagedList(pageNumber, pageSize, transactionSelector, filterParams);
                 }
 
                 // Convert to DTOs
-                var transactionListDto = transactionList.Select(transaction => new TransactionDto
+                var transactionDtoList = transactionList.Select(transaction => new TransactionDto
                 {
                     Id = transaction.Id,
                     Description = transaction.Description,
@@ -82,7 +88,17 @@ namespace SpendingTracker_API.Controllers
                     TransactionType = transaction.TransactionType
                 });
 
-                return Ok(transactionListDto);
+                // Create the paged result list
+                var pagedListResult = new PagedListResult<TransactionDto>
+                {
+                    PageCount = transactionList.PageCount,
+                    PageNumber = transactionList.PageNumber,
+                    PageSize = transactionList.PageSize,
+                    TotalItemCount = transactionList.TotalItemCount,
+                    Items = transactionDtoList.ToList(),
+                };
+
+                return Ok(pagedListResult);
             }
             catch (Exception ex)
             {

@@ -56,22 +56,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 // Add authentication
-builder.Services.AddAuthentication(scheme =>
-{
-    scheme.DefaultAuthenticateScheme = "SmartScheme"; // Use the custom policy scheme
-    scheme.DefaultChallengeScheme = "SmartScheme"; // Use the custom policy scheme
-})
-.AddPolicyScheme("SmartScheme", "Smart Scheme", policy =>
-{
-    // Switch between JWT and Cookie authentication based on the request context
-    policy.ForwardDefaultSelector = context =>
-    {
-        var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-        return !string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ")
-            ? JwtBearerDefaults.AuthenticationScheme
-            : CookieAuthenticationDefaults.AuthenticationScheme;
-    };
-})
+builder.Services.AddAuthentication()
 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
 {
     options.Cookie.SameSite = SameSiteMode.None;
@@ -104,11 +89,31 @@ builder.Services.AddAuthentication(scheme =>
     options.SaveTokens = true;
 });
 
+// Define different policies for authorization
 builder.Services.AddAuthorization(options =>
 {
-    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+    // Use all schemes when applying [Authorization]
+    options.DefaultPolicy = new AuthorizationPolicyBuilder(
+        CookieAuthenticationDefaults.AuthenticationScheme,
+        JwtBearerDefaults.AuthenticationScheme)
         .RequireAuthenticatedUser()
         .Build();
+
+    // Policy for JWT only authentication
+    options.AddPolicy(
+        AppConst.JWT_ONLY_AUTH_SCHEME,
+        new AuthorizationPolicyBuilder(
+            JwtBearerDefaults.AuthenticationScheme)
+        .RequireAuthenticatedUser()
+        .Build());
+
+    // Policy for Cookie only authentication
+    options.AddPolicy(
+        AppConst.COOKIE_ONLY_AUTH_SCHEME,
+        new AuthorizationPolicyBuilder(
+            CookieAuthenticationDefaults.AuthenticationScheme)
+        .RequireAuthenticatedUser()
+        .Build());
 });
 
 // Configure cookie policy options
@@ -139,10 +144,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 // Configure CORS policy to allow requests from the frontend
-const string CommonPolicyName = "CommonPolicy";
+const string COMMON_POLICY_NAME = "CommonPolicy";
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(CommonPolicyName, policy =>
+    options.AddPolicy(COMMON_POLICY_NAME, policy =>
     {
         policy.WithOrigins(
                 "http://localhost:7027",
@@ -217,7 +222,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.UseCookiePolicy();
 
-app.UseCors(CommonPolicyName);
+app.UseCors(COMMON_POLICY_NAME);
 
 //app.UseHttpsRedirection();
 

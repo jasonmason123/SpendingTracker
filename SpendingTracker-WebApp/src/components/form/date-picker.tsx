@@ -5,10 +5,13 @@ import Label from "./Label";
 import { CalenderIcon } from "../../icons";
 import Hook = flatpickr.Options.Hook;
 import DateOption = flatpickr.Options.DateOption;
+import { Vietnamese } from "flatpickr/dist/l10n/vn.js";
+import confirmDatePlugin from "flatpickr/dist/plugins/confirmDate/confirmDate";
 
 type PropsType = {
   id: string;
   mode?: "single" | "multiple" | "range" | "time";
+  confirmOnly?: boolean;
   onChange?: Hook | Hook[];
   defaultDate?: DateOption | DateOption[] | undefined;
   label?: string;
@@ -27,6 +30,7 @@ export default function DatePicker({
   id,
   mode,
   onChange,
+  confirmOnly,
   label,
   defaultDate,
   placeholder,
@@ -48,20 +52,30 @@ export default function DatePicker({
     if (!inputEl) return;
 
     const instance = flatpickr(inputEl, {
+      locale: Vietnamese,
+      plugins: confirmOnly
+        ? [confirmDatePlugin({
+              showAlways: false,
+              theme: "light",
+            }),
+          ] : [],
       mode: mode || "single",
       monthSelectorType: "static",
       dateFormat,
+      closeOnSelect: false,
       defaultDate,
       onChange: (selectedDates, dateStr, fpInstance) => {
         setDateValue(dateStr);
 
-        if (typeof onChange === "function") {
-          onChange(selectedDates, dateStr, fpInstance);
-        } else if (Array.isArray(onChange)) {
-          onChange.forEach((fn) => fn(selectedDates, dateStr, fpInstance));
+        if(!confirmOnly) {
+          if (typeof onChange === "function") {
+            onChange(selectedDates, dateStr, fpInstance);
+          } else if (Array.isArray(onChange)) {
+            onChange.forEach((fn) => fn(selectedDates, dateStr, fpInstance));
+          }
         }
       },
-      position: "above center",
+      position: "auto",
       maxDate,
       minDate,
       maxTime,
@@ -76,6 +90,29 @@ export default function DatePicker({
       },
     });
 
+    let confirmBtn: HTMLButtonElement | null = null;
+    function handleConfirm() {
+      const selectedDates = instance.selectedDates;
+      const dateStr = instance.input.value;
+
+      setDateValue(dateStr);
+      if (typeof onChange === "function") {
+        onChange(selectedDates, dateStr, instance);
+      } else if (Array.isArray(onChange)) {
+        onChange.forEach((fn) => fn(selectedDates, dateStr, instance));
+      }
+    }
+
+    if (confirmOnly) {
+      confirmBtn = instance.calendarContainer.querySelector(
+        ".flatpickr-confirm"
+      ) as HTMLButtonElement;
+
+      if (confirmBtn) {
+        confirmBtn.addEventListener("click", handleConfirm);
+      }
+    }
+
     flatpickrRef.current = instance;
 
     // Set dateValue manually from the selected date
@@ -88,10 +125,12 @@ export default function DatePicker({
 
     return () => {
       instance.destroy();
+      confirmBtn?.removeEventListener("click", handleConfirm);
     };
   }, [
     mode,
     onChange,
+    confirmOnly,
     id,
     defaultDate,
     maxDate,

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
@@ -19,7 +19,6 @@ export default function SignInForm() {
     email: "",
     password: "",
   });
-  const navigate = useNavigate();
 
   const SIGN_IN_ROUTE = `/api/auth/sign-in?isWeb=true`;
   const SIGN_IN_WITH_GOOGLE_ROUTE = `/api/auth/google/web-sign-in`;
@@ -31,7 +30,7 @@ export default function SignInForm() {
       let url = SIGN_IN_ROUTE;
 
       if(isChecked) {
-        url += "?remember=true";
+        url += "&remember=true";
       }
 
       const res = await fetch(url, {
@@ -44,7 +43,7 @@ export default function SignInForm() {
       });
       
       if(res.ok) {
-        navigate(APP_BASE_URL);
+        window.location.href = APP_BASE_URL;
       } else {
         setErrorMessage("Email hoặc mật khẩu chưa chính xác. Vui lòng thử lại.");
         setIsEmailValid(false);
