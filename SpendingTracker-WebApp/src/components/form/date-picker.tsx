@@ -23,6 +23,7 @@ type PropsType = {
   minTime?: DateOption;
   required?: boolean;
   disabled?: boolean;
+  className?: string;
   instanceRef?: (fpInstance: flatpickr.Instance) => void;
 };
 
@@ -41,6 +42,7 @@ export default function DatePicker({
   minTime,
   required,
   disabled,
+  className,
   instanceRef,
 }: PropsType) {
   const visibleInputRef = useRef<HTMLInputElement>(null);
@@ -151,7 +153,7 @@ export default function DatePicker({
     <div>
       {label && <Label htmlFor={id}>{label}</Label>}
 
-      <div className="relative">
+      <div className={`relative ${className}`}>
         {/* Hidden input for required validation and focus */}
         {required && (
           <input

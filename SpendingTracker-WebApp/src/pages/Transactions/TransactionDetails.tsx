@@ -1,12 +1,7 @@
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { Transaction } from "../../types";
-import { Modal } from "../../components/ui/modal";
-import Button from "../../components/ui/button/Button";
-import Input from "../../components/form/input/InputField";
-import Label from "../../components/form/Label";
-import { useModal } from "../../hooks/useModal";
 import { useEffect, useState } from "react";
 import TransactionOverallCard from "../../components/Transactions/TransactionOverallCard";
 import TransactionInfoCard from "../../components/Transactions/TransactionInfoCard";
@@ -14,23 +9,14 @@ import TransactionInfoCard from "../../components/Transactions/TransactionInfoCa
 // import TransactionNoteCard from "../../components/Transactions/TransactionNoteCard";
 // import TransactionAttachmentCard from "../../components/Transactions/TransactionAttachmentCard";
 import ComponentCard from "../../components/common/ComponentCard";
+import { deleteTransaction } from "../../api_caller/TransactionApiCaller";
 
 export default function TransactionDetails() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [transaction, setTransaction] = useState<Transaction>({});
-  const { isOpen: isOpenModalEdit,
-          openModal: openModalEdit,
-          closeModal: closeModalEdit
-        } = useModal();
-  
-  const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving changes...");
-    closeModalEdit();
-  };
   
   const { id: transactionId } = useParams<{ id: string }>();
-  const [accName, setAccName] = useState(transactionId || "");
 
   const fetchTransaction = async () => {
     try {
@@ -57,6 +43,22 @@ export default function TransactionDetails() {
     }
   }
 
+  const toEditPage = () => {
+    navigate(`/transactions/${transaction.id}/edit`, {
+      state: { transaction },
+    });
+  }
+
+  const localDeleteTransaction = async () => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa giao dịch này?")) {
+      await deleteTransaction(transaction.id! as number)
+        .then(() => {
+          alert("Giao dịch đã được xóa thành công.");
+          navigate("/transactions");
+        });
+    }
+  }
+
   useEffect(() => {
     fetchTransaction();
   }, []);
@@ -78,9 +80,14 @@ export default function TransactionDetails() {
               actions={[
                 {
                   actionName: "Cập nhật",
-                  action: openModalEdit,
+                  action: toEditPage,
                   icon: <i className="fa-solid fa-pencil"></i>,
-                }
+                },
+                {
+                  actionName: "Xóa",
+                  action: localDeleteTransaction,
+                  icon: <i className="fa-solid fa-trash"></i>,
+                },
               ]}
             >
               <TransactionOverallCard transaction={transaction} />
@@ -92,38 +99,6 @@ export default function TransactionDetails() {
           )}
         </div>
       </div>
-
-      <Modal isOpen={isOpenModalEdit} onClose={closeModalEdit} className="max-w-[700px] m-4">
-        <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
-          <div className="px-2 pr-14">
-            <h4 className="mb-6 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Cập nhật thông tin tài khoản: {transactionId}
-            </h4>
-          </div>
-          <form className="flex flex-col">
-            <div className="px-2 overflow-y-auto custom-scrollbar">
-              <div className="gap-x-6 gap-y-5 lg:grid-cols-2">
-                <div>
-                  <Label>Tên tài khoản</Label>
-                  <Input
-                    type="text"
-                    value={accName}
-                    onChange={(e) => setAccName(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={closeModalEdit}>
-                Hủy
-              </Button>
-              <Button size="sm" onClick={handleSave}>
-                Lưu
-              </Button>
-            </div>
-          </form>
-        </div>
-      </Modal>
     </>
   );
 }

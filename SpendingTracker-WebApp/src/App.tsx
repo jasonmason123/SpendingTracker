@@ -28,7 +28,7 @@ const AppLayout = lazy(() => import("./layout/AppLayout"));
 const Home = lazy(() => import("./pages/Dashboard/Home"));
 const Transactions = lazy(() => import("./pages/Transactions/Transactions"));
 const TransactionDetails = lazy(() => import("./pages/Transactions/TransactionDetails"));
-const TransactionCreate = lazy(() => import("./pages/Transactions/TransactionCreate"));
+const TransactionAddEdit = lazy(() => import("./pages/Transactions/TransactionAddEdit"));
 // import NotFound from "./pages/OtherPage/NotFound";
 
 export default function App() {
@@ -48,8 +48,9 @@ export default function App() {
 
               {/* Transactions */}
               <Route path="transactions" element={<Transactions />} />
-              <Route path="transactions/:id/details" element={<TransactionDetails />} />
-              <Route path="transactions/new" element={<TransactionCreate />} />
+              <Route path="transactions/add" element={<TransactionAddEdit />} />
+              <Route path="transactions/:id" element={<TransactionDetails />} />
+              <Route path="transactions/:id/edit" element={<TransactionAddEdit />} />
 
               {/* Others Page */}
               <Route path="profile" element={<UserProfiles />} />

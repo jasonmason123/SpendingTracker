@@ -6,14 +6,14 @@ TableFooter,
 TableRow,
 } from "../ui/table";
   
-import {  DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE, PagedListResult, Transaction, TransactionFilterParams, TransactionType } from "../../types";
+import {  DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE, Transaction, TransactionFilterParams, TransactionType } from "../../types";
 import { useEffect, useState } from "react";
 import React from "react";
 import { useNavigate } from "react-router";
-import { buildQueryString } from "../../utils";
 import Pagination from "../tables/Pagination";
 import DatePicker from "../form/date-picker"; // Add this import if not present
 import flatpickr from "flatpickr"; // Add this import if not present
+import { fetchTransactionPagedList } from "../../api_caller/TransactionApiCaller";
 
 interface TransactionTableProps {
   isSearchAndFilterIncluded?: boolean;
@@ -52,38 +52,23 @@ export default function TransactionsTable({
     return acc;
   }, {} as Record<string, Transaction[]>);
 
-  const fetchData = async() => {
-    setLoading(true);
-    const queryString = buildQueryString(filterParam);
-    try {
-      const res = await fetch(`/api/transactions/get-list?${queryString}`, {
-        method: "GET",
-        credentials: "include",
-      });
-
-      const rawData = await res.json();
-      
-      if (!res.ok) {
-        console.error("Unexpected response format or server error:", rawData);
-      } else {
-        const data = rawData as PagedListResult<Transaction>;
-        setTransactions(data.items ?? []);
-        itemCount != data.totalItemCount && setItemCount(data.totalItemCount);
-        pageCount != data.pageCount && setPageCount(data.pageCount);
-      }
-    } catch (error) {
-      console.error("Error fetching transactions:", error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
     if(fetchTransactions) {
-      fetchData();
+      setLoading(true);
+      fetchTransactionPagedList(filterParam)
+        .then((data) => {
+          setTransactions(data.items ?? []);
+          setItemCount(data.totalItemCount);
+          setPageCount(data.pageCount);
+        })
+        .catch((error) => {
+          console.error("Error fetching transactions:", error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
-  }
-  , [filterParam]);
+  }, [filterParam]);
 
   //If search, other filter params will not be applied
   const onSearch = (searchStr: string) => {
@@ -110,8 +95,8 @@ export default function TransactionsTable({
     });
   }
 
-  const onSelect = (transactionUid: string) => {
-    navigate(`/transactions/${transactionUid}/details`);
+  const onSelect = (transactionId: number) => {
+    navigate(`/transactions/${transactionId}`);
   }
 
   const handleClearFilters = () => {
@@ -166,6 +151,7 @@ export default function TransactionsTable({
                 <DatePicker
                   id="dateRange"
                   mode="range"
+                  className="w-64"
                   confirmOnly={true}
                   onChange={handleDateRangeChange}
                   placeholder="Tìm trong khoảng ngày"
@@ -182,7 +168,7 @@ export default function TransactionsTable({
               </div>
             </div>
 
-            <form className="w-full sm:w-1/4"
+            <form className="h-11 w-full sm:w-1/4"
               onSubmit={(e) => {
                 e.preventDefault();
                 onSearch!== undefined && onSearch(searchStr);
@@ -272,7 +258,9 @@ export default function TransactionsTable({
                           <TableRow
                             key={transaction.id}
                             className="hover:bg-gray-50 dark:hover:bg-white/[0.03] cursor-pointer"
-                            onClick={() => transaction.id !== undefined && onSelect && onSelect(transaction.id)}
+                            onClick={() => transaction.id !== undefined
+                              && onSelect
+                              && onSelect(transaction.id)}
                           >
                             <TableCell className="px-4 py-3 sm:px-6 text-start">
                               <div className="flex items-center justify-between gap-2">
