@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
@@ -7,6 +7,7 @@ import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 import { checkStrongPassword } from "../../utils";
 import { APP_BASE_URL } from "../../types";
+import { authenticationApiCaller } from "../../api_caller/AuthenticationApiCaller";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,24 +15,17 @@ export default function SignUpForm() {
   const [isChecked, setIsChecked] = useState(false);
   const [isNotStrongPassword, setIsNotStrongPassword] = useState(false);
   const [isPasswordMatch, setIsPasswordMatch] = useState(true);
-  const [isEmailDuplicated, setIsEmailDuplicated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   const [credentials, setCredentials] = useState({
     email: "",
     password: "",
   });
 
-  const SIGN_UP_ROUTE = `/api/auth/sign-up?isWeb=true`;
-  const SIGN_IN_WITH_GOOGLE_ROUTE = `/api/auth/google/web-sign-in`;
-
   const onSetEmail = (email: string) => {
     setCredentials((prev) => ({ ...prev, email }));
-    if (isEmailDuplicated) {
-      setIsEmailDuplicated(false);
-    }
   }
 
   const onSetPassword = (password: string) => {
@@ -57,48 +51,43 @@ export default function SignUpForm() {
     if (!isNotStrongPassword && isPasswordMatch) {
       try {
         setIsLoading(true);
-        const res = await fetch(SIGN_UP_ROUTE, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(credentials),
-          credentials: "include",
-        });
-        if (res.ok) {
-          const data = await res.json();
 
-          if(isEmailDuplicated) {
-            setIsEmailDuplicated(false);
-          }
-          //Navigate to verify account page
-          navigate(`${APP_BASE_URL}/verify-account/${data.key}`);
-        } else if(res.status === 409) {
-          setIsEmailDuplicated(true);
-        } else {
-          setErrorMessage("Có lỗi xảy ra. Vui lòng thử lại.");
-          if(isEmailDuplicated) {
-            setIsEmailDuplicated(false);
-          }
-        }
-        setIsLoading(false);
+        await authenticationApiCaller.SignUp(credentials, true)
+          .then(async (response) => {
+            if (response.ok) {
+              window.location.href = APP_BASE_URL;
+
+              // Optionally, navigate to a verification page
+              //const data = await response.json();
+              //navigate(`${APP_BASE_URL}/verify-account/${data.key}`);
+
+            } else {
+              response.json().then((data) => {
+                console.error("Sign up api error: ", data);
+                setErrorMessage(data.message || "Đăng ký không thành công. Vui lòng thử lại.");
+              });
+            }
+          });
       } catch (error) {
-        console.error("Sign in error: ", error);
+        console.error("Sign up error: ", error);
         setErrorMessage("Có lỗi bên phía máy chủ. Vui lòng báo cáo sự cố và thử lại sau.");
+      } finally {
         setIsLoading(false);
-        if(isEmailDuplicated) {
-          setIsEmailDuplicated(false);
-        }
       }
     }
   }
 
   const handleSignUpWithGoogle = async () => {
-    let url = SIGN_IN_WITH_GOOGLE_ROUTE;
-    if(isChecked) {
-      url += "?remember=true";
-    }
-    window.location.href = url;
+    authenticationApiCaller.signInWithGoogle(false)
+      .then((response) => {
+        if (!response.ok) {
+          setErrorMessage("Đăng nhập với Google không thành công. Vui lòng thử lại.");
+        }
+      })
+      .catch((error) => {
+        console.error("Sign in with Google error: ", error);
+        setErrorMessage("Có lỗi xảy ra khi đăng nhập với Google. Vui lòng thử lại.");
+      });
   }
   
   return (
@@ -188,7 +177,6 @@ export default function SignUpForm() {
                   </Label>
                   <Input
                     disabled={isLoading}
-                    error={isEmailDuplicated}
                     onChange={(e) => onSetEmail(e.target.value)}
                     required
                     type="email"
@@ -196,11 +184,6 @@ export default function SignUpForm() {
                     name="email"
                     placeholder="Nhập email của bạn"
                   />
-                  {isEmailDuplicated && (
-                    <p className="mt-2 text-sm text-red-500 dark:text-red-400">
-                      Email đã tồn tại. Vui lòng chọn một email khác.
-                    </p>
-                  )}
                 </div>
                 {/* <!-- Password --> */}
                 <div>

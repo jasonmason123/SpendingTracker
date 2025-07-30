@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json.Linq;
 using SpendingTracker_API.DTOs.Web_Mobile;
 using SpendingTracker_API.Entities;
 using SpendingTracker_API.Services.NotificationService;

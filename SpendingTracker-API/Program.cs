@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.FileProviders;
 using DotNetEnv;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,8 +31,8 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnCh
 builder.Configuration.AddEnvironmentVariables();
 
 // Added host configuration (Bind host to 0.0.0.0 to match Render's configuration)
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+//var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+//builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Add services to the container.
 builder.Services.AddScoped<IAppUnitOfWork, EfUnitOfWork>();
@@ -56,26 +57,47 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 // Add authentication
+var jwtIssuer = builder.Configuration["JwtSettings:Issuer"];
+var jwtAudience = builder.Configuration["JwtSettings:Audience"];
 builder.Services.AddAuthentication()
-.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+// Define scheme for mobile authentication
+.AddJwtBearer(AuthSchemes.MOBILE_AUTH_SCHEME, options =>
 {
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-})
-.AddJwtBearer(options =>
-{
-    var issuer = builder.Configuration["JwtSettings:Issuer"];
-    var audience = builder.Configuration["JwtSettings:Audience"];
-
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = issuer,
-        ValidAudience = audience,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(EnvNames.JWT_SECRET_KEY) ?? ""))
+    };
+})
+// Define scheme for web authentication
+.AddJwtBearer(AuthSchemes.WEB_AUTH_SCHEME, options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(EnvNames.JWT_SECRET_KEY) ?? ""))
+    };
+
+    //Get jwt from cookie
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = ctx =>
+        {
+            ctx.Request.Cookies.TryGetValue(AppConst.JWT_COOKIE_KEY, out var accessToken);
+            if (!string.IsNullOrEmpty(accessToken))
+                ctx.Token = accessToken;
+            return Task.CompletedTask;
+        }
     };
 })
 .AddCookie("External")
@@ -94,24 +116,24 @@ builder.Services.AddAuthorization(options =>
 {
     // Use all schemes when applying [Authorization]
     options.DefaultPolicy = new AuthorizationPolicyBuilder(
-        CookieAuthenticationDefaults.AuthenticationScheme,
-        JwtBearerDefaults.AuthenticationScheme)
+        AuthSchemes.MOBILE_AUTH_SCHEME,
+        AuthSchemes.WEB_AUTH_SCHEME)
         .RequireAuthenticatedUser()
         .Build();
 
-    // Policy for JWT only authentication
+    // Policy for mobile authentication
     options.AddPolicy(
-        AppConst.JWT_ONLY_AUTH_SCHEME,
+        AuthSchemes.MOBILE_AUTH_SCHEME,
         new AuthorizationPolicyBuilder(
-            JwtBearerDefaults.AuthenticationScheme)
+            AuthSchemes.WEB_AUTH_SCHEME)
         .RequireAuthenticatedUser()
         .Build());
 
-    // Policy for Cookie only authentication
+    // Policy for web authentication
     options.AddPolicy(
-        AppConst.COOKIE_ONLY_AUTH_SCHEME,
+        AuthSchemes.WEB_AUTH_SCHEME,
         new AuthorizationPolicyBuilder(
-            CookieAuthenticationDefaults.AuthenticationScheme)
+            AuthSchemes.WEB_AUTH_SCHEME)
         .RequireAuthenticatedUser()
         .Build());
 });
@@ -121,26 +143,6 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.MinimumSameSitePolicy = SameSiteMode.None;
     options.Secure = CookieSecurePolicy.Always;
-});
-
-// ===== Configure Identity =======
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/app/sign-in";
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Always use secure cookies
-
-    options.Events.OnRedirectToLogin = context =>
-    {
-        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-        return Task.CompletedTask;
-    };
-
-    options.Events.OnRedirectToAccessDenied = context =>
-    {
-        context.Response.StatusCode = StatusCodes.Status403Forbidden;
-        return Task.CompletedTask;
-    };
 });
 
 // Configure CORS policy to allow requests from the frontend
@@ -181,6 +183,15 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+
+// Add Data Protection to persist cookie storage
+// After redeployment, the key storage file will be overwritten, which means that old authentication sessions will not work.
+// TODO: Find a way to persist key storage file on server, so that only 1 key is used across deployments. And the file must be stored securely and not be commited to Git.
+// TODO: Or change cookie authentication to putting JWT inside cookies for simplicity.
+//builder.Services.AddDataProtection()
+//    .SetApplicationName("SpendingTracker")
+//    .PersistKeysToFileSystem(new DirectoryInfo("/app/keys"));
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

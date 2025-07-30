@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using X.PagedList;
 using X.PagedList.Extensions;
 using SpendingTracker_API.Repositories.FilterParams;
+using SpendingTracker_API.Utils;
 
 namespace SpendingTracker_API.Controllers
 {
@@ -47,11 +48,11 @@ namespace SpendingTracker_API.Controllers
         }
 
         [HttpGet("get-list")]
-        public ActionResult<PagedListResult<TransactionDto>> GetList(
+        public ActionResult<PagedListResult<TransactionDto>> GetPagedList(
             [FromQuery] string? searchString,
             [FromQuery] TransactionFilterParams? filterParams,
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10
+            [FromQuery] int pageNumber = AppConst.DEFAULT_PAGE_NUMBER,
+            [FromQuery] int pageSize = AppConst.DEFAULT_PAGE_SIZE
         )
         {
             try

@@ -6,65 +6,53 @@ import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 import { APP_BASE_URL } from "../../types";
+import { authenticationApiCaller } from "../../api_caller/AuthenticationApiCaller";
 
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
+  const [isRemembered, setIsRemembered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isEmailValid, setIsEmailValid] = useState(true);
-  const [isPasswordValid, setIsPasswordValid] = useState(true);
   const [credentials, setCredentials] = useState({
     email: "",
     password: "",
   });
 
-  const SIGN_IN_ROUTE = `/api/auth/sign-in?isWeb=true`;
-  const SIGN_IN_WITH_GOOGLE_ROUTE = `/api/auth/google/web-sign-in`;
   const SIGN_IN_WITH_PASSKEY_ROUTE = `/api/auth/signin-passkey`;
 
   const handleSignIn = async () => {
     try {
       setIsLoading(true);
-      let url = SIGN_IN_ROUTE;
 
-      if(isChecked) {
-        url += "&remember=true";
-      }
-
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-        credentials: "include",
-      });
-      
-      if(res.ok) {
-        window.location.href = APP_BASE_URL;
-      } else {
-        setErrorMessage("Email hoặc mật khẩu chưa chính xác. Vui lòng thử lại.");
-        setIsEmailValid(false);
-        setIsPasswordValid(false);
-      }
-      setIsLoading(false);
+      await authenticationApiCaller.signIn(credentials, isRemembered)
+        .then((response) => {
+          if (response.ok) {
+            window.location.href = APP_BASE_URL;
+          } else {
+            setErrorMessage("Email hoặc mật khẩu chưa chính xác. Vui lòng thử lại.");
+          }
+        });
     } catch (error) {
       console.error("Sign in error: ", error);
       setErrorMessage("Có lỗi bên phía máy chủ. Vui lòng báo cáo sự cố và thử lại sau.");
-      setIsEmailValid(false);
-      setIsPasswordValid(false);
+    } finally {
       setIsLoading(false);
     }
   }
 
   const handleSignInWithGoogle = async () => {
-    let url = SIGN_IN_WITH_GOOGLE_ROUTE;
-    if(isChecked) {
-      url += "?remember=true";
-    }
-    window.location.href = url;
+    authenticationApiCaller.signInWithGoogle(isRemembered)
+      .then((response) => {
+        if (!response.ok) {
+          setErrorMessage("Đăng nhập với Google không thành công. Vui lòng thử lại.");
+        }
+      })
+      .catch((error) => {
+        console.error("Sign in with Google error: ", error);
+        setErrorMessage("Có lỗi xảy ra khi đăng nhập với Google. Vui lòng thử lại.");
+      });
   }
 
   const handleSignInWithPasskey = async (email: string) => {
@@ -239,7 +227,7 @@ export default function SignInForm() {
                   </Label>
                   <Input
                     disabled={isLoading}
-                    error={!isEmailValid}
+                    error={!isEmailValid || errorMessage != null}
                     required
                     placeholder="info@gmail.com"
                     onChange={(e) => setCredentials({
@@ -255,7 +243,7 @@ export default function SignInForm() {
                   <div className="relative">
                     <Input
                       disabled={isLoading}
-                      error={!isPasswordValid}
+                      error={errorMessage != null}
                       type={showPassword ? "text" : "password"}
                       placeholder="Nhập mật khẩu của bạn"
                       required
@@ -280,8 +268,8 @@ export default function SignInForm() {
                   <div className="flex items-center gap-3">
                     <Checkbox
                       disabled={isLoading}
-                      checked={isChecked}
-                      onChange={setIsChecked}
+                      checked={isRemembered}
+                      onChange={setIsRemembered}
                       id="keepLoggedIn"
                     />
                     <label

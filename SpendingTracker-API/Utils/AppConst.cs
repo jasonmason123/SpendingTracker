@@ -8,8 +8,8 @@
         public const string JWT_COOKIE_KEY = "user_session";
         public const int JWT_COOKIE_EXPIRATION_IN_DAYS = 7;
 
-        //Authentication schemes
-        public const string JWT_ONLY_AUTH_SCHEME = "JwtOnly";
-        public const string COOKIE_ONLY_AUTH_SCHEME = "CookieOnly";
+        //Page number and page size
+        public const int DEFAULT_PAGE_NUMBER = 1;
+        public const int DEFAULT_PAGE_SIZE = 10;
     }
 }

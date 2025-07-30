@@ -4,24 +4,20 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { APP_BASE_URL } from "../../types";
 
 import avatar from "/images/user/avatar.jpg";
+import { authenticationApiCaller } from "../../api_caller/AuthenticationApiCaller";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const SIGN_OUT_URL = "/api/auth/sign-out";
-
   const [userInfo, setUserInfo] = useState({ username: "", email: "" });
 
   function handleSignOut() {
-    fetch(SIGN_OUT_URL, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    })
+    authenticationApiCaller.signOut()
       .then((response) => {
         if (response.ok) {
+          // Clear user info from local state
+          setUserInfo({ username: "", email: "" });
+          // Redirect to sign-in page
           window.location.href = `${APP_BASE_URL}/sign-in`;
         } else {
           console.error("Failed to sign out");
