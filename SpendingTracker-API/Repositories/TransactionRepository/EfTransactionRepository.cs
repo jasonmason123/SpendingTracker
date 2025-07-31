@@ -34,6 +34,7 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
             var query = _context.Transactions
                 .Where(t => t.UserId == _userRetriever.UserId)
                 .OrderByDescending(t => t.Date)
+                .ThenByDescending(t => t.Id)
                 .AsQueryable();
 
             if (filterParams != null)
@@ -66,6 +67,7 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
             var query = _context.Transactions
                 .Where(t => t.UserId == _userRetriever.UserId)
                 .OrderByDescending(t => t.Date)
+                .ThenByDescending(t => t.Id)
                 .AsQueryable();
 
             if(filterParams != null)

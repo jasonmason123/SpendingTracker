@@ -70,6 +70,13 @@ export default function TransactionsTable({
     }
   }, [filterParam]);
 
+  // Set transactions to default transactions on reloads
+  useEffect(() => {
+    if (!fetchTransactions && defaultTransactions) {
+      setTransactions(defaultTransactions);
+    }
+  }, [defaultTransactions, fetchTransactions]);
+
   //If search, other filter params will not be applied
   const onSearch = (searchStr: string) => {
     handleClearFilters();

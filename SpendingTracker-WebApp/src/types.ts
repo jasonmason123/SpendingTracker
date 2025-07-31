@@ -71,3 +71,14 @@ export interface PagedListResult<T extends any> {
   pageNumber: number;
   items: T[];
 }
+
+export interface IncomeExpenseResult {
+  income: number;
+  expense: number;
+}
+
+export interface AmountsByYearResult {
+  year: number;
+  monthlyIncomes: Record<number, number>;
+  monthlyExpenses: Record<number, number>;
+}

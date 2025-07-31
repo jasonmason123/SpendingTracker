@@ -79,7 +79,7 @@ export interface AuthenticationApiCaller {
   signInWithGoogle: (remember: boolean) => Promise<Response>;
   signOut: () => Promise<Response>;
   SignUp: (credentials: { email: string; password: string }, isWeb?: boolean) => Promise<Response>;
-}
+};
 
 export const authenticationApiCaller: AuthenticationApiCaller = {
   signIn,

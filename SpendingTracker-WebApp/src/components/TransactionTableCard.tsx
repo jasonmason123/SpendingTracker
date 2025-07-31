@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import TransactionsTable from "./Transactions/TransactionsTable";
-import { Transaction, APP_BASE_URL } from "../types";
+import { Transaction } from "../types";
 
 interface TransactionTableCardProps {
   title?: string;
@@ -17,12 +17,12 @@ export default function TransactionTableCard({
         {title}
       </h4>
       <TransactionsTable
-        defaultTransactions={transactions as Transaction[]}
+        defaultTransactions={transactions}
         fetchTransactions = {false}
       />
       {transactions && transactions.length > 0 && (
         <div className="text-center mt-4 text-gray-500 dark:text-gray-400">
-          <Link to={APP_BASE_URL + "/transactions"} className="text-sm">
+          <Link to="/transactions" className="text-sm">
             Xem tất cả các giao dịch <i className="fa-solid fa-arrow-right"></i>
           </Link>
         </div>
