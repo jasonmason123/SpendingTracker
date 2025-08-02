@@ -3,71 +3,89 @@ import Badge from "../ui/badge/Badge";
 import { useEffect, useState } from "react";
 import { statisticsApiCaller } from "../../api_caller/StatisticsApiCaller";
 import Chart from "react-apexcharts";
-import { IncomeExpenseResult } from "../../types";
-import { ArrowDownIcon, ArrowUpIcon } from "../../icons";
+import { ArrowDownIcon, ArrowUpIcon, InfoIcon } from "../../icons";
+import Tippy from "@tippyjs/react";
+import { PeriodUnit } from "../../types";
 
-// TODO: Add roll-over mechanism after each month on backend
 export default function MonthlyOverall() {
   const today = new Date();
   const savingPercentage = 10;
   const oneHundredPercent = 100;
-  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
   const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
   const daysRemain = Math.ceil((endOfMonth.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
   const [loading, setLoading] = useState(true);
-  const [loadingPrevMonth, setLoadingPrevMonth] = useState(true);
   const [income, setIncome] = useState<number>(0);
   const [expense, setExpense] = useState<number>(0);
-  // If remaining is negative, it represents the overspent amount
-  const [remaining, setRemaining] = useState<number>(0);
-  const [absoluteRemaining, setAbsoluteRemaining] = useState<number>(0);
+  // If this is negative, it represents the overspent amount, else, remaining amount
+  const [incomeExpenseDiff, setIncomeExpenseDiff] = useState<number>(0);
+  const [absoluteIncomeExpenseDiff, setAbsoluteIncomeExpenseDiff] = useState<number>(0);
   const [spentEarnedRatio, setSpentEarnedRatio] = useState<number>(0);
+  const [rollover, setRollover] = useState<number>(0);
   // If dailySpending is negative, it represents minimum the amount that
   // must be made each day to balance income and expense by the end of the month
-  const [dailySpending, setDailySpending] = useState<number>(0);
+  const [dailyAmount, setDailyAmount] = useState<number>(0);
   const [saving, setSaving] = useState<number>(0);
   const [incomeDifference, setIncomeDifference] = useState<number>(0);
   const [expenseDifference, setExpenseDifference] = useState<number>(0);
 
-  const calculateSaving = (income: number): number => {
+  function calculateSaving(income: number): number {
     return income * (savingPercentage / oneHundredPercent);
   }
 
-  const setCurrentIncomeExpense = async (): Promise<IncomeExpenseResult | null> => {
+  function calculateExpenseIncomeRatio(income: number, expense: number, rollover: number): number {
+    // If rollover is negative, it adds to expense
+    const adjustedExpense = expense + (rollover < 0 ? Math.abs(rollover) : 0);
+    // If rollover is positive, it adds to income
+    const adjustedIncome = income + (rollover > 0 ? rollover : 0);
+
+    // Prevent division by zero
+    if (adjustedIncome === 0) {
+      if(adjustedExpense > 0)
+        return 1.1;
+      return 0;
+    }
+
+    return adjustedExpense / adjustedIncome;
+  }
+
+  const getSetData = async () => {
     if(!loading)
       setLoading(true);
 
-    return statisticsApiCaller
-      .getIncomeExpenseByPeriod(startOfMonth.toISOString(), endOfMonth.toISOString())
+    await statisticsApiCaller
+      .getIncomeExpenseSummary(new Date().toISOString(), PeriodUnit.MONTH, true)
       .then((response) => {
+        console.log("Response summary", response);
+
         const responseIncome = response.income;
         const responseExpense = response.expense;
+        const responseRollover = response.rollover;
         
-        const responseRemaining = responseIncome - responseExpense;
-        const responseAbsoluteRemaining = Math.abs(responseRemaining);
-        const responseRatio = responseIncome === 0 ? 0 : (responseExpense / responseIncome) * oneHundredPercent;
+        const responseRatio = calculateExpenseIncomeRatio(responseIncome, responseExpense, responseRollover) * oneHundredPercent;
+
+        const responseIncomeExpenseDiff = (responseIncome - responseExpense) + responseRollover;
 
         // If spending/income exceeds saving amount then saving is 0
+        // Include rollover into income if rollover > 0 (leftover amount from previous month)
         const savingAmount = responseRatio <= (oneHundredPercent - savingPercentage) ?
-          calculateSaving(responseIncome) : 0;
+          calculateSaving(responseIncome + (responseRollover > 0 ? responseRollover : 0)) : 0;
         
-        const dailySpendingAmount = daysRemain > 0
-          ? (responseRemaining - savingAmount) / daysRemain
+        const responseDailyAmount = daysRemain > 0
+          ? (responseIncomeExpenseDiff - savingAmount) / daysRemain
           : 0;
 
         setIncome(responseIncome);
         setExpense(responseExpense);
-        setRemaining(responseRemaining);
-        setAbsoluteRemaining(responseAbsoluteRemaining);
+        setIncomeExpenseDiff(responseIncomeExpenseDiff);
+        setAbsoluteIncomeExpenseDiff(Math.abs(responseIncomeExpenseDiff));
         setSpentEarnedRatio(responseRatio);
         setSaving(savingAmount);
-        setDailySpending(dailySpendingAmount);
+        setDailyAmount(responseDailyAmount);
+        setRollover(responseRollover);
 
-        return {
-          income: responseIncome,
-          expense: responseExpense,
-        };
+        setIncomeDifference(response.incomeChange);
+        setExpenseDifference(response.expenseChange);
       })
       .catch((err) => {
         console.error("Failed to fetch income/expense", err);
@@ -78,46 +96,8 @@ export default function MonthlyOverall() {
       });
   };
 
-  const setIncomeExpenseDiff = async (
-    currentIncome: number,
-    currentExpense: number
-  ) => {
-    // No compare to previous months if current month has no any income or expense
-    if(currentIncome === 0 && currentExpense === 0)
-      return;
-    
-    if(!loadingPrevMonth)
-      setLoadingPrevMonth(true);
-    
-    const startOfPrevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-    const endOfPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59, 999);
-
-    try {
-      const response = await statisticsApiCaller.getIncomeExpenseByPeriod(
-        startOfPrevMonth.toISOString(),
-        endOfPrevMonth.toISOString()
-      );
-
-      const resPrevIncome = response.income;
-      const resPrevExpense = response.expense;
-
-      setIncomeDifference(currentIncome - resPrevIncome);
-      setExpenseDifference(currentExpense - resPrevExpense);
-    } catch (err) {
-      console.error("Failed to fetch income/expense differences", err);
-    } finally {
-      setLoadingPrevMonth(false);
-    }
-  };
-
   useEffect(() => {
-    const fetchData = async () => {
-      const current = await setCurrentIncomeExpense();
-      if(current != null) {
-        await setIncomeExpenseDiff(current?.income, current?.expense);
-      }
-    };
-    fetchData();
+    getSetData();
   }, []);
 
   const colorSpending = "#F87171";
@@ -156,7 +136,7 @@ export default function MonthlyOverall() {
             offsetY: -40,
             color: colorSpending,
             formatter: function() {
-              return absoluteRemaining.toLocaleString("vi-VN", {
+              return absoluteIncomeExpenseDiff.toLocaleString("vi-VN", {
                 style: "currency",
                 currency: "VND"
               })
@@ -204,14 +184,15 @@ export default function MonthlyOverall() {
 
                 <span className={`absolute left-1/2 top-1/2 px-3 py-1 -translate-x-1/2
                   -translate-y-[50%] text-sm font-medium text-gray-500 dark:text-gray-400
-                  ${remaining >= 0 ? "text-blue-500 dark:text-blue-400" : "text-error-600 dark:text-error-500"}`}
+                  ${incomeExpenseDiff >= 0 ? "text-blue-500 dark:text-blue-400" : "text-error-600 dark:text-error-500"}`}
                 >
-                  {remaining >= 0 ? "Còn lại" : "Đã quá hạn mức"}
+                  {incomeExpenseDiff >= 0 ? "Tháng này còn" : "Tháng này đã quá"}
                 </span>
               </div>
 
               <p className="mt-5 text-center text-sm text-gray-500 sm:text-base">
-                {spentEarnedRatio <= 60 && spentEarnedRatio > 0
+                {spentEarnedRatio <= 0 ? "Hiện chưa ghi nhận bất kỳ khoản thu nhập hay chi tiêu mới nào, hãy ghi chép lại nhé." :
+                  spentEarnedRatio <= 60 && spentEarnedRatio > 0
                   ? "Chi tiêu tháng này vẫn trong giới hạn. Hãy cố gắng tiết kiệm phần còn lại nếu có thể."
                   : spentEarnedRatio > 60 && spentEarnedRatio < 100
                   ? "Bạn sắp chạm ngưỡng chi tiêu tháng này, hãy tiết kiệm hơn. Cân nhắc tăng thêm thu nhập nếu có thể."
@@ -226,7 +207,20 @@ export default function MonthlyOverall() {
           {/* Income */}
           <div className="flex justify-between items-center">
             <div>
-              <span className="text-sm text-gray-500 dark:text-gray-400">Thu nhập</span>
+              <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
+                <span>Thu nhập</span>
+                {rollover > 0 && (
+                  <Tippy
+                    content={`Tháng trước bạn còn dư ${rollover.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      })} nên khoản dư sẽ được tính sang tháng này. Bạn đã làm tốt lắm!`}
+                    key="leftover-explaination"
+                  >
+                    <InfoIcon className="w-4 h-4 text-blue-500" />
+                  </Tippy>
+                )}
+              </div>
               <h4 className="mt-1 font-bold text-blue-600 dark:text-blue-500">
                 {income.toLocaleString("vi-VN", {
                   style: "currency",
@@ -234,7 +228,7 @@ export default function MonthlyOverall() {
                 })}
               </h4>
             </div>
-            {!loadingPrevMonth && (
+            {!loading && income != 0 && (
               <div className="text-sm text-gray-500 dark:text-gray-400 text-right">
                 <div>So với tháng trước:</div>
                 {incomeDifference < 0 ? (
@@ -261,7 +255,20 @@ export default function MonthlyOverall() {
           {/* Spending */}
           <div className="flex justify-between items-center">
             <div>
-              <span className="text-sm text-gray-500 dark:text-gray-400">Chi tiêu</span>
+              <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
+                <span>Chi tiêu</span>
+                {rollover < 0 && (
+                  <Tippy
+                    content={`Tháng trước bạn đã tiêu quá ${Math.abs(rollover).toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    })} nên khoản quá hạn mức sẽ được tính sang tháng này.`}
+                    key="overspent-explaination"
+                  >
+                    <InfoIcon className="w-4 h-4 text-blue-500" />
+                  </Tippy>
+                )}
+              </div>
               <h4 className="mt-1 font-bold text-error-600 dark:text-error-500">
                 {expense.toLocaleString("vi-VN", {
                   style: "currency",
@@ -269,7 +276,7 @@ export default function MonthlyOverall() {
                 })}
               </h4>
             </div>
-            {!loadingPrevMonth && (
+            {!loading && expense != 0 && (
               <div className="text-sm text-gray-500 dark:text-gray-400 text-right">
                 <div>So với tháng trước:</div>
                 {expenseDifference < 0 ? (
@@ -293,16 +300,16 @@ export default function MonthlyOverall() {
             )}
           </div>
 
-          {/* Remaining */}
+          {/* Rollover from previous month */}
           <div className="flex justify-between items-center border-t pt-3">
             <span className="text-sm font-medium text-gray-700 dark:text-white/90">
-              {remaining >= 0 ? "Còn lại" : "Đã quá hạn mức"}
+              {rollover >= 0 ? "Tháng trước còn" : "Tháng trước đã quá"}
             </span>
-            <span className={`font-semibold
-              ${remaining > 0 ? "text-blue-600 dark:text-blue-500" :
+            <span className={`font-bold text-sm
+              ${rollover > 0 ? "text-blue-600 dark:text-blue-500" :
                 "text-error-600 dark:text-error-500"}`}
             >
-              {absoluteRemaining.toLocaleString("vi-VN", {
+              {Math.abs(rollover).toLocaleString("vi-VN", {
                 style: "currency",
                 currency: "VND",
               })}
@@ -312,7 +319,7 @@ export default function MonthlyOverall() {
       </div>
 
       {/* Footer: Extra Fields */}
-      {!loading && (
+      {!loading && (income != 0 || expense != 0 || rollover != 0) && (
         <div className="mt-6 text-center">
           <h3 className="text-base font-semibold text-gray-700 dark:text-white mb-2">
             Khuyến nghị
@@ -320,10 +327,10 @@ export default function MonthlyOverall() {
           <div className="grid grid-cols-1 md:grid-cols-3 text-center border-t pt-4 text-sm text-gray-600 dark:text-gray-300">
             <div className="mt-4 md:mt-0">
               <span className="text-xs">
-                {dailySpending < 0 ? "Trung bình cần tiết kiệm" : "Mức an toàn có thể chi"}
+                {dailyAmount < 0 ? "Trung bình cần tiết kiệm" : "Mức an toàn có thể chi"}
               </span>
               <div className="font-medium text-gray-800 dark:text-white/90">
-                {Math.abs(dailySpending).toLocaleString("vi-VN", {
+                {Math.abs(dailyAmount).toLocaleString("vi-VN", {
                   style: "currency",
                   currency: "VND",
                 })} / ngày
@@ -337,11 +344,22 @@ export default function MonthlyOverall() {
             </div>
             {spentEarnedRatio <= (oneHundredPercent - savingPercentage) ? (
               <div className="mt-4 md:mt-0">
-                <span className="text-xs">
-                    Mục tiêu tiết kiệm ({savingPercentage}% thu nhập)
-                </span>
+                <div className="flex justify-center text-xs">
+                  <span className="flex items-center gap-1">
+                    Mục tiêu tiết kiệm
+                    <Tippy
+                      key="saving-goal"
+                      content={`Hãy cố gắng tiết kiệm được khoảng ${savingPercentage}% thu nhập của bạn đến cuối tháng nhé!`}
+                    >
+                      <InfoIcon className="w-3 h-3 text-blue-500" />
+                    </Tippy>
+                  </span>
+                </div>
                 <div className="font-medium text-gray-800 dark:text-white/90">
-                  {saving.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+                  {(saving / daysRemain).toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND"
+                  })} / ngày
                 </div>
               </div>
             ) : spentEarnedRatio <= oneHundredPercent ? (
@@ -362,7 +380,7 @@ export default function MonthlyOverall() {
                   Tiến độ hồi phục
                 </span>
                 <div className="font-medium text-gray-800 dark:text-white/90">
-                  Còn {Math.abs(remaining).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+                  Còn {absoluteIncomeExpenseDiff.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
                 </div>
               </div>
             )}

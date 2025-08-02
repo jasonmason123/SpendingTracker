@@ -5,8 +5,8 @@ import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
-import logo from "/images/logo/logo.svg";
-import logoDark from "/images/logo/logo-dark.svg";
+import logo from "/images/logo/logo.png";
+import logoDark from "/images/logo/logo-dark.png";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);

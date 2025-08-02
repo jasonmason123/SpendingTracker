@@ -9,9 +9,9 @@ import {
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import logo from "/images/logo/logo.svg";
-import logoDark from "/images/logo/logo-dark.svg";
-import logoIcon from "/images/logo/logo-icon.svg";
+import logo from "/images/logo/logo.png";
+import logoDark from "/images/logo/logo-dark.png";
+import logoIcon from "/images/logo/logo-icon.png";
 
 type NavItem = {
   name: string;

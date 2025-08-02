@@ -2,7 +2,7 @@ import React from "react";
 import GridShape from "../../components/common/GridShape";
 import { Link } from "react-router";
 import ThemeTogglerTwo from "../../components/common/ThemeTogglerTwo";
-import authLogo from "/images/logo/auth-logo.svg";
+import authLogo from "/images/logo/auth-logo.png";
 
 export default function AuthLayout({
   children,
@@ -27,7 +27,7 @@ export default function AuthLayout({
                 />
               </Link>
               <p className="text-center text-gray-400 dark:text-white/60">
-                Personal finance management app to help you track your spending and save money.
+                Theo dõi chi tiêu dễ dàng, tiết kiệm thông minh – ứng dụng đồng hành cùng bạn trên hành trình tài chính cá nhân.
               </p>
             </div>
           </div>

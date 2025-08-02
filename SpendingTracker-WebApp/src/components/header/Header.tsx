@@ -3,8 +3,8 @@ import { ThemeToggleButton } from "../common/ThemeToggleButton";
 import NotificationDropdown from "./NotificationDropdown";
 import UserDropdown from "./UserDropdown";
 import { Link } from "react-router";
-import logo from "/images/logo/logo.svg";
-import logoDark from "/images/logo/logo-dark.svg";
+import logo from "/images/logo/logo.png";
+import logoDark from "/images/logo/logo-dark.png";
 
 // Define the interface for the props
 interface HeaderProps {

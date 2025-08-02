@@ -172,7 +172,7 @@ export default function StatisticsChart() {
             Thống kê
           </h3>
           <p className="mt-1 text-gray-500 text-theme-sm dark:text-gray-400">
-            Thống kê thu chi ở thời điểm hiện tại
+            Thống kê thu chi theo năm
           </p>
         </div>
         <div className="flex items-start w-full gap-3 sm:justify-end">

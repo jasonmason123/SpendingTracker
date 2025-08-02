@@ -73,8 +73,16 @@ export interface PagedListResult<T extends any> {
 }
 
 export interface IncomeExpenseResult {
+  from: string;
+  to: string;
   income: number;
   expense: number;
+}
+
+export interface IncomeExpenseSummaryResult extends IncomeExpenseResult {
+  incomeChange: number;
+  expenseChange: number;
+  rollover: number;
 }
 
 export interface AmountsByYearResult {
