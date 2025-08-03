@@ -207,20 +207,7 @@ export default function MonthlyOverall() {
           {/* Income */}
           <div className="flex justify-between items-center">
             <div>
-              <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
-                <span>Thu nhập</span>
-                {rollover > 0 && (
-                  <Tippy
-                    content={`Tháng trước bạn còn dư ${rollover.toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      })} nên khoản dư sẽ được tính sang tháng này. Bạn đã làm tốt lắm!`}
-                    key="leftover-explaination"
-                  >
-                    <InfoIcon className="w-4 h-4 text-blue-500" />
-                  </Tippy>
-                )}
-              </div>
+              <span className="text-sm text-gray-500 dark:text-gray-400">Thu nhập</span>
               <h4 className="mt-1 font-bold text-blue-600 dark:text-blue-500">
                 {income.toLocaleString("vi-VN", {
                   style: "currency",
@@ -255,20 +242,7 @@ export default function MonthlyOverall() {
           {/* Spending */}
           <div className="flex justify-between items-center">
             <div>
-              <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
-                <span>Chi tiêu</span>
-                {rollover < 0 && (
-                  <Tippy
-                    content={`Tháng trước bạn đã tiêu quá ${Math.abs(rollover).toLocaleString("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    })} nên khoản quá hạn mức sẽ được tính sang tháng này.`}
-                    key="overspent-explaination"
-                  >
-                    <InfoIcon className="w-4 h-4 text-blue-500" />
-                  </Tippy>
-                )}
-              </div>
+              <span className="text-sm text-gray-500 dark:text-gray-400">Chi tiêu</span>
               <h4 className="mt-1 font-bold text-error-600 dark:text-error-500">
                 {expense.toLocaleString("vi-VN", {
                   style: "currency",
@@ -302,8 +276,23 @@ export default function MonthlyOverall() {
 
           {/* Rollover from previous month */}
           <div className="flex justify-between items-center border-t pt-3">
-            <span className="text-sm font-medium text-gray-700 dark:text-white/90">
+            <span className="flex text-sm font-medium text-gray-700 dark:text-white/90 gap-1">
               {rollover >= 0 ? "Tháng trước còn" : "Tháng trước đã quá"}
+              {rollover != 0 && (
+                <Tippy
+                  content={rollover > 0 ? `Tháng trước bạn còn dư ${rollover.toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    })} nên khoản dư sẽ được tính sang tháng này. Bạn đã làm tốt lắm!` : 
+                    `Tháng trước bạn đã tiêu quá ${Math.abs(rollover).toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    })} nên khoản quá hạn mức sẽ được tính sang tháng này.`}
+                  key="rollover-explaination"
+                >
+                  <InfoIcon className="w-3 h-3 text-blue-500" />
+                </Tippy>
+              )}
             </span>
             <span className={`font-bold text-sm
               ${rollover > 0 ? "text-blue-600 dark:text-blue-500" :

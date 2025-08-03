@@ -12,6 +12,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using SpendingTracker_API.Controllers.AuthenticationControllers.DTOs;
+using SpendingTracker_API.Authentication.OtpAuthentication;
 
 namespace SpendingTracker_API.Controllers.AuthenticationControllers
 {
@@ -26,13 +27,21 @@ namespace SpendingTracker_API.Controllers.AuthenticationControllers
         private readonly IConfiguration _configuration;
         private readonly IPasswordAuth _passwordAuth;
         private readonly IAuthTokenService _authTokenService;
+        private readonly IOtpAuth _otpAuth;
 
-        public WebAuthenticationController(UserManager<AppUser> userManager, IConfiguration configuration, IPasswordAuth passwordAuth, IAuthTokenService authTokenService)
+        public WebAuthenticationController(
+            UserManager<AppUser> userManager,
+            IConfiguration configuration,
+            IPasswordAuth passwordAuth,
+            IAuthTokenService authTokenService,
+            IOtpAuth otpAuth
+        )
         {
             _userManager = userManager;
             _configuration = configuration;
             _passwordAuth = passwordAuth;
             _authTokenService = authTokenService;
+            _otpAuth = otpAuth;
         }
 
         [HttpPost("sign-in")]
@@ -44,26 +53,36 @@ namespace SpendingTracker_API.Controllers.AuthenticationControllers
             try
             {
                 var authResult = await _passwordAuth.AuthenticateAsync(passwordCredentials);
-                if (authResult.Succeed && authResult.User != null)
+                if (authResult.Succeeded && authResult.User != null)
                 {
-                    var jwtToken = _authTokenService.GenerateToken(authResult.User);
-                    SetAuthCookies(authResult.User, jwtToken, remember ?? false);
-                    Console.WriteLine("Signed in successfully");
-                    return Ok();
+                    if (authResult.IsEmailConfirmed)
+                    {
+                        var jwtToken = _authTokenService.GenerateToken(authResult.User);
+                        SetAuthCookies(authResult.User, jwtToken, remember ?? false);
+                        Console.WriteLine("Signed in successfully");
+                        return Ok(new
+                        {
+                            Succeeded = authResult.Succeeded,
+                        });
+                    }
+                    Console.WriteLine("Authentication succeeded but email confirmation is required");
+                    var confirmationToken = await _otpAuth.SendOtpAsync(authResult.User);
+                    return Ok(new
+                    {
+                        Succeeded = authResult.Succeeded,
+                        IsEmailConfirmed = authResult.IsEmailConfirmed,
+                        ConfirmationToken = confirmationToken,
+                    });
                 }
 
-                Console.WriteLine("Invalid email or password.");
-                return Unauthorized("Invalid email or password.");
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                Console.WriteLine($"Unauthorized exception: {ex}");
-                return Unauthorized(ex.Message);
-            }
-            catch (ArgumentException ex)
-            {
-                Console.WriteLine($"Argument exception: {ex}");
-                return BadRequest(ex.Message);
+                Console.WriteLine($"Succeeded: {authResult.Succeeded}");
+                Console.WriteLine($"IsLockedOut: {authResult.IsLockedOut}");
+                Console.WriteLine($"IsEmailConfirmed: {authResult.IsEmailConfirmed}");
+                return Unauthorized(new
+                {
+                    Succeeded = authResult.IsLockedOut ? false : authResult.Succeeded,
+                    IsLockedOut = authResult.IsLockedOut,
+                });
             }
             catch (Exception ex)
             {
@@ -77,14 +96,11 @@ namespace SpendingTracker_API.Controllers.AuthenticationControllers
         {
             try
             {
-                var registrationResult = await _passwordAuth.RegisterAsync(passwordCredentials, false);
+                var registrationResult = await _passwordAuth.RegisterAsync(passwordCredentials, true);
                 if (registrationResult.Succeeded && registrationResult.User != null)
                 {
-                    var jwtToken = _authTokenService.GenerateToken(registrationResult.User);
-
-                    SetAuthCookies(registrationResult.User, jwtToken, false);
-                    Console.WriteLine("Registration completed");
-                    return Ok();
+                    var confirmationToken = await _otpAuth.SendOtpAsync(registrationResult.User);
+                    return Ok(confirmationToken);
                 }
                 Console.WriteLine($"Failed to register user: {registrationResult.Message}");
                 return BadRequest(registrationResult.Message);
@@ -96,8 +112,79 @@ namespace SpendingTracker_API.Controllers.AuthenticationControllers
             }
         }
 
+        [HttpPost("verify-account/{verificationKey}")]
+        public async Task<IActionResult> VerifyAccountSignUp(string verificationKey, [FromForm] string code)
+        {
+            try
+            {
+                var result = await _otpAuth.VerifyAsync(verificationKey, code);
+
+                if (!result.Succeeded)
+                {
+                    return BadRequest("Wrong code or code may have expired");
+                }
+
+                var jwtToken = _authTokenService.GenerateToken(result.User!);
+                SetAuthCookies(result.User!, jwtToken, false);
+                Console.WriteLine("Registration completed");
+
+                return Ok();
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest("Invalid key");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Verify account error: {ex}");
+                return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
+            }
+        }
+        
+        [HttpPost("verify-account/resend/{oldVerificationKey}")]
+        public async Task<IActionResult> ResendOtpCode(string oldVerificationKey)
+        {
+            try
+            {
+                var newVerificationKey = await _otpAuth.ResendOtpAsync(oldVerificationKey);
+                return Ok(new
+                {
+                    VerificationKey = newVerificationKey
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ResendOtpCode error: {ex}");
+                return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
+            }
+        }
+
+        [HttpPost("request-reset-password")]
+        public async Task<IActionResult> RequestResetPassword([FromForm] string email)
+        {
+            try
+            {
+                await _passwordAuth.RequestResetPasswordAsync(email);
+                return Ok();
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(new
+                {
+                    Message = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ResetPassword error: {ex}");
+                return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
+            }
+        }
+
         // Oauth workflow for web, using cookies:
-        [HttpGet("/sign-in/google")]
+        [HttpGet("sign-in/google")]
         public IActionResult GoogleWebSignIn([FromQuery(Name = "remember")] bool? remember)
         {
             var redirectUrl = $"{Request.Scheme}://{Request.Host.Value}{Request.PathBase.Value}/api/auth/web/sign-in/google/callback";
@@ -109,7 +196,7 @@ namespace SpendingTracker_API.Controllers.AuthenticationControllers
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
 
-        [HttpGet("/sign-in/google/callback")]
+        [HttpGet("sign-in/google/callback")]
         public async Task<IActionResult> GoogleCallback([FromQuery(Name = "remember")] bool? remember)
         {
             try

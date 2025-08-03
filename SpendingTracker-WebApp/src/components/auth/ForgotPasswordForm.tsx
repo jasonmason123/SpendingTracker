@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Input from "../form/input/InputField";
 import { Link } from "react-router";
+import { authenticationApiCaller } from "../../api_caller/AuthenticationApiCaller";
 
 
 export default function ForgotPasswordForm() {
@@ -10,25 +11,18 @@ export default function ForgotPasswordForm() {
   const [emailSent, setEmailSent] = useState(false);
 
   const handleSubmit = async () => {
-    const formData = new FormData();
-    formData.append("email", email);
-
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/forgot-password`, {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
+      const res = await authenticationApiCaller.forgotPasswordRequest(email);
 
       if (res.ok) {
         setEmailSent(true);
       } else {
         setErrorMessage("Chúng tôi không nhận ra địa chỉ email này. Vui lòng thử lại.");
-        setIsLoading(false);
       }
     } catch (error) {
       setErrorMessage("Đã xảy ra lỗi. Vui lòng thử lại.");
+    } finally {
       setIsLoading(false);
     }
   }
@@ -46,6 +40,17 @@ export default function ForgotPasswordForm() {
               `Chúng tôi đã gửi hướng dẫn đến địa chỉ email ${email}. Vui lòng kiểm tra hộp thư đến của bạn.` :
               "Vui lòng nhập địa chỉ email mà bạn đã sử dụng để đăng ký tài khoản."}
           </p>
+          {emailSent && (
+            <div className="pt-2 text-center">
+              <Link
+                to="/sign-in"
+                className="text-brand-500 hover:underline"
+                onClick={e => isLoading && e.preventDefault()}
+              >
+                Quay lại trang đăng nhập
+              </Link>
+            </div>
+          )}
         </div>
         {!emailSent && (
           <form
@@ -73,8 +78,12 @@ export default function ForgotPasswordForm() {
               Gửi mã xác thực
             </button>
             <div className="pt-2 text-center">
-              <Link to="/sign-in" className="text-brand-500 hover:underline">
-                Quay lại đăng nhập
+              <Link
+                to="/sign-in"
+                className="text-brand-500 hover:underline"
+                onClick={e => isLoading && e.preventDefault()}
+              >
+                Quay lại trang đăng nhập
               </Link>
             </div>
           </form>

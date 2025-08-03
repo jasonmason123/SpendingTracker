@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Caching.Memory;
+using SpendingTracker_API.Authentication.OtpAuthentication;
 using SpendingTracker_API.Controllers.AuthenticationControllers.DTOs;
 using SpendingTracker_API.Entities;
 using SpendingTracker_API.Services.NotificationService;
@@ -16,51 +19,56 @@ namespace SpendingTracker_API.Authentication.PasswordAuthentication
         private readonly INotificationService _notificationService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMemoryCache _memoryCache;
+        private readonly IOtpAuth _otpAuth;
 
         public PasswordAuth(
             UserManager<AppUser> userManager,
             INotificationService notificationService,
             IHttpContextAccessor httpContextAccessor,
-            IMemoryCache memoryCache
+            IMemoryCache memoryCache,
+            IOtpAuth otpAuth
         )
         {
             _userManager = userManager;
             _notificationService = notificationService;
             _httpContextAccessor = httpContextAccessor;
             _memoryCache = memoryCache;
+            _otpAuth = otpAuth;
         }
 
         public async Task<AuthenticationResult> AuthenticateAsync(PasswordCredentialsDto passwordCredentials)
         {
-            var user = await _userManager.FindByEmailAsync(passwordCredentials.Email)
-                ?? throw new ArgumentException(ErrorMessages.USER_EMAIL_NOT_FOUND);
+            var user = await _userManager.FindByEmailAsync(passwordCredentials.Email);
 
-            //Check lockout status
-            if (await _userManager.IsLockedOutAsync(user))
+            if (user == null)
             {
-                throw new UnauthorizedAccessException(
-                    $"{ErrorMessages.USER_LOCKED_OUT_UNTIL} {await _userManager.GetLockoutEndDateAsync(user)}.");
+                return new AuthenticationResult
+                {
+                    User = null,
+                    IsLockedOut = false,
+                    Succeeded = false,
+                    IsEmailConfirmed = false,
+                };
             }
 
-            //Check if the user is confirmed (if email confirmation is required)
-            if (!await _userManager.IsEmailConfirmedAsync(user))
+            var result = new AuthenticationResult
             {
-                throw new UnauthorizedAccessException(ErrorMessages.USER_EMAIL_NOT_CONFIRMED);
+                User = user,
+                IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user),
+                IsLockedOut = await _userManager.IsLockedOutAsync(user),
+                Succeeded = await _userManager.CheckPasswordAsync(user, passwordCredentials.Password),
+            };
+
+            //Check lockout and email confirmation status
+            if (!result.IsEmailConfirmed || result.IsLockedOut)
+            {
+                return result;
             }
 
-            var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, passwordCredentials.Password);
-
-            if (isPasswordCorrect)
+            if (result.Succeeded)
             {
                 // ✅ Reset failed count on success
                 await _userManager.ResetAccessFailedCountAsync(user);
-
-                return new AuthenticationResult
-                {
-                    Succeed = true,
-                    IsLockedOut = false,
-                    User = user,
-                };
             }
             else
             {
@@ -69,17 +77,11 @@ namespace SpendingTracker_API.Authentication.PasswordAuthentication
 
                 if (await _userManager.IsLockedOutAsync(user))
                 {
-                    throw new UnauthorizedAccessException(
-                        $"{ErrorMessages.USER_LOCKED_OUT_UNTIL} {await _userManager.GetLockoutEndDateAsync(user)}.");
+                    result.IsLockedOut = true;
                 }
-
-                return new AuthenticationResult
-                {
-                    Succeed = false,
-                    IsLockedOut = false,
-                    User = user,
-                };
             }
+
+            return result;
         }
 
         public async Task<RegistrationResult> RegisterAsync(RegistrationCredentialsDto registrationCredentials, bool requiresVerification = false)
@@ -111,56 +113,19 @@ namespace SpendingTracker_API.Authentication.PasswordAuthentication
                 result = await _userManager.CreateAsync(user, registrationCredentials.Password);
             }
             
-            if (result.Succeeded && requiresVerification)
+            if (result.Succeeded)
             {
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                //string messageBody = string.Empty;
-
-                //switch (verificationMethod)
-                //{
-                //    case RegistrationVerificationMethod.CODE_BASED:
-                //        var otp = HelperMethods.GenerateRandomNumbers(6);
-                //        var cacheKey = $"{AppConst.OTP_CACHE_KEY_PREFIX}_{user.Id}_{otp}";
-                //        _memoryCache.Set(cacheKey, otp, TimeSpan.FromMinutes(5)); // Store OTP for 5 minutes
-                //        messageBody = $"Your verification code is: <b>{otp}</b>";
-                //        break;
-                //    case RegistrationVerificationMethod.LINK_BASED:
-                //        var requestScheme = _httpContextAccessor.HttpContext?.Request.Scheme;
-                //        var requestHost = _httpContextAccessor.HttpContext?.Request.Host;
-                //        var url = $"{requestScheme}://{requestHost}/verify-registration/{token}/{user.Id}";
-                //        messageBody = $"Please verify your registration by clicking the link: <a href=\"{url}\">{url}</a>";
-                //        break;
-                //    default:
-                //        break;
-                //}
-
-                //var message = new MessageStructureDto
-                //{
-                //    Subject = "Email Verification",
-                //    Body = messageBody,
-                //    IsHtmlBody = true,
-                //};
-
-                //await _notificationService.SendAsync(user.Email, message);
-
-                //return true;
+                var message = requiresVerification ?
+                    "Registration successful. Please verify your email." :
+                    "Registration successful without email verification.";
 
                 return new RegistrationResult
                 {
                     Succeeded = true,
-                    User = user,
-                    ConfirmationToken = token,
-                    Message = "Registration successful. Please verify your email.",
-                };
-            }
-            else if(result.Succeeded && !requiresVerification)
-            {
-                return new RegistrationResult
-                {
-                    Succeeded = true,
+                    RequiresVerification = requiresVerification,
                     User = user,
                     ConfirmationToken = null,
-                    Message = "Registration successful without email verification."
+                    Message = message,
                 };
             }
 
@@ -173,41 +138,47 @@ namespace SpendingTracker_API.Authentication.PasswordAuthentication
             return new RegistrationResult
             {
                 Succeeded = false,
+                RequiresVerification = requiresVerification,
                 User = null,
                 ConfirmationToken = null,
                 Message = stringBuilder.ToString()
             };
         }
 
-        public async Task<AuthenticationResult> VerifyRegistrationAsync(string userId, string token)
+        public async Task RequestResetPasswordAsync(string email)
         {
-            var user = await _userManager.FindByIdAsync(userId) ??
-                throw new InvalidOperationException("User not found");
-            var result = await _userManager.ConfirmEmailAsync(user, token);
-
-            return new AuthenticationResult
-            {
-                Succeed = result.Succeeded,
-                IsLockedOut = false,
-                User = user
-            };
-        }
-
-        public async Task<bool> GenerateResetPasswordTokenAsync(string email)
-        {
-            var user = _userManager.FindByEmailAsync(email)
-                .GetAwaiter().GetResult() ?? throw new ArgumentException(ErrorMessages.USER_EMAIL_NOT_FOUND);
+            var user = await _userManager.FindByEmailAsync(email)
+                ?? throw new InvalidOperationException(ErrorMessages.USER_EMAIL_NOT_FOUND);
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            //TODO: send reset password link with the token and user Id
-            throw new NotImplementedException("Reset password token generation is still under development.");
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            var subject = "Your link to reset password";
+            var httpRequest = _httpContextAccessor.HttpContext.Request;
+            var url = $"{httpRequest.Scheme}://{httpRequest.Host}/reset-password/{encodedToken}/{user.Id}";
+            var body = $"<p>Visit here to reset your password: <a href=\"{url}\">{url}</a></p>";
+
+            _notificationService.SendAsync(user.Email, new MessageStructureDto
+            {
+                Subject = subject,
+                Body = body,
+                IsHtmlBody = true
+            });
         }
 
         public async Task<bool> ResetPasswordAsync(ResetPasswordRequestDto resetPasswordRequest)
         {
             var user = await _userManager.FindByIdAsync(resetPasswordRequest.UserId)
                 ?? throw new ArgumentException("User not found");
-            var result = await _userManager.ResetPasswordAsync(user, resetPasswordRequest.Token, resetPasswordRequest.NewPassword);
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(resetPasswordRequest.TokenBase64Encoded));
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPasswordRequest.NewPassword);
+            if (!result.Succeeded)
+            {
+                foreach(var error in result.Errors)
+                {
+                    Console.WriteLine("Reset password error: " + error.Description);
+                }
+            }
             return result.Succeeded;
         }
     }

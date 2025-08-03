@@ -72,6 +72,13 @@ export interface PagedListResult<T extends any> {
   items: T[];
 }
 
+export interface AuthenticationResult {
+  succeeded: boolean;
+  isLockedOut: boolean;
+  isEmailConfirmed: boolean;
+  confirmationToken?: string;
+}
+
 export interface IncomeExpenseResult {
   from: string;
   to: string;

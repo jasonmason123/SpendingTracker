@@ -1,35 +1,43 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
-import { APP_BASE_URL } from "../../types";
+import { APP_BASE_URL, AuthenticationResult } from "../../types";
 import { authenticationApiCaller } from "../../api_caller/AuthenticationApiCaller";
 
 
 export default function SignInForm() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isRemembered, setIsRemembered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isEmailValid, setIsEmailValid] = useState(true);
+  // const [isEmailValid, setIsEmailValid] = useState(true);
   const [credentials, setCredentials] = useState({
     email: "",
     password: "",
   });
 
-  const SIGN_IN_WITH_PASSKEY_ROUTE = `/api/auth/signin-passkey`;
+  // const SIGN_IN_WITH_PASSKEY_ROUTE = `/api/auth/signin-passkey`;
 
   const handleSignIn = async () => {
     try {
       setIsLoading(true);
 
       await authenticationApiCaller.signIn(credentials, isRemembered)
-        .then((response) => {
+        .then(async (response) => {
+          var authenticationResult: AuthenticationResult = await response.json();
+
           if (response.ok) {
-            window.location.href = APP_BASE_URL;
+            // If user successfully authenticated but email not confirmed, redirect to verify account
+            if(authenticationResult.isEmailConfirmed != true) {
+              navigate(`/verify-account/${authenticationResult.confirmationToken}`);
+            } else {
+              window.location.href = APP_BASE_URL;
+            }
           } else {
             setErrorMessage("Email hoặc mật khẩu chưa chính xác. Vui lòng thử lại.");
           }
@@ -43,111 +51,102 @@ export default function SignInForm() {
   }
 
   const handleSignInWithGoogle = async () => {
-    authenticationApiCaller.signInWithGoogle(isRemembered)
-      .then((response) => {
-        if (!response.ok) {
-          setErrorMessage("Đăng nhập với Google không thành công. Vui lòng thử lại.");
-        }
-      })
-      .catch((error) => {
-        console.error("Sign in with Google error: ", error);
-        setErrorMessage("Có lỗi xảy ra khi đăng nhập với Google. Vui lòng thử lại.");
-      });
+    authenticationApiCaller.signInWithGoogle(isRemembered);
   }
 
-  const handleSignInWithPasskey = async (email: string) => {
-    try {
-      if(email.trim() === "") {
-        setErrorMessage("Vui lòng nhập email trước khi đăng nhập bằng passkey.");
-        setIsEmailValid(false);
-        return;
-      }
+  // const handleSignInWithPasskey = async (email: string) => {
+  //   try {
+  //     if(email.trim() === "") {
+  //       setErrorMessage("Vui lòng nhập email trước khi đăng nhập bằng passkey.");
+  //       setIsEmailValid(false);
+  //       return;
+  //     }
       
-      setIsLoading(true);
-      // Step 1: Call backend to get assertion options
-      const response = await fetch(SIGN_IN_WITH_PASSKEY_ROUTE, {
-        method: 'POST',
-        body: new URLSearchParams({ email }), // Because [FromForm]
-        credentials: 'include',
-      });
+  //     setIsLoading(true);
+  //     // Step 1: Call backend to get assertion options
+  //     const response = await fetch(SIGN_IN_WITH_PASSKEY_ROUTE, {
+  //       method: 'POST',
+  //       body: new URLSearchParams({ email }), // Because [FromForm]
+  //       credentials: 'include',
+  //     });
   
-      if (!response.ok) {
-        throw new Error("Could not start sign-in");
-      }
+  //     if (!response.ok) {
+  //       throw new Error("Could not start sign-in");
+  //     }
 
-      const { assertionOptions } = await response.json();
+  //     const { assertionOptions } = await response.json();
   
-      // Step 2: Transform the assertionOptions into the format needed by WebAuthn
-      const decodeBase64Url = (input: string): Uint8Array => {
-        const base64 = input.replace(/-/g, '+').replace(/_/g, '/');
-        const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
-        const binary = atob(padded);
-        return Uint8Array.from(binary, char => char.charCodeAt(0));
-      };
+  //     // Step 2: Transform the assertionOptions into the format needed by WebAuthn
+  //     const decodeBase64Url = (input: string): Uint8Array => {
+  //       const base64 = input.replace(/-/g, '+').replace(/_/g, '/');
+  //       const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+  //       const binary = atob(padded);
+  //       return Uint8Array.from(binary, char => char.charCodeAt(0));
+  //     };
   
-      const transformAssertionOptions = (options: any): PublicKeyCredentialRequestOptions => {
-        return {
-          ...options,
-          challenge: decodeBase64Url(options.challenge),
-          allowCredentials: options.allowCredentials.map((cred: any) => ({
-            ...cred,
-            id: decodeBase64Url(cred.id),
-          })),
-        };
-      };
+  //     const transformAssertionOptions = (options: any): PublicKeyCredentialRequestOptions => {
+  //       return {
+  //         ...options,
+  //         challenge: decodeBase64Url(options.challenge),
+  //         allowCredentials: options.allowCredentials.map((cred: any) => ({
+  //           ...cred,
+  //           id: decodeBase64Url(cred.id),
+  //         })),
+  //       };
+  //     };
   
-      const publicKey = transformAssertionOptions(assertionOptions);
+  //     const publicKey = transformAssertionOptions(assertionOptions);
   
-      // Step 3: Get the credential from the browser
-      const getCredential = async (publicKey: PublicKeyCredentialRequestOptions) => {
-        const credential = await navigator.credentials.get({ publicKey }) as PublicKeyCredential;
+  //     // Step 3: Get the credential from the browser
+  //     const getCredential = async (publicKey: PublicKeyCredentialRequestOptions) => {
+  //       const credential = await navigator.credentials.get({ publicKey }) as PublicKeyCredential;
   
-        const toBase64Url = (buffer: ArrayBuffer) =>
-          btoa(String.fromCharCode(...new Uint8Array(buffer)))
-            .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  //       const toBase64Url = (buffer: ArrayBuffer) =>
+  //         btoa(String.fromCharCode(...new Uint8Array(buffer)))
+  //           .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
   
-        const response = credential.response as AuthenticatorAssertionResponse;
+  //       const response = credential.response as AuthenticatorAssertionResponse;
 
-        return {
-          id: credential.id,
-          rawId: toBase64Url(credential.rawId),
-          type: credential.type,
-          response: {
-            clientDataJSON: toBase64Url(credential.response.clientDataJSON),
-            authenticatorData: toBase64Url(response.authenticatorData),
-            signature: toBase64Url(response.signature),
-            userHandle: response.userHandle
-              ? toBase64Url(response.userHandle)
-              : null,
-          }
-        };
-      };
+  //       return {
+  //         id: credential.id,
+  //         rawId: toBase64Url(credential.rawId),
+  //         type: credential.type,
+  //         response: {
+  //           clientDataJSON: toBase64Url(credential.response.clientDataJSON),
+  //           authenticatorData: toBase64Url(response.authenticatorData),
+  //           signature: toBase64Url(response.signature),
+  //           userHandle: response.userHandle
+  //             ? toBase64Url(response.userHandle)
+  //             : null,
+  //         }
+  //       };
+  //     };
   
-      const credential = await getCredential(publicKey);
+  //     const credential = await getCredential(publicKey);
   
-      // Step 4: Send the result back to the backend for final verification
-      const finishPasskeySignIn = async (credentialResponse: any) => {
-        const res = await fetch(`/api/signin-passkey/finalize`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify(credentialResponse),
-        });
+  //     // Step 4: Send the result back to the backend for final verification
+  //     const finishPasskeySignIn = async (credentialResponse: any) => {
+  //       const res = await fetch(`/api/signin-passkey/finalize`, {
+  //         method: 'POST',
+  //         headers: { 'Content-Type': 'application/json' },
+  //         credentials: 'include',
+  //         body: JSON.stringify(credentialResponse),
+  //       });
   
-        if (res.ok) window.location.href = "/";
+  //       if (res.ok) window.location.href = "/";
           
-        throw new Error("Sign-in failed");
-      };
+  //       throw new Error("Sign-in failed");
+  //     };
   
-      await finishPasskeySignIn(credential);
+  //     await finishPasskeySignIn(credential);
   
-    } catch (error) {
-      console.error("Sign-in with passkey failed:", error);
-      setErrorMessage("Đăng nhập bằng passkey không thành công. Vui lòng thử lại.");
-      setIsEmailValid(false);
-      setIsLoading(false);
-    }
-  };
+  //   } catch (error) {
+  //     console.error("Sign-in with passkey failed:", error);
+  //     setErrorMessage("Đăng nhập bằng passkey không thành công. Vui lòng thử lại.");
+  //     setIsEmailValid(false);
+  //     setIsLoading(false);
+  //   }
+  // };
   
   return (
     <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
@@ -164,7 +163,7 @@ export default function SignInForm() {
               <button
                 onClick={handleSignInWithGoogle}
                 disabled={isLoading}
-                className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-3 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+                className="col-span-full w-full inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-3 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
               >
                 <svg
                   width="20"
@@ -192,14 +191,14 @@ export default function SignInForm() {
                 </svg>
                 Đăng nhập với Google
               </button>
-              <button
+              {/* <button
                 onClick={() => handleSignInWithPasskey(credentials.email)}
                 disabled={isLoading}
                 className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-3 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
               >
                 <i className="fa-solid fa-key text-lg"></i>
                 Đăng nhập bằng Passkey
-              </button>
+              </button> */}
             </div>
             <div className="relative py-3 sm:py-5">
               <div className="absolute inset-0 flex items-center">
@@ -227,7 +226,7 @@ export default function SignInForm() {
                   </Label>
                   <Input
                     disabled={isLoading}
-                    error={!isEmailValid || errorMessage != null}
+                    error={/*!isEmailValid ||*/ errorMessage != null}
                     required
                     placeholder="info@gmail.com"
                     onChange={(e) => setCredentials({

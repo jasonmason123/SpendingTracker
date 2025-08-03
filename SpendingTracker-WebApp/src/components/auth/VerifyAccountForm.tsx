@@ -1,65 +1,62 @@
 import { useNavigate, useParams } from "react-router";
 import Input from "../form/input/InputField";
 import { useState } from "react";
+import { authenticationApiCaller } from "../../api_caller/AuthenticationApiCaller";
 import { APP_BASE_URL } from "../../types";
 
 
 export default function VerifyAccountForm() {
-  const [otp, setOtp] = useState("");
-  const { key } = useParams();
+  const { confirmationToken } = useParams();
   const navigate = useNavigate();
+  const codeMaxNumberOfCharacter = 6;
+  const [code, setCode] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleResend = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/resend/${key}`, {
-        method: "GET",
-        credentials: "include",
-      });
-  
-      if (res.ok) {
-        //Replace the old key with the new one
-        const data = await res.json();
-        navigate(`${APP_BASE_URL}/verify-account/${data.key}`, { replace: true });
-        setIsLoading(false);
-      } else {
-        const err = await res.json();
-        console.error("Verification failed:", err);
-        // Show error message
-        setErrorMessage("Mã xác thực không chính xác. Vui lòng thử lại.");
-        setIsLoading(false);
-      }
+      await authenticationApiCaller.resendCode(confirmationToken as string)
+        .then(async (res) => {
+          if (res.ok) {
+            //Replace the old key with the new one
+            const data = await res.json();
+            navigate(`/verify-account/${data.confirmationToken}`, { replace: true });
+            setIsLoading(false);
+          } else {
+            const err = await res.json();
+            console.error("Verification failed:", err);
+            // Show error message
+            setErrorMessage("Có lỗi khi gửi lại mã xác thực. Vui lòng thử lại sau.");
+          }
+        });
     } catch (error) {
       console.error("Error during verification:", error);
+      setErrorMessage("Có lỗi khi gửi lại mã xác thực. Vui lòng thử lại sau.");
+    } finally {
       setIsLoading(false);
     }
   }
 
   const handleSubmit = async () => {
-    const formData = new FormData();
-    formData.append("otp", otp);
-  
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/verify-account/${key}`, {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-  
-      if (res.ok) {
-        window.location.href = "/";
-      } else {
-        const err = await res.json();
-        console.error("Verification failed:", err);
-        // Show error message
-        setErrorMessage("Mã xác thực không chính xác. Vui lòng thử lại.");
-        setIsLoading(false);
-      }
+
+      await authenticationApiCaller.verifyAccount(confirmationToken as string, code)
+        .then(async (res) => {
+          if (res.ok) {
+            window.location.href = APP_BASE_URL;
+          } else {
+            const err = await res.text();
+            console.error("Verification failed:", err);
+            // Show error message
+            setErrorMessage("Mã xác thực không chính xác. Vui lòng thử lại.");
+          }
+        });
     } catch (error) {
       console.error("Error during verification:", error);
+      setErrorMessage("Có lỗi khi xác thực. Vui lòng thử lại sau.");
+    } finally {
       setIsLoading(false);
     }
   };  
@@ -73,7 +70,7 @@ export default function VerifyAccountForm() {
             Xác thực tài khoản
           </h1>
           <p className="text-sm text-gray-600 dark:text-white/70">
-            Chúng tôi vừa gửi một mã xác thực đến email của bạn. Vui lòng nhập mã gồm 6 chữ số bên dưới để tiếp tục.
+            Chúng tôi vừa gửi một mã xác thực 6 chữ số đến email của bạn. Vui lòng nhập mã vào bên dưới và ấn "Xác nhận" để tiếp tục.
           </p>
         </div>
 
@@ -87,9 +84,10 @@ export default function VerifyAccountForm() {
           <Input
             disabled={isLoading}
             placeholder="Nhập mã OTP"
-            maxLength={6}
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
+            type="number"
+            maxLength={codeMaxNumberOfCharacter}
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
             required
           />
           {errorMessage && (
@@ -99,7 +97,7 @@ export default function VerifyAccountForm() {
           <button
             onClick={handleSubmit}
             type="submit"
-            disabled={otp.length !== 6 || isLoading}
+            disabled={code.length !== codeMaxNumberOfCharacter || isLoading}
             className="w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 hover:bg-brand-600 disabled:opacity-50"
           >
             Xác nhận

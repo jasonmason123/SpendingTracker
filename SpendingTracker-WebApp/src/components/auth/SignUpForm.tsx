@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 import { checkStrongPassword } from "../../utils";
-import { APP_BASE_URL } from "../../types";
 import { authenticationApiCaller } from "../../api_caller/AuthenticationApiCaller";
 
 export default function SignUpForm() {
@@ -17,7 +16,7 @@ export default function SignUpForm() {
   const [isPasswordMatch, setIsPasswordMatch] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const [credentials, setCredentials] = useState({
     email: "",
@@ -30,10 +29,8 @@ export default function SignUpForm() {
 
   const onSetPassword = (password: string) => {
     if(!checkStrongPassword(password) && !isNotStrongPassword) {
-      console.log("Password is not strong enough");
       setIsNotStrongPassword(true);
     } else if(checkStrongPassword(password) && isNotStrongPassword) {
-      console.log("Password is strong enough");
       setIsNotStrongPassword(false);
     }
     setCredentials((prev) => ({ ...prev, password }));
@@ -52,19 +49,17 @@ export default function SignUpForm() {
       try {
         setIsLoading(true);
 
-        await authenticationApiCaller.SignUp(credentials, true)
+        await authenticationApiCaller.signUp(credentials, true)
           .then(async (response) => {
             if (response.ok) {
-              window.location.href = APP_BASE_URL;
-
-              // Optionally, navigate to a verification page
-              //const data = await response.json();
-              //navigate(`${APP_BASE_URL}/verify-account/${data.key}`);
+              // Navigate to the verification page
+              const confirmationToken = await response.text();
+              navigate(`/verify-account/${confirmationToken}`);
 
             } else {
-              response.json().then((data) => {
+              response.text().then((data) => {
                 console.error("Sign up api error: ", data);
-                setErrorMessage(data.message || "Đăng ký không thành công. Vui lòng thử lại.");
+                setErrorMessage(data || "Đăng ký không thành công. Vui lòng thử lại.");
               });
             }
           });
@@ -78,16 +73,7 @@ export default function SignUpForm() {
   }
 
   const handleSignUpWithGoogle = async () => {
-    authenticationApiCaller.signInWithGoogle(false)
-      .then((response) => {
-        if (!response.ok) {
-          setErrorMessage("Đăng nhập với Google không thành công. Vui lòng thử lại.");
-        }
-      })
-      .catch((error) => {
-        console.error("Sign in with Google error: ", error);
-        setErrorMessage("Có lỗi xảy ra khi đăng nhập với Google. Vui lòng thử lại.");
-      });
+    authenticationApiCaller.signInWithGoogle(false);
   }
   
   return (
@@ -103,8 +89,8 @@ export default function SignUpForm() {
           <div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
               <button
-                onAbort={handleSignUpWithGoogle}
-                className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+                onClick={handleSignUpWithGoogle}
+                className="col-span-full w-full inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
                 disabled={isLoading}
               >
                 <svg
@@ -133,7 +119,7 @@ export default function SignUpForm() {
                 </svg>
                 Đăng ký với Google
               </button>
-              <button
+              {/* <button
                 className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
                 disabled={isLoading}
               >
@@ -148,7 +134,7 @@ export default function SignUpForm() {
                   <path d="M15.6705 1.875H18.4272L12.4047 8.75833L19.4897 18.125H13.9422L9.59717 12.4442L4.62554 18.125H1.86721L8.30887 10.7625L1.51221 1.875H7.20054L11.128 7.0675L15.6705 1.875ZM14.703 16.475H16.2305L6.37054 3.43833H4.73137L14.703 16.475Z" />
                 </svg>
                 Đăng ký với X
-              </button>
+              </button> */}
             </div>
             <div className="relative py-3 sm:py-5">
               <div className="absolute inset-0 flex items-center">

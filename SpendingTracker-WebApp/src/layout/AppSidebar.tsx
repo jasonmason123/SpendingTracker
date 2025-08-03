@@ -6,6 +6,7 @@ import {
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
+  ListIcon,
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -31,11 +32,11 @@ const sections: Section[] = [
     items: [
       {
         icon: <GridIcon />,
-        name: "Dashboard",
+        name: "Trang chủ",
         path: "/",
       },
       {
-        icon: <i className="fa-solid fa-money-bill"></i>,
+        icon: <ListIcon />,
         name: "Giao dịch",
         path: "/transactions",
       },
@@ -46,7 +47,12 @@ const sections: Section[] = [
     items: [
       {
         icon: <UserCircleIcon />,
-        name: "User Profile",
+        name: "Hồ sơ",
+        path: "/profile",
+      },
+      {
+        icon: <UserCircleIcon />,
+        name: "Về tác giả",
         path: "/profile",
       },
     ]

@@ -5,6 +5,7 @@ import { APP_BASE_URL } from "../../types";
 
 import avatar from "/images/user/avatar.jpg";
 import { authenticationApiCaller } from "../../api_caller/AuthenticationApiCaller";
+import { getCookie } from "../../utils";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,18 +38,15 @@ export default function UserDropdown() {
   }
 
   function getUserInfo() {
-    const cookie = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("userInfo="));
-    if (!cookie) return null;
+    const userInfoBase64 = getCookie("userInfo");
+    if (!userInfoBase64) return null;
 
     try {
-      const base64 = cookie.split("=")[1];
-      const json = atob(base64);
+      const json = atob(userInfoBase64);
       const info = JSON.parse(json);
       setUserInfo({ username: info.username, email: info.email });
     } catch (err) {
-      console.error("Failed to parse userInfo cookie", err);
+      console.error("Failed to parse userInfo:", err);
       return null;
     }
   }

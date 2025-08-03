@@ -10,7 +10,6 @@ const SignIn = lazy(() => import("./pages/AuthPages/SignIn"));
 const SignUp = lazy(() => import("./pages/AuthPages/SignUp"));
 const VerifyAccount = lazy(() => import("./pages/AuthPages/VerifyAccount"));
 const ForgotPassword = lazy(() => import("./pages/AuthPages/ForgotPassword"));
-const ResetPassword = lazy(() => import("./pages/AuthPages/ResetPassword"));
 const UserProfiles = lazy(() => import("./pages/UserProfiles"));
 const Videos = lazy(() => import("./pages/UiElements/Videos"));
 const Images = lazy(() => import("./pages/UiElements/Images"));
@@ -79,9 +78,8 @@ export default function App() {
             {/* Auth Layout */}
             <Route path="sign-in" element={<SignIn />} />
             <Route path="sign-up" element={<SignUp />} />
-            <Route path="verify-account/:key" element={<VerifyAccount />} />
+            <Route path="verify-account/:confirmationToken" element={<VerifyAccount />} />
             <Route path="forgot-password" element={<ForgotPassword />} />
-            <Route path="reset-password/:code" element={<ResetPassword />} />
 
             {/* Fallback Route */}
             {/* <Route path="*" element={<NotFound />} /> */}

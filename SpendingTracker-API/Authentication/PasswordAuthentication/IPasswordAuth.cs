@@ -6,8 +6,7 @@ namespace SpendingTracker_API.Authentication.PasswordAuthentication
     {
         public Task<AuthenticationResult> AuthenticateAsync(PasswordCredentialsDto passwordCredentials);
         public Task<RegistrationResult> RegisterAsync(RegistrationCredentialsDto registrationCredentials, bool requiresVerification = false);
-        public Task<AuthenticationResult> VerifyRegistrationAsync(string userId, string token);
-        Task<bool> GenerateResetPasswordTokenAsync(string email);
+        Task RequestResetPasswordAsync(string email);
         Task<bool> ResetPasswordAsync(ResetPasswordRequestDto resetPasswordRequest);
     }
 }

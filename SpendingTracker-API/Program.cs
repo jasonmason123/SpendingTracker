@@ -15,11 +15,10 @@ using SpendingTracker_API.Services.NotificationService;
 using SpendingTracker_API.Services.EmailService;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.FileProviders;
 using DotNetEnv;
-using Microsoft.AspNetCore.DataProtection;
+using SpendingTracker_API.Authentication.OtpAuthentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +40,7 @@ builder.Services.AddScoped<IUserClaimsRetriever, UserClaimsRetriever>();
 builder.Services.AddScoped<IPasswordAuth, PasswordAuth>();
 builder.Services.AddScoped<IAuthTokenService, JwtService>();
 builder.Services.AddScoped<INotificationService, EmailService>();
+builder.Services.AddScoped<IOtpAuth, EmailOtpAuth>();
 
 // Add Razor Pages for serving static files and views
 builder.Services.AddRazorPages();

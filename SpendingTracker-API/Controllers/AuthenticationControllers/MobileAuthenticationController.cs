@@ -31,7 +31,7 @@ namespace SpendingTracker_API.Controllers.AuthenticationControllers
             try
             {
                 var authResult = await _passwordAuth.AuthenticateAsync(passwordCredentials);
-                if (authResult.Succeed && authResult.User != null)
+                if (authResult.Succeeded && authResult.User != null)
                 {
                     var jwtToken = _authTokenService.GenerateToken(authResult.User);
 
