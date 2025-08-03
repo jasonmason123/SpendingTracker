@@ -33,13 +33,16 @@ export default function SignInForm() {
 
           if (response.ok) {
             // If user successfully authenticated but email not confirmed, redirect to verify account
-            if(authenticationResult.isEmailConfirmed != true) {
+            if(authenticationResult.isEmailConfirmed == false) {
               navigate(`/verify-account/${authenticationResult.confirmationToken}`);
             } else {
               window.location.href = APP_BASE_URL;
             }
           } else {
-            setErrorMessage("Email hoặc mật khẩu chưa chính xác. Vui lòng thử lại.");
+            const errorMessage = authenticationResult.isLockedOut == true ?
+              "Bạn đã nhập sai quá số lần cho phép. Vui lòng thử lại sau 5 phút." :
+              "Email hoặc mật khẩu chưa chính xác. Vui lòng thử lại."
+            setErrorMessage(errorMessage);
           }
         });
     } catch (error) {
