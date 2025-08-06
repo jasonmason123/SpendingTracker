@@ -33,16 +33,18 @@ namespace SpendingTracker_API.Services.AuthTokenService
             var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
             var expirationInMinutes = int.Parse(JwtExpirationInMinutesString);
 
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+            };
+
             var tokenOptions = new JwtSecurityToken(
                 issuer: JwtIssuer,
                 audience: JwtAudience,
-                claims: new List<Claim>
-                {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-                },
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(expirationInMinutes)),
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(expirationInMinutes)),
                 signingCredentials: signinCredentials
             );
 
