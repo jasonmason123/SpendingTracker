@@ -1,4 +1,4 @@
-import { PeriodUnit } from "./types"
+import { PeriodUnit, UserInfo } from "./types"
 
 export const periodUnitOptions = [
   { value: PeriodUnit.DAY as any as string, label: "Ngày" },
@@ -6,50 +6,6 @@ export const periodUnitOptions = [
   { value: PeriodUnit.MONTH as any as string, label: "Tháng" },
   { value: PeriodUnit.YEAR as any as string, label: "Năm" },
 ]
-
-export const daysOfWeek = [
-  "Chủ Nhật",
-  "Thứ Hai",
-  "Thứ Ba",
-  "Thứ Tư",
-  "Thứ Năm",
-  "Thứ Sáu",
-  "Thứ Bảy",
-];
-
-export function getCycleUnitInText(cycleUnit: PeriodUnit) {
-  return cycleUnit == PeriodUnit.DAY ? "ngày"
-  : cycleUnit == PeriodUnit.WEEK ? "tuần"
-  : cycleUnit == PeriodUnit.MONTH ? "tháng" : "năm"
-}
-
-export function getFrequencyInText(
-  cycleUnit: PeriodUnit,
-  interval: number,
-  capitalizeFirstLetter: boolean = false
-) {
-  let cycleUnitText = "";
-  switch(cycleUnit) {
-    case PeriodUnit.DAY:
-      cycleUnitText = "ngày";
-      break;
-    case PeriodUnit.WEEK:
-      cycleUnitText = "tuần";
-      break;
-    case PeriodUnit.MONTH:
-      cycleUnitText = "tháng";
-      break;
-    case PeriodUnit.YEAR:
-      cycleUnitText = "năm";
-      break;
-  }
-
-  if(interval <= 1) {
-    return capitalizeFirstLetter ? `Hàng ${cycleUnitText}` : `hàng ${cycleUnitText}`;
-  }
-
-  return capitalizeFirstLetter ? `Mỗi ${interval} ${cycleUnitText}` : `mỗi ${interval} ${cycleUnitText}`;
-}
 
 export function getCookie(name: string): string | null {
   const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
@@ -100,4 +56,22 @@ export function buildQueryString(params: Record<string, any>): string {
   });
 
   return query.toString();
+}
+
+export function getUserInfo(): UserInfo | null {
+  const userInfoBase64 = getCookie("userInfo");
+  if (!userInfoBase64) return null;
+
+  try {
+    const json = atob(userInfoBase64);
+    const info = JSON.parse(json);
+    return {
+      username: info.username,
+      email: info.email,
+      dateJoined: info.dateJoined
+    }
+  } catch (err) {
+    console.error("Failed to parse userInfo:", err);
+    return null;
+  }
 }

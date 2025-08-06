@@ -10,7 +10,7 @@ const SignIn = lazy(() => import("./pages/AuthPages/SignIn"));
 const SignUp = lazy(() => import("./pages/AuthPages/SignUp"));
 const VerifyAccount = lazy(() => import("./pages/AuthPages/VerifyAccount"));
 const ForgotPassword = lazy(() => import("./pages/AuthPages/ForgotPassword"));
-const UserProfiles = lazy(() => import("./pages/UserProfiles"));
+const DeveloperInfo = lazy(() => import("./pages/DeveloperInfo"));
 const Videos = lazy(() => import("./pages/UiElements/Videos"));
 const Images = lazy(() => import("./pages/UiElements/Images"));
 const Alerts = lazy(() => import("./pages/UiElements/Alerts"));
@@ -28,6 +28,7 @@ const Home = lazy(() => import("./pages/Dashboard/Home"));
 const Transactions = lazy(() => import("./pages/Transactions/Transactions"));
 const TransactionDetails = lazy(() => import("./pages/Transactions/TransactionDetails"));
 const TransactionAddEdit = lazy(() => import("./pages/Transactions/TransactionAddEdit"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
 // import NotFound from "./pages/OtherPage/NotFound";
 
 export default function App() {
@@ -52,7 +53,8 @@ export default function App() {
               <Route path="transactions/:id/edit" element={<TransactionAddEdit />} />
 
               {/* Others Page */}
-              <Route path="profile" element={<UserProfiles />} />
+              <Route path="developer" element={<DeveloperInfo />} />
+              <Route path="profile" element={<UserProfile />} />
               <Route path="calendar" element={<Calendar />} />
               <Route path="blank" element={<Blank />} />
 

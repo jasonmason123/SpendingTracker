@@ -2,22 +2,20 @@ import { useEffect, useState } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { APP_BASE_URL } from "../../types";
-
-import avatar from "/images/user/avatar.jpg";
 import { authenticationApiCaller } from "../../api_caller/AuthenticationApiCaller";
-import { getCookie } from "../../utils";
+import { getUserInfo } from "../../utils";
+import { useAuth } from "../../context/AuthContext";
+import avatar from "/images/user/avatar.png";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const [userInfo, setUserInfo] = useState({ username: "", email: "" });
+  const { username, email } = useAuth();
 
   function handleSignOut() {
     authenticationApiCaller.signOut()
       .then((response) => {
         if (response.ok) {
-          // Clear user info from local state
-          setUserInfo({ username: "", email: "" });
           // Redirect to sign-in page
           window.location.href = `${APP_BASE_URL}/sign-in`;
         } else {
@@ -37,20 +35,6 @@ export default function UserDropdown() {
     setIsOpen(false);
   }
 
-  function getUserInfo() {
-    const userInfoBase64 = getCookie("userInfo");
-    if (!userInfoBase64) return null;
-
-    try {
-      const json = atob(userInfoBase64);
-      const info = JSON.parse(json);
-      setUserInfo({ username: info.username, email: info.email });
-    } catch (err) {
-      console.error("Failed to parse userInfo:", err);
-      return null;
-    }
-  }
-
   useEffect(() => {
     getUserInfo();
   }, []);
@@ -65,7 +49,7 @@ export default function UserDropdown() {
           <img src={avatar} alt="User" />
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">{userInfo.username}</span>
+        <span className="block mr-1 font-medium text-theme-sm">{username}</span>
         <svg
           className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
@@ -93,10 +77,10 @@ export default function UserDropdown() {
       >
         <div>
           <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {userInfo.username}
+            {username}
           </span>
           <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            {userInfo.email}
+            {email}
           </span>
         </div>
 

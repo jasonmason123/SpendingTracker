@@ -1,6 +1,6 @@
 import React from "react";
 import Home from "./pages/Dashboard/Home";
-import UserProfiles from "./pages/UserProfiles";
+import DeveloperInfo from "./pages/DeveloperInfo";
 import Calendar from "./pages/Calendar";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
@@ -32,7 +32,7 @@ const routes : RouteType[] = [
         path: "/profile",
         title: "User Profiles",
         description: "User Profiles",
-        element: <UserProfiles />,
+        element: <DeveloperInfo />,
     },
     {
         path: "/calendar",

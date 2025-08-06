@@ -97,3 +97,9 @@ export interface AmountsByYearResult {
   monthlyIncomes: Record<number, number>;
   monthlyExpenses: Record<number, number>;
 }
+
+export interface UserInfo {
+  username: string;
+  email: string;
+  dateJoined: string;
+}

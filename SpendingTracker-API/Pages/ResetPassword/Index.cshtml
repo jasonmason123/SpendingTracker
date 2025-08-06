@@ -1,12 +1,16 @@
 ﻿@page "/reset-password/{token}/{userId}"
+@using Microsoft.Extensions.Localization
+@using SpendingTracker_API.Pages.ResetPassword
+@using SpendingTracker_API.Resources.Pages
+@using SpendingTracker_API.Resources.Pages.ResetPassword
+@using SpendingTracker_API.Utils
 @model SpendingTracker_API.Pages.ResetPassword.IndexModel
+@inject IStringLocalizer<SharedResources> SharedLocalizer
+@inject IStringLocalizer<ResetPasswordResources> Localizer
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-    ViewData["Title"] = "Reset Password";
+    ViewData["Title"] = Localizer["PageTitle"];
 }
-
-<!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -19,7 +23,7 @@
                     @if (Model.PasswordResetSuccess)
                     {
                         <div class="alert alert-success text-center">
-                            Your password has been reset successfully. Please wait while being redirected and login again...
+                            @Localizer["ResetPasswordSuccess"]
                         </div>
                         <script>
                             setTimeout(function () {
@@ -50,7 +54,7 @@
                                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100">Reset Password</button>
+                            <button type="submit" class="btn btn-primary w-100">@SharedLocalizer["Save"]</button>
                         </form>
                     }
                 </div>

@@ -56,8 +56,6 @@ export default function MonthlyOverall() {
     await statisticsApiCaller
       .getIncomeExpenseSummary(new Date().toISOString(), PeriodUnit.MONTH, true)
       .then((response) => {
-        console.log("Response summary", response);
-
         const responseIncome = response.income;
         const responseExpense = response.expense;
         const responseRollover = response.rollover;

@@ -286,7 +286,8 @@ namespace SpendingTracker_API.Controllers.AuthenticationControllers
             var userObj = new
             {
                 username = user.UserName,
-                email = user.Email
+                email = user.Email,
+                dateJoined = user.CreatedAt,
             };
             var json = JsonSerializer.Serialize(userObj);
             var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));

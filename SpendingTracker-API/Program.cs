@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.FileProviders;
 using DotNetEnv;
 using SpendingTracker_API.Authentication.OtpAuthentication;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,8 +44,21 @@ builder.Services.AddScoped<IAuthTokenService, JwtService>();
 builder.Services.AddScoped<INotificationService, EmailService>();
 builder.Services.AddScoped<IOtpAuth, EmailOtpAuth>();
 
+// Add localization for language configurations
+builder.Services.AddLocalization();
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[] { "en", "vi" };
+    options.SetDefaultCulture("en")
+           .AddSupportedCultures(supportedCultures)
+           .AddSupportedUICultures(supportedCultures);
+    options.RequestCultureProviders.Insert(0, new CookieRequestCultureProvider());
+});
+
 // Add Razor Pages for serving static files and views
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization();
 
 // Configure Identity options
 builder.Services.Configure<IdentityOptions>(options =>
@@ -198,6 +213,8 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -246,8 +263,5 @@ app.UseStaticFiles();
 app.MapControllers();
 
 app.MapRazorPages();
-
-// Serve React app for any non-API routes
-app.MapFallbackToFile(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "app", "index.html"));
 
 app.Run();

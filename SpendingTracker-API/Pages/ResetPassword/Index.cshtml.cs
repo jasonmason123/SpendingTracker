@@ -1,8 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Localization;
 using SpendingTracker_API.Authentication.PasswordAuthentication;
 using SpendingTracker_API.Controllers.AuthenticationControllers.DTOs;
 using System.ComponentModel.DataAnnotations;
+using ResetPasswordResources = SpendingTracker_API.Resources.Pages.ResetPassword.ResetPasswordResources;
 
 namespace SpendingTracker_API.Pages.ResetPassword
 {
@@ -15,12 +17,14 @@ namespace SpendingTracker_API.Pages.ResetPassword
         public string UserId { get; set; }
 
         [BindProperty]
-        [Required(ErrorMessage = "New password is required.")]
+        [Display(Name = "NewPassword", ResourceType = typeof(ResetPasswordResources))]
+        [Required(ErrorMessageResourceName = "ErrorNewPasswordRequired", ErrorMessageResourceType = typeof(ResetPasswordResources))]
         public string NewPassword { get; set; }
 
         [BindProperty]
-        [Required(ErrorMessage = "Please confirm your new password.")]
-        [Compare(nameof(NewPassword), ErrorMessage = "Passwords do not match.")]
+        [Display(Name = "ConfirmPassword", ResourceType = typeof(ResetPasswordResources))]
+        [Required(ErrorMessageResourceName = "ErrorConfirmPasswordRequired", ErrorMessageResourceType = typeof(ResetPasswordResources))]
+        [Compare(nameof(NewPassword), ErrorMessageResourceName = "ErrorPasswordNotMatch", ErrorMessageResourceType = typeof(ResetPasswordResources))]
         public string ConfirmPassword { get; set; }
 
         public string? RedirectUrl { get; set; } = "/app";
@@ -30,10 +34,12 @@ namespace SpendingTracker_API.Pages.ResetPassword
         public bool PasswordResetSuccess { get; set; } = false;
 
         private readonly IPasswordAuth _passwordAuth;
+        private readonly IStringLocalizer<ResetPasswordResources> _localizer;
 
-        public IndexModel(IPasswordAuth passwordAuth)
+        public IndexModel(IPasswordAuth passwordAuth, IStringLocalizer<ResetPasswordResources> localizer)
         {
             _passwordAuth = passwordAuth;
+            _localizer = localizer;
         }
 
         public void OnGet(string token, string userId)
@@ -59,7 +65,7 @@ namespace SpendingTracker_API.Pages.ResetPassword
             if (result)
                 PasswordResetSuccess = true;
             else
-                ErrorMessage = "Password reset failed.";
+                ErrorMessage = _localizer["ErrorResetPasswordFailed"];
 
             return Page();
         }

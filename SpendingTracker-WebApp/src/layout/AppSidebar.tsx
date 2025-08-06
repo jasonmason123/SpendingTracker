@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
-// Assume these icons are imported from an icon library
 import {
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
+  MailIcon,
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -51,9 +51,9 @@ const sections: Section[] = [
         path: "/profile",
       },
       {
-        icon: <UserCircleIcon />,
+        icon: <MailIcon />,
         name: "Về tác giả",
-        path: "/profile",
+        path: "/developer",
       },
     ]
   }
@@ -72,7 +72,6 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // const isActive = (path: string) => location.pathname === path;
   const isActive = useCallback(
     (path: string) => path == '/' ?
       location.pathname === path :
