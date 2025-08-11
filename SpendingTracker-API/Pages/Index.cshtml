@@ -52,6 +52,33 @@
         </div>
     </div>
 
+    <h2 class="mt-5 mb-3">@Localizer["WebSnapshot"]</h2>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-3">
+        @foreach (var item in new[] {
+            new { Title = Localizer["HomeImgTitle"].Value, ImageUrl = "/images/web_dashboard_1.png" },
+            new { Title = Localizer["HomeImgTitle"].Value, ImageUrl = "/images/web_dashboard_2.png" },
+            new { Title = Localizer["TransactionsImgTitle"].Value, ImageUrl = "/images/web_transactions.png" },
+            new { Title = Localizer["TransactionDetailsImgTitle"].Value, ImageUrl = "/images/web_transaction_details.png" },
+            new { Title = Localizer["TransactionAddEditImgTitle"].Value, ImageUrl = "/images/web_transaction_add_edit.png" },
+            new { Title = Localizer["CategoriesImgTitle"].Value, ImageUrl = "/images/web_categories.png" },
+            new { Title = Localizer["CategoryAddEditImgTitle"].Value, ImageUrl = "/images/web_category_add_edit.png" },
+            new { Title = Localizer["ProfileImgTitle"].Value, ImageUrl = "/images/web_profile.png" },
+            new { Title = Localizer["DeveloperImgTitle"].Value, ImageUrl = "/images/web_developer.png" },
+        })
+        {
+            <div class="col">
+                <div class="card h-100 text-center shadow-sm border-0">
+                    <a href="@item.ImageUrl" target="_blank" class="d-block p-2">
+                        <img src="@item.ImageUrl" class="card-img-top rounded" alt="@item.Title" style="object-fit: contain;" />
+                    </a>
+                    <div class="card-body p-2">
+                        <p class="card-text small">@item.Title</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
     <div class="mt-5">
         <p><strong>GitHub:</strong></p>
         <a href="https://github.com/jasonmason123/SpendingTracker" target="_blank" class="link-primary">

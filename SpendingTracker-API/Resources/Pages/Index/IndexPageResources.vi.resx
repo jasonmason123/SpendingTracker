@@ -120,8 +120,17 @@
   <data name="AuthenticationFeature" xml:space="preserve">
     <value>Xác thực và phân quyền người dùng bằng JWT</value>
   </data>
+  <data name="CategoriesImgTitle" xml:space="preserve">
+    <value>Danh mục</value>
+  </data>
+  <data name="CategoryAddEditImgTitle" xml:space="preserve">
+    <value>Form thêm hoặc sửa danh mục</value>
+  </data>
   <data name="ClientSupport" xml:space="preserve">
     <value>Máy chủ này hỗ trợ cả ứng dụng Android và ứng dụng web</value>
+  </data>
+  <data name="DeveloperImgTitle" xml:space="preserve">
+    <value>Nhà phát triển</value>
   </data>
   <data name="HomeImgTitle" xml:space="preserve">
     <value>Trang chủ</value>
@@ -138,6 +147,9 @@
   <data name="NiceDay" xml:space="preserve">
     <value>Chúc bạn một ngày tốt lành</value>
   </data>
+  <data name="ProfileImgTitle" xml:space="preserve">
+    <value>Hồ sơ người dùng</value>
+  </data>
   <data name="SettingsImgTitle" xml:space="preserve">
     <value>Cài đặt</value>
   </data>
@@ -146,6 +158,9 @@
   </data>
   <data name="ToWeb" xml:space="preserve">
     <value>Đi đến ứng dụng Web</value>
+  </data>
+  <data name="TransactionAddEditImgTitle" xml:space="preserve">
+    <value>Form thêm hoặc sửa giao dịch</value>
   </data>
   <data name="TransactionAddImgTitle" xml:space="preserve">
     <value>Giao dịch cùng nút "Thêm"</value>
@@ -158,6 +173,9 @@
   </data>
   <data name="TransactionsImgTitle" xml:space="preserve">
     <value>Giao dịch</value>
+  </data>
+  <data name="WebSnapshot" xml:space="preserve">
+    <value>Ảnh chụp ứng dụng web</value>
   </data>
   <data name="Welcome" xml:space="preserve">
     <value>Chào mừng đến với Money Diary</value>

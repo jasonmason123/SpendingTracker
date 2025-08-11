@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-public class MessageStructureDto
+﻿public class MessageStructureDto
 {
     public string Subject { get; set; }
     public string Body { get; set; }

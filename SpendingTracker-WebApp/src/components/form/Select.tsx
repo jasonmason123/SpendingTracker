@@ -1,9 +1,5 @@
 import { useState } from "react";
-
-interface Option {
-  value: string;
-  label: string;
-}
+import { Option } from "../../types";
 
 interface SelectProps {
   options: Option[];

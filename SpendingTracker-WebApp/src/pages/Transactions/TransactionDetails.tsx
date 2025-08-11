@@ -35,7 +35,6 @@ export default function TransactionDetails() {
         createdAt: data.createdAt && new Date(data.createdAt),
         updatedAt: data.updatedAt && new Date(data.updatedAt),
       });
-      console.log("Transaction data fetched:", data);
     } catch (error) {
       console.error("Error fetching account data:", error);
     } finally {

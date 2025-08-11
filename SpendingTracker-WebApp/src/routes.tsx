@@ -6,6 +6,7 @@ import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
 import LineChart from "./pages/Charts/LineChart";
 import Transactions from "./pages/Transactions/Transactions";
+import Categories from "./pages/Categories/Categories";
 
 type RouteType = {
     path?: string;
@@ -27,6 +28,12 @@ const routes : RouteType[] = [
         title: "Transactions",
         description: "Financial Transactions",
         element: <Transactions />,
+    },
+    {
+        path: "/categories",
+        title: "Categories",
+        description: "Manage Categories",
+        element: <Categories />,
     },
     {
         path: "/profile",

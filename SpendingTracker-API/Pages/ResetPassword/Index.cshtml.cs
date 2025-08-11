@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Localization;
 using SpendingTracker_API.Authentication.PasswordAuthentication;
-using SpendingTracker_API.Controllers.AuthenticationControllers.DTOs;
+using SpendingTracker_API.DTOs.Web_Mobile.Authentication;
 using System.ComponentModel.DataAnnotations;
 using ResetPasswordResources = SpendingTracker_API.Resources.Pages.ResetPassword.ResetPasswordResources;
 

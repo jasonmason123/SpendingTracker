@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SpendingTracker_API.Authentication.PasswordAuthentication;
-using SpendingTracker_API.Controllers.AuthenticationControllers.DTOs;
+using SpendingTracker_API.DTOs.Web_Mobile.Authentication;
 using SpendingTracker_API.Entities;
-using SpendingTracker_API.Services.AuthTokenService;
+using SpendingTracker_API.Utils.AuthTokenService;
 using SpendingTracker_API.Utils.Messages;
 
 namespace SpendingTracker_API.Controllers.AuthenticationControllers
@@ -15,9 +15,9 @@ namespace SpendingTracker_API.Controllers.AuthenticationControllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly IPasswordAuth _passwordAuth;
-        private readonly IAuthTokenService _authTokenService;
+        private readonly IAuthTokenProvider _authTokenService;
 
-        public MobileAuthenticationController(UserManager<AppUser> userManager, IConfiguration configuration, IPasswordAuth passwordAuth, IAuthTokenService authTokenService)
+        public MobileAuthenticationController(UserManager<AppUser> userManager, IConfiguration configuration, IPasswordAuth passwordAuth, IAuthTokenProvider authTokenService)
         {
             _userManager = userManager;
             _configuration = configuration;

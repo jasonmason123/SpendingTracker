@@ -70,11 +70,38 @@ namespace SpendingTracker_API.Resources.Pages.Index {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Categories.
+        /// </summary>
+        public static string CategoriesImgTitle {
+            get {
+                return ResourceManager.GetString("CategoriesImgTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Form to add or edit category.
+        /// </summary>
+        public static string CategoryAddEditImgTitle {
+            get {
+                return ResourceManager.GetString("CategoryAddEditImgTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This server supports both Android and web applications..
         /// </summary>
         public static string ClientSupport {
             get {
                 return ResourceManager.GetString("ClientSupport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Developer.
+        /// </summary>
+        public static string DeveloperImgTitle {
+            get {
+                return ResourceManager.GetString("DeveloperImgTitle", resourceCulture);
             }
         }
         
@@ -124,6 +151,15 @@ namespace SpendingTracker_API.Resources.Pages.Index {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User profile.
+        /// </summary>
+        public static string ProfileImgTitle {
+            get {
+                return ResourceManager.GetString("ProfileImgTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Settings.
         /// </summary>
         public static string SettingsImgTitle {
@@ -147,6 +183,15 @@ namespace SpendingTracker_API.Resources.Pages.Index {
         public static string ToWeb {
             get {
                 return ResourceManager.GetString("ToWeb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Form to add or edit transaction.
+        /// </summary>
+        public static string TransactionAddEditImgTitle {
+            get {
+                return ResourceManager.GetString("TransactionAddEditImgTitle", resourceCulture);
             }
         }
         
@@ -183,6 +228,15 @@ namespace SpendingTracker_API.Resources.Pages.Index {
         public static string TransactionsImgTitle {
             get {
                 return ResourceManager.GetString("TransactionsImgTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Web Snapshots.
+        /// </summary>
+        public static string WebSnapshot {
+            get {
+                return ResourceManager.GetString("WebSnapshot", resourceCulture);
             }
         }
         

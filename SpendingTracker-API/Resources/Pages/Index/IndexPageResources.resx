@@ -120,8 +120,17 @@
   <data name="AuthenticationFeature" xml:space="preserve">
     <value>User authentication and authorization via JWT</value>
   </data>
+  <data name="CategoriesImgTitle" xml:space="preserve">
+    <value>Categories</value>
+  </data>
+  <data name="CategoryAddEditImgTitle" xml:space="preserve">
+    <value>Form to add or edit category</value>
+  </data>
   <data name="ClientSupport" xml:space="preserve">
     <value>This server supports both Android and web applications.</value>
+  </data>
+  <data name="DeveloperImgTitle" xml:space="preserve">
+    <value>Developer</value>
   </data>
   <data name="HomeImgTitle" xml:space="preserve">
     <value>Home</value>
@@ -138,6 +147,9 @@
   <data name="NiceDay" xml:space="preserve">
     <value>Have a nice day</value>
   </data>
+  <data name="ProfileImgTitle" xml:space="preserve">
+    <value>User profile</value>
+  </data>
   <data name="SettingsImgTitle" xml:space="preserve">
     <value>Settings</value>
   </data>
@@ -146,6 +158,9 @@
   </data>
   <data name="ToWeb" xml:space="preserve">
     <value>Go to Web App</value>
+  </data>
+  <data name="TransactionAddEditImgTitle" xml:space="preserve">
+    <value>Form to add or edit transaction</value>
   </data>
   <data name="TransactionAddImgTitle" xml:space="preserve">
     <value>Transactions with Add button</value>
@@ -158,6 +173,9 @@
   </data>
   <data name="TransactionsImgTitle" xml:space="preserve">
     <value>Transactions</value>
+  </data>
+  <data name="WebSnapshot" xml:space="preserve">
+    <value>Web Snapshots</value>
   </data>
   <data name="Welcome" xml:space="preserve">
     <value>Welcome to Money Diary</value>

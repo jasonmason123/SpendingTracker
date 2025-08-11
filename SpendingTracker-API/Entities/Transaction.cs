@@ -20,5 +20,8 @@ namespace SpendingTracker_API.Entities
         [ForeignKey(nameof(AppUser))]
         public string UserId { get; set; }
         public AppUser? User { get; set; }
+        [ForeignKey(nameof(Category))]
+        public int CategoryId { get; set; }
+        public Category? TransactionCategory { get; set; }
     }
 }

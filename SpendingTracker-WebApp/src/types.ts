@@ -10,6 +10,11 @@ export interface PageTitle {
   state?: any;
 }
 
+export interface Option {
+  value: string;
+  label: string;
+}
+
 //Enums
 export enum AccountType {
     CASH = "CASH",
@@ -46,6 +51,16 @@ export interface Transaction {
   attachmentUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  categoryId?: number; // Added to link to category
+  categoryName?: string;
+}
+
+export interface Category {
+  id?: number;
+  name: string;
+  createdAt?: Date;
+  updatedAt?: Date | null;
+  flagDel?: FlagBoolean;
 }
 
 //Filter params

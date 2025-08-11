@@ -12,12 +12,13 @@ namespace SpendingTracker_API.Context
         // DbSet properties for your entities
         public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            // Add any additional model configurations here
 
+            // Add any additional model configurations here
             modelBuilder.Entity<AppUser>()
                 .HasIndex(u => u.Email)
                 .IsUnique();

@@ -1,5 +1,5 @@
 ﻿using SpendingTracker_API.Entities;
-using SpendingTracker_API.Repositories.FilterParams;
+using SpendingTracker_API.Repositories._FilterParams;
 using System.Linq.Expressions;
 using X.PagedList;
 
@@ -13,6 +13,6 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
         public IPagedList<Transaction> Search(string searchString, int pageNumber, int pageSize, Expression<Func<Transaction, Transaction>>? selector = null);
         public Task<Transaction> AddAsync(Transaction transaction);
         public Task<Transaction> UpdateAsync(Transaction transaction);
-        public Task<bool> RemoveAsync(int id);
+        public Task<bool> ExecuteDeleteAsync(int id);
     }
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import Select from "../../components/form/Select";
-import { Transaction, TransactionType } from "../../types";
+import { Option, Transaction, TransactionType } from "../../types";
 import Button from "../../components/ui/button/Button";
 import Input from "../../components/form/input/InputField";
 import DatePicker from "../../components/form/date-picker";
@@ -10,6 +10,8 @@ import flatpickr from "flatpickr";
 import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { createTransaction, fetchTransaction, updateTransaction } from "../../api_caller/TransactionApiCaller";
+import ModalSelect from "../../components/form/ModalSelect";
+import { fetchCategoryOptions } from "../../api_caller/CategoryApiCaller";
 // import TextArea from "../../components/form/input/TextArea";
 // import FileInput from "../../components/form/input/FileInput";
 
@@ -26,11 +28,23 @@ export default function TransactionAddEdit() {
   const transactionFromState: Transaction = location.state?.transaction;
 
   const [loading, setLoading] = useState(false);
+  const [loadingOptions, setLoadingOptions] = useState(true);
+  const [categoryOptions, setCategoryOptions] = useState<Option[]>([]);
   const [newTransaction, setNewTransaction] = useState<Transaction | undefined>();
   const datePickerRef = React.useRef<flatpickr.Instance | null>(null);
 
+  const handleError = (message:string, error: any) => {
+    alert("Có lỗi xảy ra, vui lòng thử lại sau.");
+    console.error(message, error);
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if(!confirm("Bạn có chắc chắn muốn lưu?")) {
+      return;
+    }
+
     if (newTransaction) {
       try {
         setLoading(true);
@@ -49,7 +63,7 @@ export default function TransactionAddEdit() {
           "/transactions";
         navigate(navigatePath);
       } catch (error) {
-        console.error("Error saving transaction:", error);
+        handleError("Error saving transaction:", error);
       } finally {
         setLoading(false);
       }
@@ -61,6 +75,7 @@ export default function TransactionAddEdit() {
     if (transactionFromState && id) {
       setNewTransaction(transactionFromState);
     } else if(!transactionFromState && id) {
+      setLoading(true);
       fetchTransaction(parseInt(id))
         .then((transaction) => {
           setNewTransaction({
@@ -71,12 +86,25 @@ export default function TransactionAddEdit() {
           });
         })
         .catch((error) => {
-          console.error("Error fetching transaction:", error);
+          handleError("Error fetching transaction:", error);
         })
         .finally(() => {
           setLoading(false);
         });
     }
+  }, []);
+  
+  useEffect(() => {
+    fetchCategoryOptions()
+      .then((options) => {
+        setCategoryOptions(options);
+      })
+      .catch((error) => {
+        handleError("Error fetching category options:", error);
+      })
+      .finally(() => {
+        setLoadingOptions(false);
+      });
   }, []);
     
   return (
@@ -204,7 +232,7 @@ export default function TransactionAddEdit() {
                         : "Khoản đã chi (VNĐ)"}
                       <span className="text-red-500">*</span>
                     </p>
-                    <p className="text-sm font-medium text-gray-800 dark:text-white/90">
+                    <div className="text-sm font-medium text-gray-800 dark:text-white/90">
                       <Input
                         required
                         disabled={loading}
@@ -221,7 +249,27 @@ export default function TransactionAddEdit() {
                           }))
                         }
                       />
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                      Phân loại giao dịch<span className="text-red-500">*</span>
                     </p>
+                    <div className="text-sm font-medium text-gray-800 dark:text-white/90">
+                      <ModalSelect
+                        defaultValue={newTransaction?.categoryId + ""}
+                        disabled={loading || loadingOptions}
+                        options={categoryOptions}
+                        onChange={(value) => {
+                          setNewTransaction((prev) => ({
+                            ...prev,
+                            categoryId: parseInt(value),
+                          }))
+                        }}
+                        placeholder={loading || loadingOptions ? "Đang tải..." : "Chọn danh mục"}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

@@ -5,14 +5,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SpendingTracker_API.Authentication.PasswordAuthentication;
 using SpendingTracker_API.Entities;
-using SpendingTracker_API.Services.AuthTokenService;
 using SpendingTracker_API.Utils.Messages;
 using SpendingTracker_API.Utils;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using SpendingTracker_API.Controllers.AuthenticationControllers.DTOs;
 using SpendingTracker_API.Authentication.OtpAuthentication;
+using SpendingTracker_API.Utils.AuthTokenService;
+using SpendingTracker_API.DTOs.Web_Mobile.Authentication;
 
 namespace SpendingTracker_API.Controllers.AuthenticationControllers
 {
@@ -26,14 +26,14 @@ namespace SpendingTracker_API.Controllers.AuthenticationControllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly IPasswordAuth _passwordAuth;
-        private readonly IAuthTokenService _authTokenService;
+        private readonly IAuthTokenProvider _authTokenService;
         private readonly IOtpAuth _otpAuth;
 
         public WebAuthenticationController(
             UserManager<AppUser> userManager,
             IConfiguration configuration,
             IPasswordAuth passwordAuth,
-            IAuthTokenService authTokenService,
+            IAuthTokenProvider authTokenService,
             IOtpAuth otpAuth
         )
         {

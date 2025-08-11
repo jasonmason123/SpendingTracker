@@ -6,7 +6,7 @@ import { buildQueryString } from "../utils";
  * @param transactionId - The ID of the transaction to fetch.
  * @returns A promise that resolves to the fetched transaction.
  */
-export function fetchTransaction(transactionId: number): Promise<Transaction> {
+export async function fetchTransaction(transactionId: number): Promise<Transaction> {
   return fetch(`/api/transactions/${transactionId}`, {
     method: "GET",
     credentials: "include",
@@ -30,7 +30,7 @@ export function fetchTransaction(transactionId: number): Promise<Transaction> {
  * @param filterParam - The parameters to filter the transactions.
  * @returns A promise that resolves to a paginated list of transactions.
  */
-export function fetchTransactionPagedList(filterParam: TransactionFilterParams): Promise<PagedListResult<Transaction>> {
+export async function fetchTransactionPagedList(filterParam: TransactionFilterParams): Promise<PagedListResult<Transaction>> {
   const queryString = buildQueryString(filterParam);
   return fetch(`/api/transactions/get-list?${queryString}`, {
     method: "GET",
@@ -58,7 +58,7 @@ export function fetchTransactionPagedList(filterParam: TransactionFilterParams):
  * @param transaction - The transaction object to create.
  * @returns A promise that resolves to the created transaction.
  */
-export function createTransaction(transaction: Transaction): Promise<Transaction> {
+export async function createTransaction(transaction: Transaction): Promise<Transaction> {
   return fetch("/api/transactions/add", {
     method: "POST",
     headers: {
@@ -79,7 +79,7 @@ export function createTransaction(transaction: Transaction): Promise<Transaction
  * @param transaction - The transaction object with updated data.
  * @returns A promise that resolves to the updated transaction.
  */
-export function updateTransaction(transaction: Transaction): Promise<Transaction> {
+export async function updateTransaction(transaction: Transaction): Promise<Transaction> {
   return fetch(`/api/transactions/update/${transaction.id}`, {
     method: "PUT",
     headers: {
@@ -100,7 +100,7 @@ export function updateTransaction(transaction: Transaction): Promise<Transaction
  * @param transactionId - The ID of the transaction to delete.
  * @returns A promise that resolves when the transaction is deleted.
  */
-export function deleteTransaction(transactionId: number): Promise<void> {
+export async function deleteTransaction(transactionId: number): Promise<void> {
   return fetch(`/api/transactions/delete/${transactionId}`, {
     method: "DELETE",
     credentials: "include",

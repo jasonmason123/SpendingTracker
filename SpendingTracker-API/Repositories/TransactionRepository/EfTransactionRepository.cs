@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpendingTracker_API.Context;
 using SpendingTracker_API.Entities;
-using SpendingTracker_API.Repositories.FilterParams;
+using SpendingTracker_API.Repositories._FilterParams;
 using SpendingTracker_API.Utils.UserRetriever;
 using System.Linq.Expressions;
 using X.PagedList;
@@ -23,7 +23,9 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
         public async Task<Transaction> GetAsync(int id)
         {
             return await _context.Transactions
-                .FirstOrDefaultAsync(t => t.Id == id && t.UserId == _userRetriever.UserId);
+                .Where(t => t.Id == id && t.UserId == _userRetriever.UserId)
+                .Include(x => x.TransactionCategory)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<Transaction>> GetListAsync(
@@ -32,10 +34,7 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
         )
         {
             var query = _context.Transactions
-                .Where(t => t.UserId == _userRetriever.UserId)
-                .OrderByDescending(t => t.Date)
-                .ThenByDescending(t => t.Id)
-                .AsQueryable();
+                .Where(t => t.UserId == _userRetriever.UserId);
 
             if (filterParams != null)
             {
@@ -53,6 +52,9 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
                     query = query.Where(t => t.TransactionType == filterParams.TransactionType.Value);
                 }
             }
+
+            if (selector != null)
+                query = query.Include(x => x.TransactionCategory).Select(selector);
 
             return await query.ToListAsync();
         }
@@ -147,12 +149,17 @@ namespace SpendingTracker_API.Repositories.TransactionRepository
                 existingTransaction.Amount = transaction.Amount;
             }
 
+            if (existingTransaction.CategoryId != transaction.CategoryId)
+            {
+                existingTransaction.CategoryId = transaction.CategoryId;
+            }
+
             existingTransaction.UpdatedAt = DateTime.UtcNow;
 
             return existingTransaction;
         }
 
-        public async Task<bool> RemoveAsync(int id)
+        public async Task<bool> ExecuteDeleteAsync(int id)
         {
             var result = await _context.Transactions
                 .Where(x => x.Id == id && x.UserId == _userRetriever.UserId)

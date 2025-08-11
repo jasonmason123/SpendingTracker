@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router";
 
 import {
   ChevronDownIcon,
+  FileIcon,
   GridIcon,
   HorizontaLDots,
   ListIcon,
@@ -36,9 +37,14 @@ const sections: Section[] = [
         path: "/",
       },
       {
-        icon: <ListIcon />,
+        icon: <FileIcon />,
         name: "Giao dịch",
         path: "/transactions",
+      },
+      {
+        icon: <ListIcon />,
+        name: "Danh mục",
+        path: "/categories",
       },
     ]
   },
@@ -52,7 +58,7 @@ const sections: Section[] = [
       },
       {
         icon: <MailIcon />,
-        name: "Về tác giả",
+        name: "Nhà phát triển",
         path: "/developer",
       },
     ]

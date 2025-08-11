@@ -10,9 +10,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using SpendingTracker_API.Utils;
 using SpendingTracker_API.Authentication.PasswordAuthentication;
-using SpendingTracker_API.Services.AuthTokenService;
-using SpendingTracker_API.Services.NotificationService;
-using SpendingTracker_API.Services.EmailService;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -21,6 +18,9 @@ using DotNetEnv;
 using SpendingTracker_API.Authentication.OtpAuthentication;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Options;
+using SpendingTracker_API.Repositories.CategoryRepository;
+using SpendingTracker_API.Utils.AuthTokenService;
+using SpendingTracker_API.Utils.NotificationService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,17 +31,14 @@ Env.Load();
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 builder.Configuration.AddEnvironmentVariables();
 
-// Added host configuration (Bind host to 0.0.0.0 to match Render's configuration)
-//var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-//builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-
 // Add services to the container.
 builder.Services.AddScoped<IAppUnitOfWork, EfUnitOfWork>();
 builder.Services.AddScoped<ITransactionRepository, EfTransactionRepository>();
+builder.Services.AddScoped<ICategoryRepository, EfCategoryRepository>();
 builder.Services.AddScoped<IUserClaimsRetriever, UserClaimsRetriever>();
 builder.Services.AddScoped<IPasswordAuth, PasswordAuth>();
-builder.Services.AddScoped<IAuthTokenService, JwtService>();
-builder.Services.AddScoped<INotificationService, EmailService>();
+builder.Services.AddScoped<IAuthTokenProvider, JwtProvider>();
+builder.Services.AddScoped<INotificationSender, EmailSender>();
 builder.Services.AddScoped<IOtpAuth, EmailOtpAuth>();
 
 // Add localization for language configurations

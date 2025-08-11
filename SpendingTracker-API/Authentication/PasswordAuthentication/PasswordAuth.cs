@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Caching.Memory;
 using SpendingTracker_API.Authentication.OtpAuthentication;
-using SpendingTracker_API.Controllers.AuthenticationControllers.DTOs;
+using SpendingTracker_API.DTOs.Web_Mobile.Authentication;
 using SpendingTracker_API.Entities;
-using SpendingTracker_API.Services.NotificationService;
 using SpendingTracker_API.Utils.Messages;
+using SpendingTracker_API.Utils.NotificationService;
 using System.Text;
 
 namespace SpendingTracker_API.Authentication.PasswordAuthentication
@@ -16,14 +16,14 @@ namespace SpendingTracker_API.Authentication.PasswordAuthentication
         private const string ALLOWED_CHARACTERS_FOR_USERNAME = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
 
         private readonly UserManager<AppUser> _userManager;
-        private readonly INotificationService _notificationService;
+        private readonly INotificationSender _notificationService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMemoryCache _memoryCache;
         private readonly IOtpAuth _otpAuth;
 
         public PasswordAuth(
             UserManager<AppUser> userManager,
-            INotificationService notificationService,
+            INotificationSender notificationService,
             IHttpContextAccessor httpContextAccessor,
             IMemoryCache memoryCache,
             IOtpAuth otpAuth

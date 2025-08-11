@@ -1,20 +1,20 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 using SpendingTracker_API.Authentication.OtpAuthentication.DTOs;
-using SpendingTracker_API.Controllers.AuthenticationControllers.DTOs;
+using SpendingTracker_API.DTOs.Web_Mobile.Authentication;
 using SpendingTracker_API.Entities;
-using SpendingTracker_API.Services.NotificationService;
 using SpendingTracker_API.Utils;
+using SpendingTracker_API.Utils.NotificationService;
 
 namespace SpendingTracker_API.Authentication.OtpAuthentication
 {
     public class EmailOtpAuth : IOtpAuth
     {
         private readonly UserManager<AppUser> _userManager;
-        private readonly INotificationService _notificationService;
+        private readonly INotificationSender _notificationService;
         private readonly IMemoryCache _memoryCache;
 
-        public EmailOtpAuth(UserManager<AppUser> userManager, INotificationService notificationService, IMemoryCache memoryCache)
+        public EmailOtpAuth(UserManager<AppUser> userManager, INotificationSender notificationService, IMemoryCache memoryCache)
         {
             _userManager = userManager;
             _notificationService = notificationService;

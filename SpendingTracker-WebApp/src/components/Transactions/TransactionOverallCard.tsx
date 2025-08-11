@@ -35,11 +35,11 @@ export default function TransactionOverallCard({ transaction }: TransactionOvera
         </div>
         <div>
           <span className={`text-lg font-bold
-              ${transaction.amount && transaction.amount < 0 ? "text-red-500" :
-                transaction.amount && transaction.amount > 0 ? "text-green-500" :
+              ${transaction.transactionType == TransactionType.EXPENSE ? "text-red-500" :
+                transaction.transactionType == TransactionType.INCOME ? "text-green-500" :
                 "text-gray-500"}`}
           >
-            {transaction.amount !== undefined && transaction.amount > 0 ? '+' : ''}
+            {transaction.transactionType == TransactionType.INCOME ? '+' : '-'}
             {transaction.amount && transaction.amount.toLocaleString("vi-VN", {
               style: "currency",
               currency: "VND"

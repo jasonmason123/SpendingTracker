@@ -1,4 +1,4 @@
-﻿using SpendingTracker_API.Controllers.AuthenticationControllers.DTOs;
+﻿using SpendingTracker_API.DTOs.Web_Mobile.Authentication;
 
 namespace SpendingTracker_API.Authentication.PasswordAuthentication
 {

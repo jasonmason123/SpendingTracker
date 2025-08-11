@@ -14,29 +14,34 @@ export default function TransactionInfoCard({ transaction }: TransactionInfoCard
             Thông tin chung
           </h4>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-7 2xl:gap-x-32">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                 {transaction.transactionType === TransactionType.INCOME
                     && (transaction.amount && transaction.amount > 0) ? "Khoản nhận về" : "Khoản đã chi"}
               </p>
               <p className="text-sm font-bold text-gray-800 dark:text-white/90 text-bold">
-                {transaction.amount && transaction.amount > 0 ? (
+                {transaction.transactionType == TransactionType.INCOME ? (
                   <span className="text-green-500">
-                    +{transaction.amount.toLocaleString("vi-VN", {
+                    +{transaction.amount && transaction.amount.toLocaleString("vi-VN", {
                       style: "currency",
                       currency: "VND"
                     })}
                   </span>
-                ) : transaction.amount && transaction.amount < 0 ? (
+                ) : transaction.transactionType == TransactionType.EXPENSE ? (
                   <span className="text-red-500">
-                    {transaction.amount.toLocaleString("vi-VN", {
+                    -{transaction.amount && transaction.amount.toLocaleString("vi-VN", {
                       style: "currency",
                       currency: "VND"
                     })}
                   </span>
                 ) : (
-                  <span className="text-gray-500">{transaction.amount} VNĐ</span>
+                  <span className="text-gray-500">
+                    {transaction.amount && transaction.amount.toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND"
+                    })}
+                  </span>
                 )}
               </p>
             </div>
@@ -67,6 +72,15 @@ export default function TransactionInfoCard({ transaction }: TransactionInfoCard
               </p>
               <p className="text-sm font-bold text-gray-800 dark:text-white/90">
                 {transaction?.merchant}
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                Danh mục
+              </p>
+              <p className="text-sm font-bold text-gray-800 dark:text-white/90">
+                {transaction?.categoryName}
               </p>
             </div>
           </div>

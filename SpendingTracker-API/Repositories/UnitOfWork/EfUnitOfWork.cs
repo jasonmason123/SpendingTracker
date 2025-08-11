@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using SpendingTracker_API.Context;
+using SpendingTracker_API.Repositories.CategoryRepository;
 using SpendingTracker_API.Repositories.TransactionRepository;
 
 namespace SpendingTracker_API.Repositories.UnitOfWork
@@ -11,14 +12,17 @@ namespace SpendingTracker_API.Repositories.UnitOfWork
         private IDbContextTransaction? _transaction;
 
         public ITransactionRepository Transactions { get; }
+        public ICategoryRepository Categories { get; }
 
         public EfUnitOfWork(
             AppDbContext context,
-            ITransactionRepository transactions
+            ITransactionRepository transactions,
+            ICategoryRepository categories
         )
         {
             _context = context;
             Transactions = transactions;
+            Categories = categories;
         }
 
         public async Task BeginTransactionAsync()

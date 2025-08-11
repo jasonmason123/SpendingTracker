@@ -29,6 +29,9 @@ const Transactions = lazy(() => import("./pages/Transactions/Transactions"));
 const TransactionDetails = lazy(() => import("./pages/Transactions/TransactionDetails"));
 const TransactionAddEdit = lazy(() => import("./pages/Transactions/TransactionAddEdit"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
+const Categories = lazy(() => import("./pages/Categories/Categories"));
+const CategoryDetails = lazy(() => import("./pages/Categories/CategoryDetails"));
+const CategoryAddEdit = lazy(() => import("./pages/Categories/CategoryAddEdit"));
 // import NotFound from "./pages/OtherPage/NotFound";
 
 export default function App() {
@@ -51,6 +54,12 @@ export default function App() {
               <Route path="transactions/add" element={<TransactionAddEdit />} />
               <Route path="transactions/:id" element={<TransactionDetails />} />
               <Route path="transactions/:id/edit" element={<TransactionAddEdit />} />
+
+              {/* Categories */}
+              <Route path="categories" element={<Categories />} />
+              <Route path="categories/add" element={<CategoryAddEdit />} />
+              <Route path="categories/:id" element={<CategoryDetails />} />
+              <Route path="categories/:id/edit" element={<CategoryAddEdit />} />
 
               {/* Others Page */}
               <Route path="developer" element={<DeveloperInfo />} />
