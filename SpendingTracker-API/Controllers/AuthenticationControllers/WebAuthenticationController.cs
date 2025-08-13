@@ -244,7 +244,7 @@ namespace SpendingTracker_API.Controllers.AuthenticationControllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Sign-out error: {ex}");
+                Console.WriteLine($"Google sign-in error: {ex}");
                 return StatusCode(500, ErrorMessages.INTERNAL_SERVER_ERROR_MESSAGE);
             }
         }
