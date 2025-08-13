@@ -1,6 +1,5 @@
 package vn.edu.fpt.spendingtracker_mobile.api_connector;
 
-import java.util.Date;
 import java.util.List;
 
 import retrofit2.Call;
@@ -10,12 +9,12 @@ import vn.edu.fpt.spendingtracker_mobile.dtos.IncomeExpenseDto;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
 
 public interface HomepageApiConnector {
-    @GET("api/statistics/get-income-expense-by-period")
-    Call<IncomeExpenseDto> getIncomeExpenseByPeriod(
+    @GET("api/statistics/get-income-expense-custom-range")
+    Call<IncomeExpenseDto> getIncomeExpenseCustomRange(
         @Query("dateFrom") String dateFromString,
         @Query("dateTo") String dateToString
     );
 
-    @GET("api/statistics/get-top-3-recent")
-    Call<List<Transaction>> getTopThreeRecentTransactions();
+    @GET("api/statistics/get-top-recent")
+    Call<List<Transaction>> getTopRecentTransactions(@Query("top") int top);
 }

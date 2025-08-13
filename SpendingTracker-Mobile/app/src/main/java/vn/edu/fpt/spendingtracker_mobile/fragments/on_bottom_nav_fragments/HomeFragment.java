@@ -132,7 +132,7 @@ public class HomeFragment extends BaseFragment {
         Locale locale = new Locale("vi", "VN");
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(locale);
 
-        apiConnector.getIncomeExpenseByPeriod(from, to)
+        apiConnector.getIncomeExpenseCustomRange(from, to)
                 .enqueue(new ApiCallback<IncomeExpenseDto>(requireContext()) {
             @Override
             public void onResponse(
@@ -177,7 +177,8 @@ public class HomeFragment extends BaseFragment {
     }
 
     private void getThreeRecentTransactions() {
-        apiConnector.getTopThreeRecentTransactions()
+        int top = 3;
+        apiConnector.getTopRecentTransactions(top)
             .enqueue(new ApiCallback<List<Transaction>>(requireContext()) {
                 @Override
                 public void onResponse(

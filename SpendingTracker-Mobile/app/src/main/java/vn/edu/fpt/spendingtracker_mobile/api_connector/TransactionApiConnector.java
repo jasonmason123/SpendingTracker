@@ -16,22 +16,22 @@ import vn.edu.fpt.spendingtracker_mobile.dtos.PagedListResult;
 import vn.edu.fpt.spendingtracker_mobile.entities.Transaction;
 
 public interface TransactionApiConnector {
-    @GET("api/transaction/get/{id}")
+    @GET("api/transactions/get/{id}")
     Call<Transaction> get(@Path("id") int id);
 
-    @GET("api/transaction/get-list")
+    @GET("api/transactions/get-list")
     Call<PagedListResult<Transaction>> getPagedList(
             @Query("searchString") @Nullable String searchString,
             @Query("pageNumber") int pageNumber,
             @Query("pageSize") int pageSize
     );
 
-    @POST("api/transaction/add")
+    @POST("api/transactions/add")
     Call<Transaction> add(@Body Transaction transactionDto);
 
-    @PUT("api/transaction/update/{id}")
+    @PUT("api/transactions/update/{id}")
     Call<Transaction> update(@Path("id") int id, @Body Transaction transactionDto);
 
-    @DELETE("api/transaction/delete/{id}")
+    @DELETE("api/transactions/delete/{id}")
     Call<Transaction> delete(@Path("id") int id);
 }

@@ -7,8 +7,8 @@ import vn.edu.fpt.spendingtracker_mobile.dtos.IncomeExpenseDto;
 import vn.edu.fpt.spendingtracker_mobile.dtos.MonthlyAmountsByYearDto;
 
 public interface StatisticsApiConnector {
-    @GET("api/statistics/get-income-expense-by-period")
-    Call<IncomeExpenseDto> getIncomeExpenseByPeriod(
+    @GET("api/statistics/get-income-expense-custom-range")
+    Call<IncomeExpenseDto> getIncomeExpenseCustomRange(
             @Query("dateFrom") String dateFromString,
             @Query("dateTo") String dateToString
     );

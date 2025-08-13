@@ -163,7 +163,7 @@ public class StatisticsFragment extends BaseFragment {
 
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(LOCALE);
 
-        apiConnector.getIncomeExpenseByPeriod(from, to)
+        apiConnector.getIncomeExpenseCustomRange(from, to)
             .enqueue(new ApiCallback<IncomeExpenseDto>(requireContext()) {
                 @Override
                 public void onResponse(

@@ -23,14 +23,14 @@ public abstract class ApiCallback<T> implements Callback<T> {
 
     @Override
     public void onFailure(Call<T> call, Throwable t) {
-        Log.e("ApiCallback", t.getMessage());
+        Log.e("ApiCallback", "Error", t);
         if(context != null) {
             if(t instanceof IOException) {
                 HelperMethods.showMessageDialog(
                         R.string.network_error_message, context);
             } else {
                 HelperMethods.showMessageDialog(
-                        R.string.api_error_message, context);
+                    R.string.api_error_message, context);
             }
         }
     }

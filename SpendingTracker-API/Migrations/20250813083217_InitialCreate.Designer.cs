@@ -12,7 +12,7 @@ using SpendingTracker_API.Context;
 namespace SpendingTracker_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250713095201_InitialCreate")]
+    [Migration("20250813083217_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -83,7 +83,48 @@ namespace SpendingTracker_API.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.ToTable("AppUser");
+                });
+
+            modelBuilder.Entity("SpendingTracker_API.Entities.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FlagDel")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("MonthlyLimit")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Name", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("Category");
                 });
 
             modelBuilder.Entity("SpendingTracker_API.Entities.Transaction", b =>
@@ -96,6 +137,9 @@ namespace SpendingTracker_API.Migrations
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -123,18 +167,39 @@ namespace SpendingTracker_API.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Transaction");
                 });
 
-            modelBuilder.Entity("SpendingTracker_API.Entities.Transaction", b =>
+            modelBuilder.Entity("SpendingTracker_API.Entities.Category", b =>
                 {
                     b.HasOne("SpendingTracker_API.Entities.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SpendingTracker_API.Entities.Transaction", b =>
+                {
+                    b.HasOne("SpendingTracker_API.Entities.Category", "TransactionCategory")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SpendingTracker_API.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TransactionCategory");
 
                     b.Navigation("User");
                 });
